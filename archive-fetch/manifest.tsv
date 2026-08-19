@@ -1,7 +1,5 @@
 source_id	url	filename
-BKI56_1904_IA_GOOGLE_ID	https://archive.org/download/bub_gb_ExAiAQAAMAAJ/bub_gb_ExAiAQAAMAAJ.pdf	1904_BKI56_full_volume.pdf
-BKI61_1908_IA_GOOGLE_ID_A	https://archive.org/download/bub_gb_qr9ya2IAkRkC/bub_gb_qr9ya2IAkRkC.pdf	1908_BKI61_full_volume_A.pdf
-BKI61_1908_IA_GOOGLE_ID_B	https://archive.org/download/bub_gb_NOgPAAAAYAAJ/bub_gb_NOgPAAAAYAAJ.pdf	1908_BKI61_full_volume_B.pdf
-IA_DISCOVERY_1904	https://archive.org/advancedsearch.php?q=year%3A1904%20AND%20title%3ABijdragen&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=date&fl%5B%5D=year&rows=200&page=1&output=json	ia_discovery_1904.json
-IA_DISCOVERY_1908	https://archive.org/advancedsearch.php?q=year%3A1908%20AND%20title%3ABijdragen&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=date&fl%5B%5D=year&rows=200&page=1&output=json	ia_discovery_1908.json
-IA_DISCOVERY_1910	https://archive.org/advancedsearch.php?q=year%3A1910%20AND%20title%3ABijdragen&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=date&fl%5B%5D=year&rows=200&page=1&output=json	ia_discovery_1910.json
+IA_META_BKI56_1904	https://archive.org/metadata/dli.ministry.10283	meta_dli.ministry.10283.json
+IA_META_BKI61_1908	https://archive.org/metadata/dli.ministry.10280	meta_dli.ministry.10280.json
+IA_META_BKI63_1910_A	https://archive.org/metadata/dli.ministry.10287	meta_dli.ministry.10287.json
+IA_META_BKI63_1910_B	https://archive.org/metadata/dli.ministry.10281	meta_dli.ministry.10281.json
