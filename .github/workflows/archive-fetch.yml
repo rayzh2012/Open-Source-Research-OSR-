@@ -4,6 +4,9 @@ on:
     paths:
       - '.github/workflows/archive-fetch.yml'
       - 'archive-fetch/manifest.txt'
+  pull_request:
+    paths:
+      - 'archive-fetch/manifest.txt'
   workflow_dispatch:
 
 permissions:
