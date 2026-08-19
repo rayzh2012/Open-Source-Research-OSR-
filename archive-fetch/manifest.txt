@@ -1,0 +1,5 @@
+ARCHIVE_FETCH_REQUEST v1
+source_id=NIAS_SUNDERMANN_1886_TBG31
+url=https://kitlv-docs.library.leiden.edu/open/Metamorfoze/TBG/MMKITLV01_PDF_TS2332_1886_31.pdf
+target=Google Drive / Seram ethnography / Archive-First Staging / raw-sources
+requested_at=2026-08-19
