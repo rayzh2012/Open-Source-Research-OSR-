@@ -1,0 +1,36 @@
+name: Archive Fetch Bridge
+on:
+  push:
+    paths:
+      - '.github/workflows/archive-fetch.yml'
+      - 'archive-fetch/manifest.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Fetch public-domain source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p downloads
+          url='https://kitlv-docs.library.leiden.edu/open/Metamorfoze/TBG/MMKITLV01_PDF_TS2332_1886_31.pdf'
+          out='downloads/1886_TBG31_Sundermann_Niassische_Erzaehlungen_source_volume.pdf'
+          curl -fL --retry 5 --retry-delay 3 --connect-timeout 30 "$url" -o "$out"
+          test -s "$out"
+          head -c 5 "$out" | grep -q '%PDF-'
+          sha256sum "$out" | tee downloads/SHA256SUMS.txt
+          stat -c '%n %s bytes' "$out" | tee downloads/SIZES.txt
+          printf '%s\n' "$url" > downloads/SOURCE_URLS.txt
+      - name: Upload archive bridge artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: archive-fetch-nias-1886
+          path: downloads/
+          compression-level: 0
+          retention-days: 7
