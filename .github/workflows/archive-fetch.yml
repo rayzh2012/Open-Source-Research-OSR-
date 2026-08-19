@@ -3,10 +3,10 @@ on:
   push:
     paths:
       - '.github/workflows/archive-fetch.yml'
-      - 'archive-fetch/manifest.txt'
+      - 'archive-fetch/manifest.tsv'
   pull_request:
     paths:
-      - 'archive-fetch/manifest.txt'
+      - 'archive-fetch/manifest.tsv'
   workflow_dispatch:
 
 permissions:
@@ -15,25 +15,41 @@ permissions:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
-      - name: Fetch public-domain source
+      - uses: actions/checkout@v4
+      - name: Fetch and validate archive sources
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
           mkdir -p downloads
-          url='https://kitlv-docs.library.leiden.edu/open/Metamorfoze/TBG/MMKITLV01_PDF_TS2332_1886_31.pdf'
-          out='downloads/1886_TBG31_Sundermann_Niassische_Erzaehlungen_source_volume.pdf'
-          curl -fL --retry 5 --retry-delay 3 --connect-timeout 30 "$url" -o "$out"
-          test -s "$out"
-          head -c 5 "$out" | grep -q '%PDF-'
-          sha256sum "$out" | tee downloads/SHA256SUMS.txt
-          stat -c '%n %s bytes' "$out" | tee downloads/SIZES.txt
-          printf '%s\n' "$url" > downloads/SOURCE_URLS.txt
+          : > downloads/RESULTS.tsv
+          printf 'source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n' > downloads/RESULTS.tsv
+          while IFS=$'\t' read -r source_id url filename; do
+            [[ -z "${source_id:-}" || "$source_id" == source_id ]] && continue
+            out="downloads/$filename"
+            echo "Fetching $source_id -> $filename"
+            rm -f "$out" /tmp/hdr
+            if ! curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 1800 "$url" -o "$out"; then
+              printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
+              rm -f "$out"
+              continue
+            fi
+            size=$(stat -c '%s' "$out" 2>/dev/null || wc -c < "$out")
+            magic=$(head -c 5 "$out" || true)
+            if [[ "$magic" != "%PDF-" ]]; then
+              printf '%s\tNOT_PDF\t%s\t%s\t\t%s\n' "$source_id" "$filename" "$size" "$url" >> downloads/RESULTS.tsv
+              mv "$out" "downloads/${filename}.not_pdf"
+              continue
+            fi
+            sha=$(sha256sum "$out" | awk '{print $1}')
+            printf '%s\tOK_PDF\t%s\t%s\t%s\t%s\n' "$source_id" "$filename" "$size" "$sha" "$url" >> downloads/RESULTS.tsv
+          done < archive-fetch/manifest.tsv
+          cat downloads/RESULTS.tsv
       - name: Upload archive bridge artifact
         uses: actions/upload-artifact@v4
         with:
-          name: archive-fetch-nias-1886
+          name: archive-fetch-batch
           path: downloads/
           compression-level: 0
           retention-days: 7
