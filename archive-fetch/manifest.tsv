@@ -1,5 +1,6 @@
 source_id	url	filename
-IA_META_BKI56_1904	https://archive.org/metadata/dli.ministry.10283	meta_dli.ministry.10283.json
-IA_META_BKI61_1908	https://archive.org/metadata/dli.ministry.10280	meta_dli.ministry.10280.json
-IA_META_BKI63_1910_A	https://archive.org/metadata/dli.ministry.10287	meta_dli.ministry.10287.json
-IA_META_BKI63_1910_B	https://archive.org/metadata/dli.ministry.10281	meta_dli.ministry.10281.json
+BKI_1904_DLI10283_26741	https://archive.org/download/dli.ministry.10283/26741.pdf	1904_BKI56_DLI10283_26741_original.pdf
+BKI_1908_DLI10280_26745	https://archive.org/download/dli.ministry.10280/26745.pdf	1908_BKI_DLI10280_26745_original.pdf
+BKI_1908_DLI10280_26746	https://archive.org/download/dli.ministry.10280/26746.pdf	1908_BKI_DLI10280_26746_original.pdf
+BKI_1910_DLI10281_26748	https://archive.org/download/dli.ministry.10281/26748.pdf	1910_BKI_DLI10281_26748_original.pdf
+BKI_1910_DLI10287_26749	https://archive.org/download/dli.ministry.10287/26749.pdf	1910_BKI_DLI10287_26749_original.pdf
