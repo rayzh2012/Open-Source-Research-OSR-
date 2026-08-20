@@ -1,0 +1,203 @@
+{
+  "benchmark_id": "yunnan-songkran-v1",
+  "semantic_version": "semantic/songkran-v1",
+  "notes": "Public-safe benchmark. Raw copyrighted source text remains in Google Drive and is not committed. derived_test_segments are paraphrased test text; events are manually audited source-derived gold labels.",
+  "fixtures": [
+    {
+      "fixture_id": "YUNNAN_2002_0353_DEHONG_DAI",
+      "semantic_version": "semantic/songkran-v1",
+      "semantic_config": {
+        "domain": "songkran-dangerous-head",
+        "mode": "manual-gold-v1"
+      },
+      "semantic_description": "Manual gold event sequence for Yunnan Folk Tale Collection no.353",
+      "source": {
+        "title": "中国民间故事集成 云南卷 下册",
+        "publication_year": 2002,
+        "story_number": 353,
+        "story_title": "泼",
+        "ethnicity": "傣族",
+        "narrator": "岩林",
+        "collector": "林木",
+        "collection_location": "德宏州",
+        "drive_file_id": "1yGg5yYBBiTOKsULEODQoW6MAl67SNGpy",
+        "pdf_pages": [84, 85],
+        "source_text_status": "DRIVE_PRIVATE_NOT_COMMITTED"
+      },
+      "derived_test_segments": [
+        "魔王把致命弱点告诉第十二位妻子：可以用他自己的头发勒断颈部。",
+        "妻子用魔王自己的头发完成断首，魔王随即死亡。",
+        "断下的头无法正常处置：火会失控，埋藏会产生恶臭，投入河中会使水沸腾成灾。",
+        "十二位妻子轮流抱持危险头颅，并在轮换时用水清洗，后来被解释为泼水节的来源。"
+      ],
+      "events": [
+        {
+          "ordinal": 0,
+          "segment_ordinal": 0,
+          "predicate": "HAIR_WEAPON",
+          "actor": "TWELFTH_WIFE",
+          "patient": "DEMON_KING",
+          "tags": ["OWN_HAIR", "VULNERABILITY_DISCLOSED"],
+          "payload": {"female_actor_count": 1, "hair_owner": "male_target", "hair_count": 1}
+        },
+        {
+          "ordinal": 1,
+          "segment_ordinal": 1,
+          "predicate": "DECAPITATE",
+          "actor": "TWELFTH_WIFE",
+          "patient": "DEMON_KING",
+          "tags": ["HAIR_WEAPON"],
+          "state_before": {"head_attached": true, "vitality": "alive"},
+          "state_after": {"head_attached": false, "vitality": "dead"}
+        },
+        {
+          "ordinal": 2,
+          "segment_ordinal": 2,
+          "predicate": "DANGEROUS_HEAD",
+          "actor": "SEVERED_HEAD",
+          "tags": ["FIRE", "ODOR", "BOILING_WATER"],
+          "payload": {"hazards": ["fire_when_burned", "odor_when_buried", "boiling_water_when_thrown_in_river"]}
+        },
+        {
+          "ordinal": 3,
+          "segment_ordinal": 3,
+          "predicate": "FEMALE_ROTATION",
+          "actor": "TWELVE_WIVES",
+          "patient": "SEVERED_HEAD",
+          "payload": {"female_count": 12, "rotation_unit": "day"}
+        },
+        {
+          "ordinal": 4,
+          "segment_ordinal": 3,
+          "predicate": "WATER_WASH",
+          "actor": "TWELVE_WIVES",
+          "patient": "SEVERED_HEAD",
+          "tags": ["RITUAL_WATER"]
+        },
+        {
+          "ordinal": 5,
+          "segment_ordinal": 3,
+          "predicate": "RITUAL_ORIGIN",
+          "tags": ["SONGKRAN", "WATER_FESTIVAL"]
+        }
+      ]
+    },
+    {
+      "fixture_id": "YUNNAN_2002_0354_RUILI_DEANG",
+      "semantic_version": "semantic/songkran-v1",
+      "semantic_config": {
+        "domain": "songkran-dangerous-head",
+        "mode": "manual-gold-v1"
+      },
+      "semantic_description": "Manual gold event sequence for Yunnan Folk Tale Collection no.354",
+      "source": {
+        "title": "中国民间故事集成 云南卷 下册",
+        "publication_year": 2002,
+        "story_number": 354,
+        "story_title": "泼水节与节令的由来",
+        "ethnicity": "德昂族",
+        "narrator": "满坎木",
+        "collector": "杨筑骧",
+        "collection_location": "瑞丽县",
+        "collection_year": 1985,
+        "drive_file_id": "1yGg5yYBBiTOKsULEODQoW6MAl67SNGpy",
+        "pdf_pages": [85, 86],
+        "source_text_status": "DRIVE_PRIVATE_NOT_COMMITTED"
+      },
+      "derived_test_segments": [
+        "四位威哈木制定的节令与真实气候不合，历法试行后被判失败并面临断首惩罚。",
+        "每位威哈木的十二位妻子各拔七根头发搓成绳，趁丈夫熟睡勒下头颅。",
+        "威哈木的头接触地面便喷火，妻子们因此轮流抱持危险头颅。",
+        "妻子们砍取水牛、老象、龙和猴子的头接到威哈木颈部，接驳后威哈木重新活起来。",
+        "随后出现洗血污、重新校正历法，并把月亮、太阳、雷雨、冷热和农业季节纳入新的秩序。"
+      ],
+      "events": [
+        {
+          "ordinal": 0,
+          "segment_ordinal": 0,
+          "predicate": "CALENDAR_ERROR",
+          "actor": "WEIHAMU",
+          "tags": ["SEASON_MISMATCH", "PUNISHMENT_TRIGGER"]
+        },
+        {
+          "ordinal": 1,
+          "segment_ordinal": 1,
+          "predicate": "HAIR_WEAPON",
+          "actor": "TWELVE_WIVES_PER_WEIHAMU",
+          "patient": "WEIHAMU",
+          "tags": ["WIVES_OWN_HAIR", "BRAIDED_ROPE"],
+          "payload": {"female_count_per_target": 12, "hair_owner": "wives", "hair_count_per_wife": 7}
+        },
+        {
+          "ordinal": 2,
+          "segment_ordinal": 1,
+          "predicate": "DECAPITATE",
+          "actor": "WIVES",
+          "patient": "WEIHAMU",
+          "tags": ["HAIR_WEAPON"],
+          "state_before": {"head_attached": true, "vitality": "alive"},
+          "state_after": {"head_attached": false, "vitality": "dead_or_inactive"}
+        },
+        {
+          "ordinal": 3,
+          "segment_ordinal": 2,
+          "predicate": "DANGEROUS_HEAD",
+          "actor": "SEVERED_HEAD",
+          "tags": ["FIRE_ON_GROUND"],
+          "payload": {"hazards": ["fire_when_touching_ground"]}
+        },
+        {
+          "ordinal": 4,
+          "segment_ordinal": 2,
+          "predicate": "FEMALE_ROTATION",
+          "actor": "WIVES",
+          "patient": "SEVERED_HEAD",
+          "payload": {"female_count_per_target": 12, "rotation_unit": "day"}
+        },
+        {
+          "ordinal": 5,
+          "segment_ordinal": 3,
+          "predicate": "GRAFT_HEAD",
+          "actor": "WIVES",
+          "patient": "WEIHAMU",
+          "tags": ["CROSS_SPECIES_HEAD_REPLACEMENT"],
+          "payload": {"species": ["buffalo", "old_elephant", "dragon", "monkey"], "species_count": 4}
+        },
+        {
+          "ordinal": 6,
+          "segment_ordinal": 3,
+          "predicate": "REVIVE",
+          "patient": "WEIHAMU",
+          "state_before": {"vitality": "dead_or_inactive"},
+          "state_after": {"vitality": "alive"}
+        },
+        {
+          "ordinal": 7,
+          "segment_ordinal": 4,
+          "predicate": "WATER_WASH",
+          "actor": "WIVES",
+          "patient": "WEIHAMU",
+          "tags": ["WASH_BLOOD", "RITUAL_WATER"]
+        },
+        {
+          "ordinal": 8,
+          "segment_ordinal": 4,
+          "predicate": "CALENDAR_REPAIR",
+          "tags": ["MOON", "SUN", "RAIN", "TEMPERATURE"]
+        },
+        {
+          "ordinal": 9,
+          "segment_ordinal": 4,
+          "predicate": "AGRICULTURE_ORDER",
+          "tags": ["SOWING", "PLANTING", "HARVEST", "PROSPERITY"]
+        },
+        {
+          "ordinal": 10,
+          "segment_ordinal": 4,
+          "predicate": "RITUAL_ORIGIN",
+          "tags": ["SONGKRAN", "WATER_FESTIVAL"]
+        }
+      ]
+    }
+  ]
+}
