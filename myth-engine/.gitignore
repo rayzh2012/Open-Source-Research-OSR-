@@ -1,0 +1,10 @@
+# Private/raw corpora stay in Drive or local working storage.
+private-corpus/
+raw-corpus/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Generated local reports/indexes are reproducible and should not be committed by default.
+reports/generated/
+indexes/local/

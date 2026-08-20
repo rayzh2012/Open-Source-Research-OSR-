@@ -1,0 +1,34 @@
+name: Myth Engine CI
+
+on:
+  push:
+    paths:
+      - 'myth-engine/**'
+      - '.github/workflows/myth-engine-ci.yml'
+  pull_request:
+    paths:
+      - 'myth-engine/**'
+      - '.github/workflows/myth-engine-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run unit tests
+        working-directory: myth-engine
+        run: python -m unittest discover -s tests -v
+      - name: Smoke-test CLI
+        working-directory: myth-engine
+        run: |
+          tmpdb=$(mktemp)
+          python -m myth_engine.cli init "$tmpdb"
+          rm -f "$tmpdb" "$tmpdb-wal" "$tmpdb-shm"
