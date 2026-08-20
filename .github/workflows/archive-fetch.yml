@@ -46,14 +46,7 @@ jobs:
                 printf '%s\tRESOLVE_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
                 continue
               fi
-              fetch_url=$(python - <<'PY'
-import json
-p='/tmp/gbooks.json'
-with open(p, encoding='utf-8') as f:
-    d=json.load(f)
-print((((d.get('accessInfo') or {}).get('pdf') or {}).get('downloadLink')) or '')
-PY
-)
+              fetch_url=$(python -c "import json; d=json.load(open('/tmp/gbooks.json', encoding='utf-8')); print((((d.get('accessInfo') or {}).get('pdf') or {}).get('downloadLink')) or '')")
               if [[ -z "$fetch_url" ]]; then
                 cp /tmp/gbooks.json "downloads/${filename}.gbooks_metadata.json"
                 printf '%s\tNO_PDF_LINK\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
