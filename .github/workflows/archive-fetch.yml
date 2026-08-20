@@ -39,7 +39,11 @@ jobs:
             out="downloads/$filename"
             echo "Fetching $source_id [$kind] -> $filename"
             rm -f "$out"
-            if ! curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 1800 "$url" -o "$out"; then
+            if ! curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 1800 \
+              -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36' \
+              -H 'Accept: application/pdf,application/octet-stream;q=0.9,*/*;q=0.8' \
+              -H 'Referer: https://repository.si.edu/' \
+              "$url" -o "$out"; then
               printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
               rm -f "$out"
               continue
