@@ -4,9 +4,12 @@ on:
     paths:
       - '.github/workflows/archive-fetch.yml'
       - 'archive-fetch/manifest.tsv'
+      - 'myth-engine/myth_engine/acquisition.py'
   pull_request:
     paths:
+      - '.github/workflows/archive-fetch.yml'
       - 'archive-fetch/manifest.tsv'
+      - 'myth-engine/myth_engine/acquisition.py'
   workflow_dispatch:
 
 permissions:
@@ -18,6 +21,9 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Fetch and validate archive sources
         shell: bash
         run: |
@@ -47,6 +53,16 @@ jobs:
             printf '%s\tOK_PDF\t%s\t%s\t%s\t%s\n' "$source_id" "$filename" "$size" "$sha" "$url" >> downloads/RESULTS.tsv
           done < archive-fetch/manifest.tsv
           cat downloads/RESULTS.tsv
+      - name: Build Myth Engine acquisition metadata
+        env:
+          PYTHONPATH: myth-engine
+        run: |
+          python -m myth_engine.acquisition \
+            archive-fetch/manifest.tsv \
+            downloads/RESULTS.tsv \
+            --stubs-dir downloads/SOURCE_STUBS \
+            --records-jsonl downloads/SOURCE_RECORDS.jsonl
+          find downloads/SOURCE_STUBS -name source.json -print
       - name: Upload archive bridge artifact
         uses: actions/upload-artifact@v4
         with:
