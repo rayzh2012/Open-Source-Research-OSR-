@@ -1,2 +1,3 @@
 source_id	url	filename
-GOOGLE_BOOKS_API_DEVRIES1927	https://www.googleapis.com/books/v1/volumes?q=intitle%3A%22Bij%20de%20Berg-Alfoeren%20op%20West-Seran%22%2Binauthor%3A%22Gijsbert%20de%20Vries%22&maxResults=20	google_books_devries1927.json
+hueting_1908_tobelo_tales	https://brill.com/view/journals/bki/61/1/article-p1_1.pdf	1908_Hueting_O_Tobelohoka_Manga_Totoade_BKI61_pp1-318.pdf
+hueting_1910_word_substitution	https://brill.com/view/journals/bki/63/1/article-p109_4.pdf	1910_Hueting_Woordverwisseling_Tobeloreezen_BKI63_pp109-110.pdf
