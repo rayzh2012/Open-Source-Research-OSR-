@@ -32,25 +32,48 @@ jobs:
           mkdir -p downloads
           : > downloads/RESULTS.tsv
           printf 'source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n' > downloads/RESULTS.tsv
-          while IFS=$'\t' read -r source_id url filename; do
+          while IFS=$'\t' read -r source_id url filename expected_kind; do
             [[ -z "${source_id:-}" || "$source_id" == source_id ]] && continue
+            kind=$(printf '%s' "${expected_kind:-PDF}" | tr -d '\r' | tr '[:lower:]' '[:upper:]')
+            [[ -z "$kind" ]] && kind=PDF
             out="downloads/$filename"
-            echo "Fetching $source_id -> $filename"
-            rm -f "$out" /tmp/hdr
+            echo "Fetching $source_id [$kind] -> $filename"
+            rm -f "$out"
             if ! curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 1800 "$url" -o "$out"; then
               printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
               rm -f "$out"
               continue
             fi
             size=$(stat -c '%s' "$out" 2>/dev/null || wc -c < "$out")
-            magic=$(head -c 5 "$out" || true)
-            if [[ "$magic" != "%PDF-" ]]; then
-              printf '%s\tNOT_PDF\t%s\t%s\t\t%s\n' "$source_id" "$filename" "$size" "$url" >> downloads/RESULTS.tsv
-              mv "$out" "downloads/${filename}.not_pdf"
+            status=''
+            case "$kind" in
+              PDF)
+                magic=$(head -c 5 "$out" || true)
+                if [[ "$magic" == "%PDF-" ]]; then
+                  status=OK_PDF
+                else
+                  status=NOT_PDF
+                fi
+                ;;
+              TEXT)
+                mime=$(file -b --mime-type "$out" || true)
+                if [[ -s "$out" && "$mime" == text/* ]]; then
+                  status=OK_TEXT
+                else
+                  status=NOT_TEXT
+                fi
+                ;;
+              *)
+                status=UNSUPPORTED_KIND
+                ;;
+            esac
+            if [[ "$status" != OK_PDF && "$status" != OK_TEXT ]]; then
+              printf '%s\t%s\t%s\t%s\t\t%s\n' "$source_id" "$status" "$filename" "$size" "$url" >> downloads/RESULTS.tsv
+              mv "$out" "downloads/${filename}.${status,,}"
               continue
             fi
             sha=$(sha256sum "$out" | awk '{print $1}')
-            printf '%s\tOK_PDF\t%s\t%s\t%s\t%s\n' "$source_id" "$filename" "$size" "$sha" "$url" >> downloads/RESULTS.tsv
+            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$source_id" "$status" "$filename" "$size" "$sha" "$url" >> downloads/RESULTS.tsv
           done < archive-fetch/manifest.tsv
           cat downloads/RESULTS.tsv
       - name: Build Myth Engine acquisition metadata
