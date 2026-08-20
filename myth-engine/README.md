@@ -71,6 +71,99 @@ semantic/v1
 
 A text segment never changes identity. New interpretation creates a new semantic event/version linked to the same segment. This preserves old readings and makes reinterpretation diffable.
 
+## Universal Myth Archive contract
+
+The long-term target is **not a collection of notes**. It is a programmable archive in which every myth, legend, historical anecdote, and later retelling can be addressed, versioned, dated, traversed, compared, and rendered as a graph.
+
+### Identity hierarchy
+
+```text
+story_family_id
+  └── witness_id
+       └── segment_id
+            └── semantic_event_id
+```
+
+- `story_family_id` groups candidate versions without asserting common origin.
+- `witness_id` identifies one concrete textual/oral witness or publication occurrence.
+- `segment_id` identifies stable source spans by hash.
+- `semantic_event_id` identifies versioned symbolic interpretation attached to a stable source span.
+
+Every layer is addressable by dictionary/hash-table style key lookup; graph edges are secondary relations, not identity.
+
+### Time is first-class data
+
+Every witness should carry separate dates where available:
+
+```text
+composition_date_min / composition_date_max
+collection_date
+publication_date
+manuscript_date
+attestation_date
+translation_date
+import_date
+```
+
+Unknown dates stay unknown. A later publication must never silently become the origin date of the story.
+
+This enables chronological slicing, holdout tests, lineage visualization, and queries such as:
+
+```text
+show all witnesses of family X before 1500
+show all mutations appearing after witness Y
+show earliest attestation of event bundle Z
+```
+
+### Graph model
+
+Nodes may include:
+
+```text
+STORY_FAMILY / WITNESS / SEGMENT / EVENT / ENTITY / PLACE / SOURCE / LANGUAGE / PERIOD
+```
+
+Edges may include:
+
+```text
+VARIANT_OF / DERIVED_FROM / QUOTED_FROM / TRANSLATED_FROM
+SAME_OCCURRENCE_CANDIDATE / MUTATION_OF / NEXT_EVENT
+MENTIONS_ENTITY / LOCATED_AT / ATTESTED_IN / DATED_TO
+INTERPRETS_AS / SUPPORTS / CONTRADICTS
+```
+
+The graph is a DAG where provenance requires acyclicity, but analytical association edges may form a broader graph. Reticulation is allowed: one witness can inherit from multiple sources.
+
+### Traversal contract
+
+- **Hash/dictionary/inverted index** finds candidate nodes quickly.
+- **BFS** answers neighborhood questions: all relatives within N hops, all versions reachable from a witness, all sources connected to an entity.
+- **DFS** answers lineage/path questions: provenance chains, deep mutation paths, dependency exploration.
+- Traversal never substitutes for source retrieval or chronology validation.
+
+### Visualization contract
+
+The same graph must support machine-readable export for:
+
+1. witness stemmata / reticulation graphs;
+2. chronological timelines;
+3. geography × time maps;
+4. entity-story networks;
+5. mutation/event diff graphs;
+6. source-provenance diagrams.
+
+Visualization is therefore a projection of the stored graph, not a manually redrawn research product.
+
+### One substrate, three output modes
+
+The archive is deliberately shared by three downstream uses:
+
+1. **Historical research** — source criticism, provenance, chronology, competing hypotheses, falsification, transmission analysis.
+2. **Chronicle / personal history writing** — query verified events and dated relationships without rebuilding context manually.
+3. **Fiction / myth construction** — reuse the same entities, variants, motifs and timelines while keeping `FACT / INFERENCE / HYPOTHESIS / CANON` explicitly separated.
+
+The storage substrate is shared; epistemic status is not. Fictional canon must never overwrite historical evidence.
+
 ## MVP layout
 
 ```text
@@ -97,4 +190,4 @@ python -m myth_engine.cli bfs myth.db <node-id> --depth 3
 
 ## Core invariant
 
-**Text identity, semantic interpretation, provenance, and hypothesis are four separate layers.** Never rewrite a source because an interpretation changed, and never count a republished/translated occurrence as independent evidence merely because it appears in another publication.
+**Text identity, semantic interpretation, provenance, chronology, hypothesis, and canon are separate layers.** Never rewrite a source because an interpretation changed, never count a republished/translated occurrence as independent evidence merely because it appears in another publication, and never let fiction-layer canon back-propagate into historical fact.
