@@ -43,7 +43,7 @@ class YunnanSongkranBenchmarkTests(unittest.TestCase):
         self.assertFalse(deang["raw_source_committed"])
 
     def test_direct_dictionary_retrieval_finds_rare_bundle(self):
-        hits = self.db.dictionary_scan(["头发", "断首", "十二", "水", "历法", "动物"])
+        hits = self.db.dictionary_scan(["头发", "断首", "十二", "水", "历法", "老象", "猴子"])
         dai = self.ids["YUNNAN_2002_0353_DEHONG_DAI"]
         deang = self.ids["YUNNAN_2002_0354_RUILI_DEANG"]
 
@@ -52,7 +52,8 @@ class YunnanSongkranBenchmarkTests(unittest.TestCase):
         self.assertTrue(any(h.witness_id == dai for h in hits["十二"]))
         self.assertTrue(any(h.witness_id == deang for h in hits["十二"]))
         self.assertTrue(any(h.witness_id == deang for h in hits["历法"]))
-        self.assertTrue(any(h.witness_id == deang for h in hits["动物"]))
+        self.assertTrue(any(h.witness_id == deang for h in hits["老象"]))
+        self.assertTrue(any(h.witness_id == deang for h in hits["猴子"]))
 
     def test_semantic_diff_exposes_mutation_slots(self):
         dai = self.ids["YUNNAN_2002_0353_DEHONG_DAI"]
