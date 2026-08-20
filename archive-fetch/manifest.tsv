@@ -1,5 +1,6 @@
-source_id	url	filename
-nias_1886_tbg31	https://kitlv-docs.library.leiden.edu/open/Metamorfoze/TBG/MMKITLV01_PDF_TS2332_1886_31.pdf	1886_TBG31_Sundermann_Niassische_Erzaehlungen_source_volume.pdf
-borneo_hose_mcdougall_1912_v1	https://archive.org/download/pagantribesofbor01hose/pagantribesofbor01hose.pdf	1912_Hose_McDougall_Pagan_Tribes_of_Borneo_v1.pdf
-borneo_hose_mcdougall_1912_v2	https://archive.org/download/pagantribesofbor02hose/pagantribesofbor02hose.pdf	1912_Hose_McDougall_Pagan_Tribes_of_Borneo_v2.pdf
-sarawak_roth_1896_v1	https://archive.org/download/nativesofsarawak01roth/nativesofsarawak01roth.pdf	1896_Roth_Natives_of_Sarawak_and_British_North_Borneo_v1.pdf
+source_id	url	filename	expected_kind
+nias_1886_tbg31	https://kitlv-docs.library.leiden.edu/open/Metamorfoze/TBG/MMKITLV01_PDF_TS2332_1886_31.pdf	1886_TBG31_Sundermann_Niassische_Erzaehlungen_source_volume.pdf	PDF
+borneo_hose_mcdougall_1912_v1	https://archive.org/download/pagantribesofbor01hose/pagantribesofbor01hose.pdf	1912_Hose_McDougall_Pagan_Tribes_of_Borneo_v1.pdf	PDF
+borneo_hose_mcdougall_1912_v2	https://archive.org/download/pagantribesofbor02hose/pagantribesofbor02hose.pdf	1912_Hose_McDougall_Pagan_Tribes_of_Borneo_v2.pdf	PDF
+sarawak_roth_1896_v1	https://archive.org/download/nativesofsarawak01roth/nativesofsarawak01roth.pdf	1896_Roth_Natives_of_Sarawak_and_British_North_Borneo_v1.pdf	PDF
+seram_sachse_1907	https://www.gutenberg.org/ebooks/62553.txt.utf-8	1907_Sachse_Het_eiland_Seran_en_zijne_bewoners.txt	TEXT
