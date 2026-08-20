@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import csv
 import io
 import json
@@ -55,7 +56,7 @@ def parse_archive_results(text: str) -> dict[str, dict[str, str]]:
 def join_archive_records(manifest_text: str, results_text: str | None = None) -> list[dict[str, Any]]:
     """Join acquisition intent with workflow results without inventing missing success.
 
-    A manifest row with no result remains FETCH_NOT_RUN_OR_RESULT_MISSING.  Only an
+    A manifest row with no result remains FETCH_NOT_RUN_OR_RESULT_MISSING. Only an
     explicit OK_PDF row is promoted to ACQUIRED_VERIFIED_BY_BRIDGE.
     """
     manifest = parse_archive_manifest(manifest_text)
@@ -118,3 +119,36 @@ def write_source_stubs(records: list[dict[str, Any]], output_dir: str | Path) ->
         dest.write_text(json.dumps(source_stub(record), ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
         written.append(dest)
     return written
+
+
+def write_records_jsonl(records: list[dict[str, Any]], path: str | Path) -> Path:
+    dest = Path(path)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    with dest.open("w", encoding="utf-8") as fh:
+        for row in sorted(records, key=lambda x: str(x.get("source_id", ""))):
+            fh.write(json.dumps(source_stub(row), ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n")
+    return dest
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Bridge archive-fetch TSV output into Myth Engine source metadata.")
+    parser.add_argument("manifest", type=Path)
+    parser.add_argument("results", type=Path)
+    parser.add_argument("--stubs-dir", type=Path, required=True)
+    parser.add_argument("--records-jsonl", type=Path)
+    args = parser.parse_args(argv)
+
+    records = join_archive_records(
+        args.manifest.read_text(encoding="utf-8"),
+        args.results.read_text(encoding="utf-8"),
+    )
+    paths = write_source_stubs(records, args.stubs_dir)
+    if args.records_jsonl:
+        write_records_jsonl(records, args.records_jsonl)
+    ok = sum(1 for row in records if row["acquisition_status"] == "ACQUIRED_VERIFIED_BY_BRIDGE")
+    print(json.dumps({"records": len(records), "verified": ok, "source_stubs": len(paths)}, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
