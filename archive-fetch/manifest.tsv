@@ -1,3 +1,3 @@
 source_id	url	filename
-bki63_1910_ukm	https://ptsldigital.ukm.my/bitstream/123456789/778252/4/BIJRAGEN%20TOT%20DE%20TAAL-%2C%20LAND-EN%20VOLKENKUNDE%201910.pdf	1910_BKI63_UKM_full_original.pdf
-bki61_1908_ukm_seq29	https://ptsldigital.ukm.my/bitstream/123456789/778252/29/BIJRAGEN%20TOT%20DE%20TAAL-%20LAND-%20EN%20VOLKENKUNDE%20VAN%20NEDERLANDSCH-INDIE%201908%20VOL.61.pdf	1908_BKI61_UKM_full_original.pdf
+ia_search_bki_1908	https://archive.org/advancedsearch.php?q=title%3A%28Bijdragen%20tot%20de%20taal%29%20AND%20year%3A1908%26fl%5B%5D=identifier%26fl%5B%5D=title%26fl%5B%5D=date%26rows=100%26page=1%26output=json	IA_SEARCH_BKI_1908.json
+ia_search_bki_1910	https://archive.org/advancedsearch.php?q=title%3A%28Bijdragen%20tot%20de%20taal%29%20AND%20year%3A1910%26fl%5B%5D=identifier%26fl%5B%5D=title%26fl%5B%5D=date%26rows=100%26page=1%26output=json	IA_SEARCH_BKI_1910.json
