@@ -20,11 +20,34 @@ class ArchiveBridgeTests(unittest.TestCase):
         rows = join_archive_records(manifest, results)
         self.assertEqual(rows[0]["acquisition_status"], "ACQUIRED_VERIFIED_BY_BRIDGE")
         self.assertEqual(rows[0]["source_sha256"], "abc123")
+        self.assertEqual(rows[0]["source_kind"], "PDF")
         self.assertEqual(rows[1]["acquisition_status"], "DOWNLOAD_FAILED")
         self.assertIsNone(rows[1]["source_sha256"])
         stub = source_stub(rows[0], collection="TBG")
         self.assertFalse(stub["raw_source_committed"])
         self.assertEqual(stub["collection"], "TBG")
+
+    def test_text_source_requires_text_success_status(self):
+        manifest = (
+            "source_id\turl\tfilename\texpected_kind\n"
+            "seram\thttps://example.org/seram.txt\tseram.txt\tTEXT\n"
+        )
+        good = (
+            "source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n"
+            "seram\tOK_TEXT\tseram.txt\t456\tdeadbeef\thttps://example.org/seram.txt\n"
+        )
+        rows = join_archive_records(manifest, good)
+        self.assertEqual(rows[0]["acquisition_status"], "ACQUIRED_VERIFIED_BY_BRIDGE")
+        self.assertEqual(rows[0]["source_kind"], "TEXT")
+
+        wrong_kind = good.replace("OK_TEXT", "OK_PDF")
+        rows = join_archive_records(manifest, wrong_kind)
+        self.assertEqual(rows[0]["acquisition_status"], "SOURCE_KIND_MISMATCH")
+
+    def test_unsupported_source_kind_is_rejected(self):
+        text = "source_id\turl\tfilename\texpected_kind\na\tu\tf.epub\tEPUB\n"
+        with self.assertRaises(ValueError):
+            parse_archive_manifest(text)
 
     def test_duplicate_source_id_is_rejected(self):
         text = "source_id\turl\tfilename\na\tu\tf\na\tu2\tf2\n"
