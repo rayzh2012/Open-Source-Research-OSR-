@@ -1,5 +1,2 @@
 source_id	url	filename
-hueting_1908_brill_download	https://brill.com/downloadpdf/journals/bki/61/1/article-p1_1.pdf	1908_Hueting_Tobelo_Tales_Brill_original.pdf
-hueting_1910_brill_download	https://brill.com/downloadpdf/journals/bki/63/1/article-p109_4.pdf	1910_Hueting_Woordverwisseling_Brill_original.pdf
-hueting_1908_jstor_pdf	https://www.jstor.org/stable/pdf/20769537.pdf	1908_Hueting_Tobelo_Tales_JSTOR_original.pdf
-hueting_1910_jstor_pdf	https://www.jstor.org/stable/pdf/20769582.pdf	1910_Hueting_Woordverwisseling_JSTOR_original.pdf
+bki61_1908_gbooks	gbooks:NOgPAAAAYAAJ	1908_BKI61_GoogleBooks_NOgPAAAAYAAJ_original.pdf
