@@ -22,6 +22,7 @@ jobs:
         shell: bash
         run: |
           set -u
+          test -s archive-fetch/manifest.tsv
           mkdir -p downloads
           : > downloads/RESULTS.tsv
           printf 'source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n' > downloads/RESULTS.tsv
