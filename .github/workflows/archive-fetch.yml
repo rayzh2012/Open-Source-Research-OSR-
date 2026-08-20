@@ -35,11 +35,37 @@ jobs:
           while IFS=$'\t' read -r source_id url filename; do
             [[ -z "${source_id:-}" || "$source_id" == source_id ]] && continue
             out="downloads/$filename"
+            fetch_url="$url"
             echo "Fetching $source_id -> $filename"
-            rm -f "$out" /tmp/hdr
-            if ! curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 1800 "$url" -o "$out"; then
+            rm -f "$out" /tmp/hdr /tmp/gbooks.json
+
+            if [[ "$url" == gbooks:* ]]; then
+              volume_id="${url#gbooks:}"
+              api_url="https://www.googleapis.com/books/v1/volumes/${volume_id}"
+              if ! curl -fsSL --retry 3 --connect-timeout 30 --max-time 120 "$api_url" -o /tmp/gbooks.json; then
+                printf '%s\tRESOLVE_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
+                continue
+              fi
+              fetch_url=$(python - <<'PY'
+import json
+p='/tmp/gbooks.json'
+with open(p, encoding='utf-8') as f:
+    d=json.load(f)
+print((((d.get('accessInfo') or {}).get('pdf') or {}).get('downloadLink')) or '')
+PY
+)
+              if [[ -z "$fetch_url" ]]; then
+                cp /tmp/gbooks.json "downloads/${filename}.gbooks_metadata.json"
+                printf '%s\tNO_PDF_LINK\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
+                continue
+              fi
+              echo "Resolved Google Books volume $volume_id to PDF download endpoint"
+            fi
+
+            if ! curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 1800 "$fetch_url" -o "$out"; then
               printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
               rm -f "$out"
+              [[ -f /tmp/gbooks.json ]] && cp /tmp/gbooks.json "downloads/${filename}.gbooks_metadata.json"
               continue
             fi
             size=$(stat -c '%s' "$out" 2>/dev/null || wc -c < "$out")
@@ -47,6 +73,7 @@ jobs:
             if [[ "$magic" != "%PDF-" ]]; then
               printf '%s\tNOT_PDF\t%s\t%s\t\t%s\n' "$source_id" "$filename" "$size" "$url" >> downloads/RESULTS.tsv
               mv "$out" "downloads/${filename}.not_pdf"
+              [[ -f /tmp/gbooks.json ]] && cp /tmp/gbooks.json "downloads/${filename}.gbooks_metadata.json"
               continue
             fi
             sha=$(sha256sum "$out" | awk '{print $1}')
