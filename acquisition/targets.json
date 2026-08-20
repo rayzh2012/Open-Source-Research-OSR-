@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "drive_remote": "gdrive",
+  "drive_root": "龍族古籍源庫｜Dragon Source Corpus",
+  "status_drive_path": "_ACQUISITION_STATUS/bulk_watcher_status.json",
+  "idle_sleep_seconds": 600,
+  "targets": [
+    {
+      "enabled": true,
+      "priority": 50,
+      "repo_id": "Geralt-Targaryen/Literature-zh",
+      "repo_type": "dataset",
+      "destination": "BULK_SECONDARY_CORPUS/Literature-zh",
+      "extensions": [".parquet", ".jsonl", ".json", ".zst", ".gz", ".bz2", ".zip", ".tar"]
+    },
+    {
+      "enabled": true,
+      "priority": 60,
+      "repo_id": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "repo_type": "dataset",
+      "destination": "BULK_SECONDARY_CORPUS/ChineseWebText2.0-HighQuality",
+      "extensions": [".parquet", ".jsonl", ".json", ".zst", ".gz", ".bz2", ".zip", ".tar"]
+    }
+  ]
+}

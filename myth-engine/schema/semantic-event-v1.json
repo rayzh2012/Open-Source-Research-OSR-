@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://osr.example/schema/semantic-event-v1.json",
+  "title": "Myth Engine Semantic Event v1",
+  "type": "object",
+  "required": [
+    "witness_id",
+    "semantic_version",
+    "ordinal",
+    "predicate",
+    "state_before",
+    "state_after",
+    "tags"
+  ],
+  "properties": {
+    "witness_id": {"type": "string", "minLength": 1},
+    "segment_id": {"type": ["string", "null"]},
+    "semantic_version": {"type": "string", "minLength": 1},
+    "ordinal": {"type": "integer", "minimum": 0},
+    "predicate": {
+      "type": "string",
+      "pattern": "^[A-Z0-9_:-]+$",
+      "description": "Canonical symbolic predicate, e.g. DECAPITATE, GRAFT_HEAD, RESTORE_BODY."
+    },
+    "actor": {"type": ["string", "null"]},
+    "patient": {"type": ["string", "null"]},
+    "state_before": {
+      "type": "object",
+      "description": "Explicit pre-event state. Unknown values should be omitted, not guessed."
+    },
+    "state_after": {
+      "type": "object",
+      "description": "Explicit post-event state. Unknown values should be omitted, not guessed."
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "causal_status": {
+      "type": "string",
+      "enum": ["CAUSAL_EXPLICIT", "SEQUENTIAL_ONLY", "ANALYST_INFERRED"]
+    },
+    "source_layer": {
+      "type": "string",
+      "enum": [
+        "PRIMARY_TEXT",
+        "FIELD_COLLECTION",
+        "TRANSLATION",
+        "COMMENTARY",
+        "EDITORIAL_SUMMARY",
+        "SCHOLARLY_ANALYSIS",
+        "UNKNOWN"
+      ]
+    },
+    "payload": {"type": "object"}
+  },
+  "additionalProperties": true
+}

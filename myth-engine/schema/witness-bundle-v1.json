@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/myth-engine/witness-bundle-v1.json",
+  "title": "Myth Engine Witness Bundle v1",
+  "type": "object",
+  "required": [
+    "bundle_version",
+    "witness_key",
+    "doc_hash",
+    "merkle_root",
+    "segment_count",
+    "normalized_size_chars",
+    "raw_included",
+    "semantic_events_included",
+    "artifacts"
+  ],
+  "properties": {
+    "bundle_version": {"const": "witness-bundle/v1"},
+    "witness_key": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "doc_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "merkle_root": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "segment_count": {"type": "integer", "minimum": 1},
+    "normalized_size_chars": {"type": "integer", "minimum": 0},
+    "raw_included": {"type": "boolean"},
+    "semantic_events_included": {"type": "boolean"},
+    "artifacts": {
+      "type": "object",
+      "required": ["source", "normalized", "segments"],
+      "properties": {
+        "source": {"const": "source.json"},
+        "normalized": {"const": "normalized.txt"},
+        "segments": {"const": "segments.jsonl"},
+        "raw": {"type": ["string", "null"]},
+        "semantic_events": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}
