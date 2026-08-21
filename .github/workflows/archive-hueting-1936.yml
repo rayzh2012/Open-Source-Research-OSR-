@@ -1,11 +1,8 @@
-name: Probe Google Books Hueting 1908
+name: Probe UGM Sequential Slices
 on:
   push:
     branches:
       - archive-hueting-1936-tobelo-grammar
-    paths:
-      - '.github/workflows/archive-hueting-1936.yml'
-  pull_request:
     paths:
       - '.github/workflows/archive-hueting-1936.yml'
   workflow_dispatch:
@@ -14,39 +11,37 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Probe SearchWithinVolume endpoints
+      - name: Test repeated validate-download sequence
         shell: bash
         run: |
-          set -u
+          set -euo pipefail
           mkdir -p out
+          base='https://langka.lib.ugm.ac.id'
+          viewer="$base/viewer/index/675"
           ua='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
-          urls=(
-            'https://books.google.com/books?jscmd=SearchWithinVolume2&q=hohono&vid=U2VwYkm4NBsC'
-            'https://books.google.com/books?vid=U2VwYkm4NBsC&jscmd=SearchWithinVolume2&q=hohono'
-            'https://books.google.com/books?id=U2VwYkm4NBsC&jscmd=SearchWithinVolume2&q=hohono'
-            'https://books.google.com/books?jscmd=SearchWithinVolume2&q=bohono&vid=U2VwYkm4NBsC'
-            'https://www.googleapis.com/books/v1/volumes/U2VwYkm4NBsC'
-          )
-          : > out/results.tsv
-          printf 'n\thttp\tctype\tsize\turl\n' > out/results.tsv
-          n=0
-          for url in "${urls[@]}"; do
-            n=$((n+1)); body="out/body_${n}.txt"; hdr="out/headers_${n}.txt"
-            code=$(curl -L -sS --connect-timeout 15 --max-time 90 -A "$ua" -H 'Accept-Language: en-US,en;q=0.8' -D "$hdr" -o "$body" -w '%{http_code}' "$url" || echo ERR)
-            ctype=$(awk 'BEGIN{IGNORECASE=1}/^content-type:/{v=$0}END{sub(/^[^:]*:[ ]*/,"",v);gsub(/\r/,"",v);print v}' "$hdr")
-            size=$(wc -c < "$body" 2>/dev/null || echo 0)
-            printf '%s\t%s\t%s\t%s\t%s\n' "$n" "$code" "$ctype" "$size" "$url" >> out/results.tsv
-            echo "--- BODY $n ---"
-            head -c 12000 "$body" || true
-            echo
+          curl -fL -c out/cookies.txt -b out/cookies.txt --connect-timeout 20 --max-time 120 -A "$ua" "$viewer" -o out/viewer_675.html
+          printf 'iteration\thttp\tserver_filename\tbytes\tpages\tsha256\n' > out/RESULTS.tsv
+          for i in $(seq 1 12); do
+            curl -sS -L -c out/cookies.txt -b out/cookies.txt -A "$ua" -e "$viewer" -X POST "$base/viewer/validate_page" -D "out/validate_${i}.headers" -o "out/validate_${i}.body" || true
+            code=$(curl -sS -L -c out/cookies.txt -b out/cookies.txt -A "$ua" -e "$viewer" "$base/koleksi/buku/download_file/" -D "out/download_${i}.headers" -o "out/chunk_${i}.bin" -w '%{http_code}' || true)
+            sf=$(sed -n 's/^[Cc]ontent-[Dd]isposition:.*filename=\([^;\r]*\).*/\1/p' "out/download_${i}.headers" | tail -1 | tr -d '\r\"' || true)
+            bytes=$(wc -c < "out/chunk_${i}.bin" 2>/dev/null || echo 0)
+            if head -c 5 "out/chunk_${i}.bin" | grep -q '%PDF-'; then
+              mv "out/chunk_${i}.bin" "out/chunk_${i}.pdf"
+              pages=$(pdfinfo "out/chunk_${i}.pdf" 2>/dev/null | awk '/^Pages:/{print $2}' || true)
+              sha=$(sha256sum "out/chunk_${i}.pdf" | awk '{print $1}')
+            else
+              pages=''; sha=''
+            fi
+            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$i" "$code" "$sf" "$bytes" "$pages" "$sha" >> out/RESULTS.tsv
           done
-          cat out/results.tsv
+          cat out/RESULTS.tsv
       - uses: actions/upload-artifact@v4
         with:
-          name: google-books-hueting-1908-probe
+          name: ugm-sequential-slices
           path: out/
           compression-level: 0
           retention-days: 7
