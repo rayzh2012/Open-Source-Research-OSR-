@@ -6,6 +6,10 @@ on:
     paths:
       - '.github/workflows/archive-hueting-1936.yml'
       - 'archive-fetch/hueting-1936.tsv'
+  pull_request:
+    paths:
+      - '.github/workflows/archive-hueting-1936.yml'
+      - 'archive-fetch/hueting-1936.tsv'
   workflow_dispatch:
 permissions:
   contents: read
