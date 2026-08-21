@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Map viewer IDs around 675
+      - name: Map viewer IDs around 675 v2
         shell: bash
         run: |
           set -euo pipefail
@@ -29,9 +29,9 @@ jobs:
             jar="out/cookie_${id}.txt"; html="out/viewer_${id}.html"
             code=$(curl -L -sS -c "$jar" -b "$jar" --connect-timeout 10 --max-time 30 -A "$ua" "$base/viewer/index/$id" -o "$html" -w '%{http_code}' || true)
             title=$(python - "$html" <<'PY'
-import re,sys,html as h
+import re,sys,html as h,os
 p=sys.argv[1]
-s=open(p,encoding='utf-8',errors='ignore').read() if __import__('os').path.exists(p) else ''
+s=open(p,encoding='utf-8',errors='ignore').read() if os.path.exists(p) else ''
 m=re.search(r'<div class="metadata[^>]*>.*?<h3>(.*?)</h3>',s,re.S|re.I)
 t=re.sub('<[^>]+>',' ',m.group(1)) if m else ''
 print(' '.join(h.unescape(t).split()))
