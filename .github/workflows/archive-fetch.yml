@@ -76,6 +76,43 @@ jobs:
             printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$source_id" "$status" "$filename" "$size" "$sha" "$url" >> downloads/RESULTS.tsv
           done < archive-fetch/manifest.tsv
           cat downloads/RESULTS.tsv
+      - name: Probe Kern 1893 and Hueting 1908 access
+        shell: bash
+        run: |
+          set -u
+          mkdir -p downloads/research-probe
+          rp='downloads/research-probe'
+          ua='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
+
+          kern='https://brill.com/view/journals/bki/42/1/article-p120_11.pdf'
+          if curl -fL --retry 2 --retry-delay 2 --connect-timeout 30 --max-time 300 -A "$ua" "$kern" -o "$rp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf" && test "$(head -c 5 "$rp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf")" = '%PDF-'; then
+            sha256sum "$rp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf" | tee "$rp/KERN_SHA256.txt"
+            stat -c '%n\t%s bytes' "$rp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf" | tee "$rp/KERN_SIZE.txt"
+          else
+            rm -f "$rp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf"
+            echo 'KERN_DOWNLOAD_FAILED' | tee "$rp/KERN_STATUS.txt"
+          fi
+
+          printf 'n\thttp\tctype\tsize\turl\n' > "$rp/GOOGLE_BOOKS_RESULTS.tsv"
+          urls=(
+            'https://books.google.com/books?jscmd=SearchWithinVolume2&q=hohono&vid=U2VwYkm4NBsC'
+            'https://books.google.com/books?vid=U2VwYkm4NBsC&jscmd=SearchWithinVolume2&q=hohono'
+            'https://books.google.com/books?id=U2VwYkm4NBsC&jscmd=SearchWithinVolume2&q=hohono'
+            'https://books.google.com/books?jscmd=SearchWithinVolume2&q=bohono&vid=U2VwYkm4NBsC'
+            'https://www.googleapis.com/books/v1/volumes/U2VwYkm4NBsC'
+          )
+          n=0
+          for url in "${urls[@]}"; do
+            n=$((n+1)); body="$rp/gbooks_body_${n}.txt"; hdr="$rp/gbooks_headers_${n}.txt"
+            code=$(curl -L -sS --connect-timeout 15 --max-time 90 -A "$ua" -H 'Accept-Language: en-US,en;q=0.8' -D "$hdr" -o "$body" -w '%{http_code}' "$url" || echo ERR)
+            ctype=$(awk 'BEGIN{IGNORECASE=1}/^content-type:/{v=$0}END{sub(/^[^:]*:[ ]*/,"",v);gsub(/\r/,"",v);print v}' "$hdr")
+            size=$(wc -c < "$body" 2>/dev/null || echo 0)
+            printf '%s\t%s\t%s\t%s\t%s\n' "$n" "$code" "$ctype" "$size" "$url" >> "$rp/GOOGLE_BOOKS_RESULTS.tsv"
+            echo "--- GBOOKS BODY $n ---"
+            head -c 12000 "$body" || true
+            echo
+          done
+          cat "$rp/GOOGLE_BOOKS_RESULTS.tsv"
       - name: Build Myth Engine acquisition metadata
         env:
           PYTHONPATH: myth-engine
