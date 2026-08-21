@@ -1,0 +1,71 @@
+name: Mirror 26 Histories Corpus
+
+on:
+  push:
+    paths:
+      - '.github/workflows/mirror-26histories.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch upstream 26-history corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/ahua/dataset.git upstream
+          cd upstream
+          git sparse-checkout set '26史'
+          UPSTREAM_COMMIT="$(git rev-parse HEAD)"
+          cd ..
+
+          mkdir -p package/corpus package/aux
+          find 'upstream/26史' -maxdepth 1 -type f -name '*.txt' -print0 | while IFS= read -r -d '' f; do
+            b="$(basename "$f")"
+            if [[ "$b" == '史记freq.txt' ]]; then
+              cp "$f" "package/aux/$b"
+            else
+              cp "$f" "package/corpus/$b"
+            fi
+          done
+
+          MAIN_COUNT="$(find package/corpus -maxdepth 1 -type f -name '*.txt' | wc -l | tr -d ' ')"
+          if [[ "$MAIN_COUNT" != '26' ]]; then
+            echo "Expected 26 corpus files, found $MAIN_COUNT" >&2
+            exit 1
+          fi
+
+          {
+            printf 'filename\tbytes\tsha256\n'
+            find package/corpus -maxdepth 1 -type f -name '*.txt' -print0 \
+              | sort -z \
+              | while IFS= read -r -d '' f; do
+                  printf '%s\t%s\t%s\n' "$(basename "$f")" "$(stat -c%s "$f")" "$(sha256sum "$f" | awk '{print $1}')"
+                done
+          } > package/manifest.tsv
+
+          cat > package/SOURCE.md <<EOF
+          # 二十六史原始语料镜像
+
+          - Upstream: https://github.com/ahua/dataset/tree/master/26史
+          - Upstream commit: ${UPSTREAM_COMMIT}
+          - Retrieved by: GitHub Actions cloud mirror
+          - Corpus files: 26
+          - Auxiliary files: 史记freq.txt
+          - Policy: corpus/ contains only 01史记.txt–24明史.txt + 附25新元史.txt + 附26清史稿.txt; auxiliary frequency data is isolated under aux/.
+          EOF
+
+          echo "upstream_commit=${UPSTREAM_COMMIT}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload immutable corpus artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ahua-dataset-26histories-2026-08-20
+          path: package/
+          if-no-files-found: error
+          compression-level: 6
+          retention-days: 90
