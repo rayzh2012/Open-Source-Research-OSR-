@@ -1,0 +1,57 @@
+name: Archive Fetch India NE Indonesia Books
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/archive-fetch-india-ne-indonesia.yml'
+      - 'archive-fetch/india-ne-indonesia-20260821.tsv'
+  push:
+    paths:
+      - '.github/workflows/archive-fetch-india-ne-indonesia.yml'
+      - 'archive-fetch/india-ne-indonesia-20260821.tsv'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch and validate original source books
+        shell: bash
+        run: |
+          set -u
+          manifest='archive-fetch/india-ne-indonesia-20260821.tsv'
+          test -s "$manifest"
+          mkdir -p downloads
+          printf 'source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n' > downloads/RESULTS.tsv
+          while IFS=$'\t' read -r source_id url filename expected_kind; do
+            [[ -z "${source_id:-}" || "$source_id" == source_id ]] && continue
+            out="downloads/$filename"
+            echo "Fetching $source_id -> $filename"
+            rm -f "$out"
+            if ! curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 1800 "$url" -o "$out"; then
+              printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
+              rm -f "$out"
+              continue
+            fi
+            size=$(stat -c '%s' "$out" 2>/dev/null || wc -c < "$out")
+            magic=$(head -c 5 "$out" || true)
+            if [[ "$magic" != "%PDF-" ]]; then
+              printf '%s\tNOT_PDF\t%s\t%s\t\t%s\n' "$source_id" "$filename" "$size" "$url" >> downloads/RESULTS.tsv
+              mv "$out" "downloads/${filename}.not_pdf"
+              continue
+            fi
+            sha=$(sha256sum "$out" | awk '{print $1}')
+            printf '%s\tOK_PDF\t%s\t%s\t%s\t%s\n' "$source_id" "$filename" "$size" "$sha" "$url" >> downloads/RESULTS.tsv
+          done < "$manifest"
+          cat downloads/RESULTS.tsv
+      - name: Upload acquisition artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: india-ne-indonesia-original-books-20260821
+          path: downloads/
+          compression-level: 0
+          retention-days: 7
