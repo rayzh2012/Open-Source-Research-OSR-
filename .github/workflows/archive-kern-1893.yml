@@ -1,0 +1,49 @@
+name: Archive Kern 1893 Galela Saali
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/archive-kern-1893.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch primary article
+        shell: bash
+        run: |
+          set -u
+          mkdir -p out
+          printf 'route\tstatus\tbytes\tsha256\n' > out/RESULTS.tsv
+          try_url() {
+            label="$1"; url="$2"; outp="$3"
+            if curl -fL --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 180 \
+              -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36' \
+              -H 'Accept: application/pdf,application/octet-stream;q=0.9,*/*;q=0.8' \
+              "$url" -o "$outp" && test "$(head -c 5 "$outp")" = '%PDF-'; then
+              size=$(stat -c '%s' "$outp")
+              sha=$(sha256sum "$outp" | awk '{print $1}')
+              printf '%s\tOK_PDF\t%s\t%s\n' "$label" "$size" "$sha" >> out/RESULTS.tsv
+              return 0
+            fi
+            rm -f "$outp"
+            printf '%s\tFAILED\t\t\n' "$label" >> out/RESULTS.tsv
+            return 1
+          }
+          target='out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf'
+          try_url view 'https://brill.com/view/journals/bki/42/1/article-p120_11.pdf' "$target" || \
+          try_url downloadpdf 'https://brill.com/downloadpdf/journals/bki/42/1/article-p120_11.pdf' "$target" || true
+          if test -f "$target"; then
+            pdfinfo "$target" > out/PDFINFO.txt 2>&1 || true
+            pdftotext -layout "$target" out/article.txt 2>/dev/null || true
+          fi
+          cat out/RESULTS.tsv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kern-1893-galela-saali
+          path: out/
+          compression-level: 0
+          retention-days: 7
