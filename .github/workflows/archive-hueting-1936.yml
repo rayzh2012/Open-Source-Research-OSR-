@@ -5,6 +5,9 @@ on:
       - archive-hueting-1936-tobelo-grammar
     paths:
       - '.github/workflows/archive-hueting-1936.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/archive-hueting-1936.yml'
   workflow_dispatch:
 permissions:
   contents: read
