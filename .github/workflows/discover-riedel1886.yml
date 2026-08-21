@@ -10,25 +10,26 @@ jobs:
   discover:
     runs-on: ubuntu-latest
     steps:
-      - name: Query Google Books exact-title metadata
+      - name: Scrape other-edition identifiers from Google Books
         shell: bash
         run: |
           set -u
           mkdir -p out
-          q='De sluik-en kroesharige rassen tusschen Selebes en Papua Riedel 1886'
-          curl -fL --retry 2 --get --data-urlencode "q=$q" --data-urlencode 'maxResults=40' 'https://www.googleapis.com/books/v1/volumes' -o out/google_books.json
+          url='https://books.google.com/books?id=jelU0AEACAAJ&hl=en'
+          curl -fL --retry 2 -A 'Mozilla/5.0' "$url" -o out/riedel_books.html
           python - <<'PY' | tee out/candidates.txt
-          import json
-          d=json.load(open('out/google_books.json'))
-          for item in d.get('items',[]):
-              v=item.get('volumeInfo',{}); a=item.get('accessInfo',{})
-              print('ID',item.get('id'))
-              print('TITLE',v.get('title'))
-              print('AUTHORS',v.get('authors'))
-              print('DATE',v.get('publishedDate'),'PAGES',v.get('pageCount'))
-              print('VIEW',a.get('viewability'),'PUBLIC',a.get('publicDomain'),'PDF',a.get('pdf'))
-              print('WEB',a.get('webReaderLink'))
-              print('---')
+          import re, html, pathlib
+          t=html.unescape(pathlib.Path('out/riedel_books.html').read_text(errors='ignore'))
+          seen=set()
+          for m in re.finditer(r'(?i)(?:id=|books\?id=)([A-Za-z0-9_-]{8,20})', t):
+              bid=m.group(1)
+              if bid in seen: continue
+              seen.add(bid)
+              s=max(0,m.start()-600); e=min(len(t),m.end()+1000)
+              ctx=re.sub(r'\s+',' ',t[s:e])
+              if 'Riedel' in ctx or 'sluik' in ctx.lower() or '1886' in ctx:
+                  print('ID',bid,'CTX',ctx[:1400])
+          print('ALL_IDS',sorted(seen))
           PY
       - uses: actions/upload-artifact@v4
         with:
