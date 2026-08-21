@@ -1,4 +1,4 @@
-name: Discover Riedel 1886 Columbia Images
+name: Discover Riedel 1886 Full View
 on:
   pull_request:
     paths:
@@ -10,26 +10,26 @@ jobs:
   discover:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch landing and sample page HTML
+      - name: Query Google Books exact-title metadata
         shell: bash
         run: |
           set -u
           mkdir -p out
-          base='https://www.columbia.edu/cu/lweb/digital/collections/cul/texts/ldpd_6940987_000'
-          curl -fL --retry 2 "$base/" -o out/landing.html || true
-          curl -fL --retry 2 "$base/pages/ldpd_6940987_000_00000008.html" -o out/page8.html || true
-          python - <<'PY' > out/links.txt
-          import re, pathlib, html
-          for f in ['out/landing.html','out/page8.html']:
-              p=pathlib.Path(f)
-              print('###',f)
-              if not p.exists(): continue
-              t=html.unescape(p.read_text(errors='ignore'))
-              for attr,u in re.findall(r'''(?i)(href|src)=["']([^"']+)["']''',t):
-                  if any(k in u.lower() for k in ['image','jpg','jpeg','png','tif','jp2','download','6940987']):
-                      print(attr,u)
+          q='De sluik-en kroesharige rassen tusschen Selebes en Papua Riedel 1886'
+          curl -fL --retry 2 --get --data-urlencode "q=$q" --data-urlencode 'maxResults=40' 'https://www.googleapis.com/books/v1/volumes' -o out/google_books.json
+          python - <<'PY' | tee out/candidates.txt
+          import json
+          d=json.load(open('out/google_books.json'))
+          for item in d.get('items',[]):
+              v=item.get('volumeInfo',{}); a=item.get('accessInfo',{})
+              print('ID',item.get('id'))
+              print('TITLE',v.get('title'))
+              print('AUTHORS',v.get('authors'))
+              print('DATE',v.get('publishedDate'),'PAGES',v.get('pageCount'))
+              print('VIEW',a.get('viewability'),'PUBLIC',a.get('publicDomain'),'PDF',a.get('pdf'))
+              print('WEB',a.get('webReaderLink'))
+              print('---')
           PY
-          cat out/links.txt
       - uses: actions/upload-artifact@v4
         with:
           name: riedel1886-discovery
