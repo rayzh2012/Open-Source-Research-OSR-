@@ -14,56 +14,68 @@ permissions:
   contents: read
 
 jobs:
-  fetch:
+  prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch and validate original source books
+      - id: matrix
+        name: Build source matrix from manifest
         shell: bash
         run: |
+          python - <<'PY'
+          import csv, json, os
+          path = 'archive-fetch/india-ne-indonesia-20260821.tsv'
+          with open(path, encoding='utf-8', newline='') as f:
+              rows = list(csv.DictReader(f, delimiter='\t'))
+          matrix = {'include': [
+              {'source_id': r['source_id'], 'url': r['url'], 'filename': r['filename']}
+              for r in rows if r.get('source_id')
+          ]}
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
+              out.write('matrix=' + json.dumps(matrix, separators=(',', ':')) + '\n')
+          PY
+
+  fetch:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Fetch and validate one original source book
+        shell: bash
+        env:
+          SOURCE_ID: ${{ matrix.source_id }}
+          SOURCE_URL: ${{ matrix.url }}
+          FILENAME: ${{ matrix.filename }}
+        run: |
           set -u
-          manifest='archive-fetch/india-ne-indonesia-20260821.tsv'
-          test -s "$manifest"
-          mkdir -p downloads/status
-
-          fetch_one() {
-            source_id="$1"; url="$2"; filename="$3"
-            out="downloads/$filename"
-            status_file="downloads/status/${source_id}.tsv"
-            echo "Fetching $source_id -> $filename"
-            rm -f "$out" "$status_file"
-            if ! curl -fL --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 600 "$url" -o "$out"; then
-              printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" > "$status_file"
-              rm -f "$out"
-              return 0
-            fi
-            size=$(stat -c '%s' "$out" 2>/dev/null || wc -c < "$out")
-            magic=$(head -c 5 "$out" || true)
-            if [[ "$magic" != "%PDF-" ]]; then
-              printf '%s\tNOT_PDF\t%s\t%s\t\t%s\n' "$source_id" "$filename" "$size" "$url" > "$status_file"
-              mv "$out" "downloads/${filename}.not_pdf"
-              return 0
-            fi
-            sha=$(sha256sum "$out" | awk '{print $1}')
-            printf '%s\tOK_PDF\t%s\t%s\t%s\t%s\n' "$source_id" "$filename" "$size" "$sha" "$url" > "$status_file"
-          }
-          export -f fetch_one
-
-          while IFS=$'\t' read -r source_id url filename expected_kind; do
-            [[ -z "${source_id:-}" || "$source_id" == source_id ]] && continue
-            fetch_one "$source_id" "$url" "$filename" &
-            while [[ $(jobs -rp | wc -l) -ge 4 ]]; do sleep 1; done
-          done < "$manifest"
-          wait
-
-          printf 'source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n' > downloads/RESULTS.tsv
-          find downloads/status -type f -name '*.tsv' -print0 | sort -z | xargs -0 cat >> downloads/RESULTS.tsv
-          cat downloads/RESULTS.tsv
-      - name: Upload acquisition artifact
+          mkdir -p downloads
+          printf 'source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n' > downloads/RESULT.tsv
+          out="downloads/$FILENAME"
+          echo "Fetching $SOURCE_ID -> $FILENAME"
+          if ! curl -fL --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 420 "$SOURCE_URL" -o "$out"; then
+            printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$SOURCE_ID" "$FILENAME" "$SOURCE_URL" >> downloads/RESULT.tsv
+            rm -f "$out"
+            exit 0
+          fi
+          size=$(stat -c '%s' "$out" 2>/dev/null || wc -c < "$out")
+          magic=$(head -c 5 "$out" || true)
+          if [[ "$magic" != "%PDF-" ]]; then
+            printf '%s\tNOT_PDF\t%s\t%s\t\t%s\n' "$SOURCE_ID" "$FILENAME" "$size" "$SOURCE_URL" >> downloads/RESULT.tsv
+            mv "$out" "downloads/${FILENAME}.not_pdf"
+            exit 0
+          fi
+          sha=$(sha256sum "$out" | awk '{print $1}')
+          printf '%s\tOK_PDF\t%s\t%s\t%s\t%s\n' "$SOURCE_ID" "$FILENAME" "$size" "$sha" "$SOURCE_URL" >> downloads/RESULT.tsv
+          cat downloads/RESULT.tsv
+      - name: Upload source-book artifact
         uses: actions/upload-artifact@v4
         with:
-          name: india-ne-indonesia-original-books-20260821
+          name: original-book-${{ matrix.source_id }}
           path: downloads/
           compression-level: 0
           retention-days: 7
