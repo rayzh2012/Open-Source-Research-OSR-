@@ -52,3 +52,4 @@ PY
           name: ugm-neighbor-map
           path: out/RESULTS.tsv
           retention-days: 7
+# trigger: 2026-08-21 p167 neighbor-map run
