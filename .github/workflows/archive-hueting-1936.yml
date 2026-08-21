@@ -1,41 +1,44 @@
-name: Archive Hueting 1936
+name: Archive Tobelo Morphology Controls
 on:
   push:
     branches:
       - archive-hueting-1936-tobelo-grammar
     paths:
       - '.github/workflows/archive-hueting-1936.yml'
-      - 'archive-fetch/hueting-1936.tsv'
   pull_request:
     paths:
       - '.github/workflows/archive-hueting-1936.yml'
-      - 'archive-fetch/hueting-1936.tsv'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch Hueting 1936
+      - name: Fetch Tobelo morphology controls
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p downloads
-          url='https://brill.com/view/journals/bki/94/1/article-p295_9.pdf'
-          out='downloads/1936_Hueting_Iets_over_de_spraakkunst_van_de_Tobeloreesche_taal.pdf'
-          curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 900 \
-            -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36' \
-            -H 'Accept: application/pdf,application/octet-stream;q=0.9,*/*;q=0.8' \
-            "$url" -o "$out"
-          test "$(head -c 5 "$out")" = '%PDF-'
-          sha256sum "$out" | tee downloads/SHA256.txt
-          stat -c '%s bytes' "$out" | tee downloads/SIZE.txt
+          fetch_pdf() {
+            url="$1"; out="$2"
+            curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 900 \
+              -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36' \
+              -H 'Accept: application/pdf,application/octet-stream;q=0.9,*/*;q=0.8' \
+              "$url" -o "$out"
+            test "$(head -c 5 "$out")" = '%PDF-'
+            sha256sum "$out" >> downloads/SHA256.txt
+            stat -c '%n\t%s bytes' "$out" >> downloads/SIZE.txt
+          }
+          fetch_pdf 'https://repositori.kemendikdasmen.go.id/3622/1/Struktur%20Bahasa%20Tobelo%20%20%20%2079h.pdf' 'downloads/1986_Rugebregt_et_al_Struktur_Bahasa_Tobelo.pdf'
+          fetch_pdf 'https://sil-philippines-languages.org/ical/papers/holton-tobelo.pdf' 'downloads/2006_Holton_The_relational_noun_marker_in_Tobelo.pdf'
+          cat downloads/SHA256.txt
+          cat downloads/SIZE.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: hueting-1936-tobelo-grammar
+          name: tobelo-morphology-controls
           path: downloads/
           compression-level: 0
           retention-days: 7
