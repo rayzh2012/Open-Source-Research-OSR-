@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+# Temporary research probe on PR #14; do not merge.
 jobs:
   fetch:
     runs-on: ubuntu-latest
@@ -61,7 +62,6 @@ PY
             echo
           done
 
-          # Directly inspect the page named by the later citation.
           for suffix in \
             "books?id=$id&pg=PA167" \
             "books?id=$id&pg=PA167&vq=hohono" \
@@ -74,7 +74,6 @@ PY
             grep -Eio '.{0,180}(PA167|hohono|vervang|schoon|aangetrouw|books/content|pageImage|page_image|viewport).{0,300}' "out/page_${n}.html" | head -n 120 || true
           done
 
-          # Probe common legacy page-image URL without guessing success.
           for zoom in 1 2 3; do
             url="https://books.google.com/books/content?id=$id&pg=PA167&img=1&zoom=$zoom&hl=en"
             outp="out/PA167_zoom${zoom}.bin"
