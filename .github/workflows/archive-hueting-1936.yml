@@ -38,8 +38,8 @@ jobs:
               printf '%s\tDOWNLOAD_FAILED\t%s\t\t\n' "$source" "$(basename "$out")" >> downloads/RESULTS.tsv
             fi
           }
+          fetch_pdf hueting_1936 'https://brill.com/downloadpdf/journals/bki/94/1/article-p295_9.pdf' 'downloads/1936_Hueting_Iets_over_de_spraakkunst_van_de_Tobeloreesche_taal.pdf'
           fetch_pdf holton_2006 'https://sil-philippines-languages.org/ical/papers/holton-tobelo.pdf' 'downloads/2006_Holton_The_relational_noun_marker_in_Tobelo.pdf'
-          fetch_pdf rugebregt_1986 'https://repositori.kemendikdasmen.go.id/3622/1/Struktur%20Bahasa%20Tobelo%20%20%20%2079h.pdf' 'downloads/1986_Rugebregt_et_al_Struktur_Bahasa_Tobelo.pdf'
           cat downloads/RESULTS.tsv
       - uses: actions/upload-artifact@v4
         with:
