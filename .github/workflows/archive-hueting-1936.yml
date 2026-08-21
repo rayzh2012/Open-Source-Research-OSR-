@@ -1,4 +1,4 @@
-name: Inspect UGM Hueting 1908 Viewer
+name: Fetch UGM Hueting 1908 Session PDF
 on:
   push:
     branches:
@@ -12,27 +12,39 @@ on:
 permissions:
   contents: read
 jobs:
-  inspect:
+  fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch raw viewer HTML and inspect embedded media
+      - name: Reproduce UGM viewer session and download current file
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p inspect
-          url='https://langka.lib.ugm.ac.id/viewer/index/675'
-          curl -fL --connect-timeout 20 --max-time 120 -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36' "$url" -o inspect/viewer_675.html
-          printf '%s\n' '--- MEDIA / IFRAME / SCRIPT LINES ---'
-          grep -Ein 'iframe|pdf|upload|koleksi|document|embed|object|src=|file=|viewer' inspect/viewer_675.html | tee inspect/relevant_lines.txt || true
-          printf '%s\n' '--- URLS ---'
-          grep -Eo 'https?://[^"'"'<> ]+' inspect/viewer_675.html | sort -u | tee inspect/urls.txt || true
-          printf '%s\n' '--- HTML SIZE ---'
-          wc -c inspect/viewer_675.html
+          mkdir -p out
+          base='https://langka.lib.ugm.ac.id'
+          viewer="$base/viewer/index/675"
+          ua='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
+          curl -fL -c out/cookies.txt -b out/cookies.txt --connect-timeout 20 --max-time 120 -A "$ua" "$viewer" -o out/viewer_675.html
+          curl -sS -L -c out/cookies.txt -b out/cookies.txt -A "$ua" -e "$viewer" -X POST "$base/viewer/validate_page" -D out/validate.headers -o out/validate.body || true
+          curl -sS -L -c out/cookies.txt -b out/cookies.txt -A "$ua" -e "$viewer" "$base/koleksi/buku/download_file/" -D out/download.headers -o out/Hueting1908_UGM_675.bin
+          echo '--- VALIDATE ---'
+          cat out/validate.headers || true
+          head -c 1000 out/validate.body || true
+          echo
+          echo '--- DOWNLOAD HEADERS ---'
+          cat out/download.headers || true
+          echo '--- FILE ---'
+          file out/Hueting1908_UGM_675.bin
+          wc -c out/Hueting1908_UGM_675.bin
+          head -c 16 out/Hueting1908_UGM_675.bin | xxd
+          if head -c 5 out/Hueting1908_UGM_675.bin | grep -q '%PDF-'; then
+            mv out/Hueting1908_UGM_675.bin out/1908_Hueting_Tobeloreesch-Hollandsch_woordenboek_UGM.pdf
+            sha256sum out/1908_Hueting_Tobeloreesch-Hollandsch_woordenboek_UGM.pdf | tee out/SHA256.txt
+          fi
       - uses: actions/upload-artifact@v4
         with:
-          name: ugm-hueting-1908-viewer-html
-          path: inspect/
+          name: ugm-hueting-1908-session-fetch
+          path: out/
           compression-level: 0
           retention-days: 7
