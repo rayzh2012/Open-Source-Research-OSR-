@@ -5,6 +5,9 @@ on:
   push:
     paths:
       - '.github/workflows/mirror-26histories.yml'
+  pull_request:
+    paths:
+      - 'corpus-mirror.trigger'
   workflow_dispatch:
 
 permissions:
