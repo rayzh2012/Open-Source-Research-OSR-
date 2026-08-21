@@ -1,49 +1,56 @@
-name: Archive Tobelo Morphology Controls
+name: Probe UGM Hueting 1908
 on:
   push:
     branches:
       - archive-hueting-1936-tobelo-grammar
     paths:
       - '.github/workflows/archive-hueting-1936.yml'
-  pull_request:
-    paths:
-      - '.github/workflows/archive-hueting-1936.yml'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  fetch:
+  probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch Tobelo morphology controls
+      - name: Probe collection 675 media paths
         shell: bash
         run: |
           set -u
-          mkdir -p downloads
-          : > downloads/RESULTS.tsv
-          printf 'source\tstatus\tfilename\tsize\tsha256\n' > downloads/RESULTS.tsv
-          fetch_pdf() {
-            source="$1"; url="$2"; out="$3"
-            if curl -fL --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 300 \
-              -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36' \
-              -H 'Accept: application/pdf,application/octet-stream;q=0.9,*/*;q=0.8' \
-              "$url" -o "$out" && test "$(head -c 5 "$out")" = '%PDF-'; then
-              size=$(stat -c '%s' "$out")
-              sha=$(sha256sum "$out" | awk '{print $1}')
-              printf '%s\tOK_PDF\t%s\t%s\t%s\n' "$source" "$(basename "$out")" "$size" "$sha" >> downloads/RESULTS.tsv
-            else
-              rm -f "$out"
-              printf '%s\tDOWNLOAD_FAILED\t%s\t\t\n' "$source" "$(basename "$out")" >> downloads/RESULTS.tsv
-            fi
-          }
-          fetch_pdf hueting_1936 'https://brill.com/downloadpdf/journals/bki/94/1/article-p295_9.pdf' 'downloads/1936_Hueting_Iets_over_de_spraakkunst_van_de_Tobeloreesche_taal.pdf'
-          fetch_pdf holton_2006 'https://sil-philippines-languages.org/ical/papers/holton-tobelo.pdf' 'downloads/2006_Holton_The_relational_noun_marker_in_Tobelo.pdf'
-          cat downloads/RESULTS.tsv
+          mkdir -p probe
+          : > probe/RESULTS.tsv
+          printf 'url\thttp\tcontent_type\tsize\tmagic\n' > probe/RESULTS.tsv
+          base='https://langka.lib.ugm.ac.id'
+          candidates=(
+            '/public/upload/pdf/675.pdf'
+            '/public/upload/pdf/675.PDF'
+            '/public/upload/pdf/675/675.pdf'
+            '/public/upload/675.pdf'
+            '/public/upload/doc/675.pdf'
+            '/public/upload/document/675.pdf'
+            '/public/upload/ebook/675.pdf'
+            '/public/upload/file/675.pdf'
+            '/public/upload/files/675.pdf'
+            '/public/pdf/675.pdf'
+            '/upload/pdf/675.pdf'
+            '/assets/pdf/675.pdf'
+            '/public/pdfjs/web/viewer.html?file=/public/upload/pdf/675.pdf'
+          )
+          i=0
+          for path in "${candidates[@]}"; do
+            i=$((i+1)); url="$base$path"; out="probe/candidate_$i.bin"; hdr="probe/candidate_$i.headers"
+            code=$(curl -L -sS --connect-timeout 10 --max-time 25 -A 'Mozilla/5.0' -D "$hdr" -o "$out" -w '%{http_code}' "$url" || echo ERR)
+            ctype=$(awk 'BEGIN{IGNORECASE=1}/^content-type:/{v=$0}END{sub(/^[^:]*:[ ]*/,"",v);gsub(/\r/,"",v);print v}' "$hdr")
+            size=$(wc -c < "$out" 2>/dev/null || echo 0)
+            magic=$(head -c 8 "$out" 2>/dev/null | xxd -p -c 8 || true)
+            printf '%s\t%s\t%s\t%s\t%s\n' "$url" "$code" "$ctype" "$size" "$magic" >> probe/RESULTS.tsv
+            if head -c 5 "$out" 2>/dev/null | grep -q '%PDF-'; then cp "$out" probe/Hueting1908_UGM_675.pdf; fi
+          done
+          cat probe/RESULTS.tsv
       - uses: actions/upload-artifact@v4
         with:
-          name: tobelo-morphology-controls
-          path: downloads/
+          name: ugm-hueting-1908-probe
+          path: probe/
           compression-level: 0
           retention-days: 7
