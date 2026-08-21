@@ -1,0 +1,37 @@
+name: Discover Riedel 1886 Columbia Images
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/discover-riedel1886.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch landing and sample page HTML
+        shell: bash
+        run: |
+          set -u
+          mkdir -p out
+          base='https://www.columbia.edu/cu/lweb/digital/collections/cul/texts/ldpd_6940987_000'
+          curl -fL --retry 2 "$base/" -o out/landing.html || true
+          curl -fL --retry 2 "$base/pages/ldpd_6940987_000_00000008.html" -o out/page8.html || true
+          python - <<'PY' > out/links.txt
+          import re, pathlib, html
+          for f in ['out/landing.html','out/page8.html']:
+              p=pathlib.Path(f)
+              print('###',f)
+              if not p.exists(): continue
+              t=html.unescape(p.read_text(errors='ignore'))
+              for attr,u in re.findall(r'''(?i)(href|src)=["']([^"']+)["']''',t):
+                  if any(k in u.lower() for k in ['image','jpg','jpeg','png','tif','jp2','download','6940987']):
+                      print(attr,u)
+          PY
+          cat out/links.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: riedel1886-discovery
+          path: out/
+          retention-days: 3
