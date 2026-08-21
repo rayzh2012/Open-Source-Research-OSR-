@@ -20,22 +20,27 @@ jobs:
       - name: Fetch Tobelo morphology controls
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
           mkdir -p downloads
+          : > downloads/RESULTS.tsv
+          printf 'source\tstatus\tfilename\tsize\tsha256\n' > downloads/RESULTS.tsv
           fetch_pdf() {
-            url="$1"; out="$2"
-            curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 900 \
+            source="$1"; url="$2"; out="$3"
+            if curl -fL --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 300 \
               -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36' \
               -H 'Accept: application/pdf,application/octet-stream;q=0.9,*/*;q=0.8' \
-              "$url" -o "$out"
-            test "$(head -c 5 "$out")" = '%PDF-'
-            sha256sum "$out" >> downloads/SHA256.txt
-            stat -c '%n\t%s bytes' "$out" >> downloads/SIZE.txt
+              "$url" -o "$out" && test "$(head -c 5 "$out")" = '%PDF-'; then
+              size=$(stat -c '%s' "$out")
+              sha=$(sha256sum "$out" | awk '{print $1}')
+              printf '%s\tOK_PDF\t%s\t%s\t%s\n' "$source" "$(basename "$out")" "$size" "$sha" >> downloads/RESULTS.tsv
+            else
+              rm -f "$out"
+              printf '%s\tDOWNLOAD_FAILED\t%s\t\t\n' "$source" "$(basename "$out")" >> downloads/RESULTS.tsv
+            fi
           }
-          fetch_pdf 'https://repositori.kemendikdasmen.go.id/3622/1/Struktur%20Bahasa%20Tobelo%20%20%20%2079h.pdf' 'downloads/1986_Rugebregt_et_al_Struktur_Bahasa_Tobelo.pdf'
-          fetch_pdf 'https://sil-philippines-languages.org/ical/papers/holton-tobelo.pdf' 'downloads/2006_Holton_The_relational_noun_marker_in_Tobelo.pdf'
-          cat downloads/SHA256.txt
-          cat downloads/SIZE.txt
+          fetch_pdf holton_2006 'https://sil-philippines-languages.org/ical/papers/holton-tobelo.pdf' 'downloads/2006_Holton_The_relational_noun_marker_in_Tobelo.pdf'
+          fetch_pdf rugebregt_1986 'https://repositori.kemendikdasmen.go.id/3622/1/Struktur%20Bahasa%20Tobelo%20%20%20%2079h.pdf' 'downloads/1986_Rugebregt_et_al_Struktur_Bahasa_Tobelo.pdf'
+          cat downloads/RESULTS.tsv
       - uses: actions/upload-artifact@v4
         with:
           name: tobelo-morphology-controls
