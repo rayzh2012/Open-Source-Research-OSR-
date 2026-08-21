@@ -16,7 +16,7 @@ permissions:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Fetch and validate original source books
@@ -25,28 +25,40 @@ jobs:
           set -u
           manifest='archive-fetch/india-ne-indonesia-20260821.tsv'
           test -s "$manifest"
-          mkdir -p downloads
-          printf 'source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n' > downloads/RESULTS.tsv
-          while IFS=$'\t' read -r source_id url filename expected_kind; do
-            [[ -z "${source_id:-}" || "$source_id" == source_id ]] && continue
+          mkdir -p downloads/status
+
+          fetch_one() {
+            source_id="$1"; url="$2"; filename="$3"
             out="downloads/$filename"
+            status_file="downloads/status/${source_id}.tsv"
             echo "Fetching $source_id -> $filename"
-            rm -f "$out"
-            if ! curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 1800 "$url" -o "$out"; then
-              printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
+            rm -f "$out" "$status_file"
+            if ! curl -fL --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 600 "$url" -o "$out"; then
+              printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" > "$status_file"
               rm -f "$out"
-              continue
+              return 0
             fi
             size=$(stat -c '%s' "$out" 2>/dev/null || wc -c < "$out")
             magic=$(head -c 5 "$out" || true)
             if [[ "$magic" != "%PDF-" ]]; then
-              printf '%s\tNOT_PDF\t%s\t%s\t\t%s\n' "$source_id" "$filename" "$size" "$url" >> downloads/RESULTS.tsv
+              printf '%s\tNOT_PDF\t%s\t%s\t\t%s\n' "$source_id" "$filename" "$size" "$url" > "$status_file"
               mv "$out" "downloads/${filename}.not_pdf"
-              continue
+              return 0
             fi
             sha=$(sha256sum "$out" | awk '{print $1}')
-            printf '%s\tOK_PDF\t%s\t%s\t%s\t%s\n' "$source_id" "$filename" "$size" "$sha" "$url" >> downloads/RESULTS.tsv
+            printf '%s\tOK_PDF\t%s\t%s\t%s\t%s\n' "$source_id" "$filename" "$size" "$sha" "$url" > "$status_file"
+          }
+          export -f fetch_one
+
+          while IFS=$'\t' read -r source_id url filename expected_kind; do
+            [[ -z "${source_id:-}" || "$source_id" == source_id ]] && continue
+            fetch_one "$source_id" "$url" "$filename" &
+            while [[ $(jobs -rp | wc -l) -ge 4 ]]; do sleep 1; done
           done < "$manifest"
+          wait
+
+          printf 'source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n' > downloads/RESULTS.tsv
+          find downloads/status -type f -name '*.tsv' -print0 | sort -z | xargs -0 cat >> downloads/RESULTS.tsv
           cat downloads/RESULTS.tsv
       - name: Upload acquisition artifact
         uses: actions/upload-artifact@v4
