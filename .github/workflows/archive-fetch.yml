@@ -3,130 +3,88 @@ on:
   push:
     paths:
       - '.github/workflows/archive-fetch.yml'
-      - 'archive-fetch/manifest.tsv'
-      - 'myth-engine/myth_engine/acquisition.py'
   pull_request:
     paths:
       - '.github/workflows/archive-fetch.yml'
-      - 'archive-fetch/manifest.tsv'
-      - 'myth-engine/myth_engine/acquisition.py'
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Fetch and validate archive sources
+      - name: Target Hueting 1908 p.167 via Google Books
         shell: bash
         run: |
           set -u
-          test -s archive-fetch/manifest.tsv
-          mkdir -p downloads
-          : > downloads/RESULTS.tsv
-          printf 'source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n' > downloads/RESULTS.tsv
-          while IFS=$'\t' read -r source_id url filename expected_kind; do
-            [[ -z "${source_id:-}" || "$source_id" == source_id ]] && continue
-            kind=$(printf '%s' "${expected_kind:-PDF}" | tr -d '\r' | tr '[:lower:]' '[:upper:]')
-            [[ -z "$kind" ]] && kind=PDF
-            out="downloads/$filename"
-            echo "Fetching $source_id [$kind] -> $filename"
-            rm -f "$out"
-            if ! curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 1800 "$url" -o "$out"; then
-              printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
-              rm -f "$out"
-              continue
-            fi
-            size=$(stat -c '%s' "$out" 2>/dev/null || wc -c < "$out")
-            status=''
-            case "$kind" in
-              PDF)
-                magic=$(head -c 5 "$out" || true)
-                if [[ "$magic" == "%PDF-" ]]; then
-                  status=OK_PDF
-                else
-                  status=NOT_PDF
-                fi
-                ;;
-              TEXT)
-                mime=$(file -b --mime-type "$out" || true)
-                if [[ -s "$out" && "$mime" == text/* ]]; then
-                  status=OK_TEXT
-                else
-                  status=NOT_TEXT
-                fi
-                ;;
-              *)
-                status=UNSUPPORTED_KIND
-                ;;
-            esac
-            if [[ "$status" != OK_PDF && "$status" != OK_TEXT ]]; then
-              printf '%s\t%s\t%s\t%s\t\t%s\n' "$source_id" "$status" "$filename" "$size" "$url" >> downloads/RESULTS.tsv
-              mv "$out" "downloads/${filename}.${status,,}"
-              continue
-            fi
-            sha=$(sha256sum "$out" | awk '{print $1}')
-            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$source_id" "$status" "$filename" "$size" "$sha" "$url" >> downloads/RESULTS.tsv
-          done < archive-fetch/manifest.tsv
-          cat downloads/RESULTS.tsv
-      - name: Probe Kern 1893 and Hueting 1908 access
-        shell: bash
-        run: |
-          set -u
-          mkdir -p downloads/research-probe
-          rp='downloads/research-probe'
+          mkdir -p out
           ua='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
+          id='U2VwYkm4NBsC'
 
-          kern='https://brill.com/view/journals/bki/42/1/article-p120_11.pdf'
-          if curl -fL --retry 2 --retry-delay 2 --connect-timeout 30 --max-time 300 -A "$ua" "$kern" -o "$rp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf" && test "$(head -c 5 "$rp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf")" = '%PDF-'; then
-            sha256sum "$rp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf" | tee "$rp/KERN_SHA256.txt"
-            stat -c '%n\t%s bytes' "$rp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf" | tee "$rp/KERN_SIZE.txt"
-          else
-            rm -f "$rp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf"
-            echo 'KERN_DOWNLOAD_FAILED' | tee "$rp/KERN_STATUS.txt"
-          fi
-
-          printf 'n\thttp\tctype\tsize\turl\n' > "$rp/GOOGLE_BOOKS_RESULTS.tsv"
-          urls=(
-            'https://books.google.com/books?jscmd=SearchWithinVolume2&q=hohono&vid=U2VwYkm4NBsC'
-            'https://books.google.com/books?vid=U2VwYkm4NBsC&jscmd=SearchWithinVolume2&q=hohono'
-            'https://books.google.com/books?id=U2VwYkm4NBsC&jscmd=SearchWithinVolume2&q=hohono'
-            'https://books.google.com/books?jscmd=SearchWithinVolume2&q=bohono&vid=U2VwYkm4NBsC'
-            'https://www.googleapis.com/books/v1/volumes/U2VwYkm4NBsC'
+          terms=(
+            'hohono'
+            'vervangwoorden'
+            'vervangwoord'
+            'aangetrouwde'
+            'schoonvader'
+            'schoonouders'
+            'namen'
+            'naam'
+            'verboden'
+            'mogen gebruiken'
+            'gewoon gebruikelijke woord'
+            'verwisselen'
+            'woordverwisseling'
           )
-          n=0
-          for url in "${urls[@]}"; do
-            n=$((n+1)); body="$rp/gbooks_body_${n}.txt"; hdr="$rp/gbooks_headers_${n}.txt"
-            code=$(curl -L -sS --connect-timeout 15 --max-time 90 -A "$ua" -H 'Accept-Language: en-US,en;q=0.8' -D "$hdr" -o "$body" -w '%{http_code}' "$url" || echo ERR)
-            ctype=$(awk 'BEGIN{IGNORECASE=1}/^content-type:/{v=$0}END{sub(/^[^:]*:[ ]*/,"",v);gsub(/\r/,"",v);print v}' "$hdr")
-            size=$(wc -c < "$body" 2>/dev/null || echo 0)
-            printf '%s\t%s\t%s\t%s\t%s\n' "$n" "$code" "$ctype" "$size" "$url" >> "$rp/GOOGLE_BOOKS_RESULTS.tsv"
-            echo "--- GBOOKS BODY $n ---"
-            head -c 12000 "$body" || true
+          : > out/search-matrix.tsv
+          printf 'term\thttp\tresults\tbody\n' > out/search-matrix.tsv
+          i=0
+          for term in "${terms[@]}"; do
+            i=$((i+1))
+            enc=$(python3 -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))' "$term")
+            url="https://books.google.com/books?id=$id&jscmd=SearchWithinVolume2&q=$enc"
+            body="out/search_${i}.json"
+            code=$(curl -L -sS --connect-timeout 15 --max-time 90 -A "$ua" -H 'Accept-Language: en-US,en;q=0.8' -o "$body" -w '%{http_code}' "$url" || echo ERR)
+            nr=$(python3 - "$body" <<'PY'
+import json,sys
+try:
+    print(json.load(open(sys.argv[1])).get('number_of_results',''))
+except Exception:
+    print('')
+PY
+)
+            printf '%s\t%s\t%s\t%s\n' "$term" "$code" "$nr" "$body" >> out/search-matrix.tsv
+            echo "=== TERM: $term ==="
+            cat "$body" || true
             echo
           done
-          cat "$rp/GOOGLE_BOOKS_RESULTS.tsv"
-      - name: Build Myth Engine acquisition metadata
-        env:
-          PYTHONPATH: myth-engine
-        run: |
-          python -m myth_engine.acquisition \
-            archive-fetch/manifest.tsv \
-            downloads/RESULTS.tsv \
-            --stubs-dir downloads/SOURCE_STUBS \
-            --records-jsonl downloads/SOURCE_RECORDS.jsonl
-          find downloads/SOURCE_STUBS -name source.json -print
-      - name: Upload archive bridge artifact
-        uses: actions/upload-artifact@v4
+
+          # Directly inspect the page named by the later citation.
+          for suffix in \
+            "books?id=$id&pg=PA167" \
+            "books?id=$id&pg=PA167&vq=hohono" \
+            "books?id=$id&pg=PA167&dq=hohono" \
+            "books?id=$id&pg=PA167&jscmd=SearchWithinVolume2&q=hohono"; do
+            n=$(echo "$suffix" | sha256sum | cut -c1-10)
+            curl -L -sS --connect-timeout 15 --max-time 90 -A "$ua" -H 'Accept-Language: en-US,en;q=0.8' \
+              -D "out/page_${n}.headers" -o "out/page_${n}.html" "https://books.google.com/$suffix" || true
+            echo "=== DIRECT PAGE $suffix ==="
+            grep -Eio '.{0,180}(PA167|hohono|vervang|schoon|aangetrouw|books/content|pageImage|page_image|viewport).{0,300}' "out/page_${n}.html" | head -n 120 || true
+          done
+
+          # Probe common legacy page-image URL without guessing success.
+          for zoom in 1 2 3; do
+            url="https://books.google.com/books/content?id=$id&pg=PA167&img=1&zoom=$zoom&hl=en"
+            outp="out/PA167_zoom${zoom}.bin"
+            code=$(curl -L -sS --connect-timeout 15 --max-time 90 -A "$ua" -D "out/PA167_zoom${zoom}.headers" -o "$outp" -w '%{http_code}' "$url" || echo ERR)
+            echo "PAGE_IMAGE zoom=$zoom http=$code size=$(wc -c < "$outp" 2>/dev/null || echo 0) mime=$(file -b --mime-type "$outp" 2>/dev/null || true)"
+          done
+          cat out/search-matrix.tsv
+      - uses: actions/upload-artifact@v4
         with:
-          name: archive-fetch-batch
-          path: downloads/
+          name: hueting-1908-p167-google-books-probe
+          path: out/
           compression-level: 0
           retention-days: 7
