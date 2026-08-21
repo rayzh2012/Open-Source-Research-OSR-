@@ -1,3 +1,4 @@
+# Cloud corpus mirror; source text never passes through chat context.
 name: Mirror 26 Histories Corpus
 
 on:
@@ -58,8 +59,6 @@ jobs:
           - Auxiliary files: 史记freq.txt
           - Policy: corpus/ contains only 01史记.txt–24明史.txt + 附25新元史.txt + 附26清史稿.txt; auxiliary frequency data is isolated under aux/.
           EOF
-
-          echo "upstream_commit=${UPSTREAM_COMMIT}" >> "$GITHUB_OUTPUT"
 
       - name: Upload immutable corpus artifact
         uses: actions/upload-artifact@v4
