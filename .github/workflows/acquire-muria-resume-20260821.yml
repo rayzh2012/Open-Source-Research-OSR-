@@ -10,32 +10,32 @@ jobs:
   fetch-split:
     runs-on: ubuntu-latest
     steps:
-      - name: Resume full Muria PDF and split for archive transport
+      - name: Segmented fetch full Muria PDF and split for archive transport
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p out/parts
           url='https://ignca.ndl.gov.in/bitstreams/37f6edab-db56-4d02-befb-cdbba3ff5f3b/download'
-          raw='out/1947_Elwin_The_Muria_and_Their_Ghotul.pdf'
-          for i in 1 2 3 4 5 6; do
-            curl -fL --retry 3 --retry-all-errors --connect-timeout 30 --max-time 480 -C - "$url" -o "$raw" && break || true
-          done
-          test "$(head -c 5 "$raw")" = '%PDF-'
           sudo apt-get -qq update
-          sudo apt-get -qq install -y ghostscript poppler-utils
+          sudo apt-get -qq install -y aria2 ghostscript poppler-utils
+          aria2c -x 8 -s 8 -k 1M --max-tries=12 --retry-wait=2 --timeout=30 --connect-timeout=30 --file-allocation=none --dir=out --out=1947_Elwin_The_Muria_and_Their_Ghotul.pdf "$url"
+          raw='out/1947_Elwin_The_Muria_and_Their_Ghotul.pdf'
+          test "$(head -c 5 "$raw")" = '%PDF-'
           pages=$(pdfinfo "$raw" | awk '/^Pages:/ {print $2}')
           test "$pages" -gt 700
           echo "$pages" > out/page_count.txt
           sha256sum "$raw" > out/raw_sha256.txt
+          : > out/parts_manifest.txt
           for part in 1 2 3 4; do
             first=$(( (pages*(part-1))/4 + 1 ))
             last=$(( (pages*part)/4 ))
-            out="out/parts/1947_Elwin_The_Muria_and_Their_Ghotul_Part${part}_pp$(printf '%03d' $first)-$(printf '%03d' $last).pdf"
-            gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dFirstPage=$first -dLastPage=$last -dDetectDuplicateImages=true -dCompressFonts=true -dDownsampleColorImages=false -dDownsampleGrayImages=false -dDownsampleMonoImages=false -sOutputFile="$out" "$raw"
-            test "$(head -c 5 "$out")" = '%PDF-'
-            pdfinfo "$out" | awk '/^Pages:|^File size:/'
-            sha256sum "$out"
-          done > out/parts_manifest.txt
+            outp="out/parts/1947_Elwin_The_Muria_and_Their_Ghotul_Part${part}_pp$(printf '%03d' $first)-$(printf '%03d' $last).pdf"
+            gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dFirstPage=$first -dLastPage=$last -dDetectDuplicateImages=true -dCompressFonts=true -dDownsampleColorImages=false -dDownsampleGrayImages=false -dDownsampleMonoImages=false -sOutputFile="$outp" "$raw"
+            test "$(head -c 5 "$outp")" = '%PDF-'
+            echo "PART $part PAGES $first-$last" >> out/parts_manifest.txt
+            pdfinfo "$outp" | awk '/^Pages:|^File size:/' >> out/parts_manifest.txt
+            sha256sum "$outp" >> out/parts_manifest.txt
+          done
           rm -f "$raw"
       - uses: actions/upload-artifact@v4
         with:
