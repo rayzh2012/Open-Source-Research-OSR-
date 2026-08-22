@@ -1,9 +1,5 @@
 {
-  "id": 15,
-  "action": "RUN_REPO_TASK",
-  "task_path": "tools/remote_tasks/osr_remote_probe.py",
-  "sha256": "23ddc309875270336b5a2ae81296960fe05b8ed26a9eee7bc507d4a33adbb897",
-  "args": [],
-  "timeout_seconds": 120,
-  "note": "Read-only probe for OSR Watcher 2.1 remote repo task execution."
+  "id": 17,
+  "action": "STATUS",
+  "note": "Fallback diagnostic: if Drive command read fails, report watcher version and github_fallback source."
 }
