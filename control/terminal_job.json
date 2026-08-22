@@ -1,0 +1,6 @@
+{
+  "id": 0,
+  "command": "echo OSR terminal watcher idle",
+  "cwd": "~",
+  "timeout_seconds": 300
+}
