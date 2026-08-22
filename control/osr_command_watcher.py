@@ -18,7 +18,7 @@ STATE = APP / "state.json"
 STATUS = APP / "OSR_CONTROL_STATUS.json"
 LOG = APP / "osr-control.log"
 RESULT = APP / "last_result.txt"
-ALLOWED = {"IDLE","STATUS","GIT_SYNC","SPEED_TEST","KIMI_PROBE","KIMI_RUN"}
+ALLOWED = {"IDLE", "STATUS", "GIT_SYNC", "SPEED_TEST", "KIMI_PROBE", "KIMI_RUN"}
 REMOTE_STATUS = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_STATUS.json"
 REMOTE_RESULT = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_LAST_RESULT.txt"
 REPO = Path.home() / "Open-Source-Research-OSR-"
@@ -73,8 +73,7 @@ def self_update():
     try:
         remote = fetch_bytes(WATCHER_URL, 20)
         here = Path(__file__)
-        local = here.read_bytes()
-        if remote != local:
+        if remote != here.read_bytes():
             tmp = here.with_suffix(".new")
             tmp.write_bytes(remote)
             os.chmod(tmp, 0o755)
@@ -122,14 +121,30 @@ def find_kimi():
     path = shutil.which("kimi")
     if path:
         return path
-    for p in (
+    for candidate in (
         Path.home() / ".local/bin/kimi",
         Path.home() / ".kimi/bin/kimi",
+        Path.home() / ".cargo/bin/kimi",
         Path("/opt/homebrew/bin/kimi"),
         Path("/usr/local/bin/kimi"),
     ):
-        if p.exists() and os.access(p, os.X_OK):
-            return str(p)
+        if candidate.exists() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    try:
+        p = subprocess.run(
+            ["/bin/zsh", "-ilc", "whence -p kimi"],
+            text=True,
+            capture_output=True,
+            timeout=30,
+            cwd=str(REPO),
+        )
+        if p.returncode == 0:
+            for line in reversed((p.stdout or "").splitlines()):
+                candidate = line.strip()
+                if candidate.startswith("/") and Path(candidate).exists() and os.access(candidate, os.X_OK):
+                    return candidate
+    except Exception as exc:
+        log(f"KIMI shell discovery skipped: {exc!r}")
     return None
 
 
