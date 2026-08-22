@@ -14,14 +14,14 @@ BRANCH = "stage2-direct-miner-v3-1"
 RAW = f"https://raw.githubusercontent.com/rayzh2012/Open-Source-Research-OSR-/{BRANCH}"
 COMMAND_URL = RAW + "/control/osr_command.json"
 WATCHER_URL = RAW + "/control/osr_command_watcher.py"
-DRIVE_COMMAND_FILE_ID = "1_cLvbcVFycfapPSWCTkhTgva4IE-lqAwnmm92yhTn3w"
+DRIVE_COMMAND_DIR = "gdrive:OSR_WORK_SPACE/RemoteControl"
+DRIVE_COMMAND_NAME = "OSR_CONTROL_COMMAND.txt"
 APP = Path.home() / "Library" / "Application Support" / "OSR Control"
 APP.mkdir(parents=True, exist_ok=True)
 STATE = APP / "state.json"
 STATUS = APP / "OSR_CONTROL_STATUS.json"
 LOG = APP / "osr-control.log"
 RESULT = APP / "last_result.txt"
-DRIVE_COMMAND_LOCAL = APP / "drive_command.txt"
 ALLOWED = {"IDLE", "STATUS", "GIT_SYNC", "SPEED_TEST", "KIMI_PROBE", "KIMI_RUN", "RUN_REPO_TASK"}
 REMOTE_STATUS = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_STATUS.json"
 REMOTE_RESULT = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_LAST_RESULT.txt"
@@ -84,36 +84,40 @@ def find_rclone():
 
 def fetch_drive_command():
     rclone = find_rclone()
-    tmp = DRIVE_COMMAND_LOCAL.with_suffix(".new.txt")
-    try:
-        tmp.unlink(missing_ok=True)
-        p = subprocess.run(
-            [rclone, "--drive-export-formats", "txt", "backend", "copyid", "gdrive:", DRIVE_COMMAND_FILE_ID, str(tmp)],
-            text=True,
-            capture_output=True,
-            timeout=30,
-        )
-        if p.returncode != 0:
-            raise RuntimeError(f"Drive command copyid failed: {p.stderr or p.stdout}")
-        raw = tmp.read_bytes()
-        if len(raw) > 65536:
-            raise RuntimeError(f"Drive command too large: {len(raw)}")
-        obj = json.loads(raw.decode("utf-8"))
-        if not isinstance(obj, dict):
-            raise RuntimeError("Drive command is not a JSON object")
-        os.replace(tmp, DRIVE_COMMAND_LOCAL)
-        return obj
-    finally:
-        if tmp.exists():
-            tmp.unlink(missing_ok=True)
+    p = subprocess.run(
+        [
+            rclone,
+            "--drive-export-formats",
+            "txt",
+            "--include",
+            DRIVE_COMMAND_NAME,
+            "cat",
+            DRIVE_COMMAND_DIR,
+        ],
+        text=True,
+        capture_output=True,
+        timeout=30,
+    )
+    if p.returncode != 0:
+        raise RuntimeError(f"Drive command cat failed rc={p.returncode}: {p.stderr or p.stdout}")
+    raw = (p.stdout or "").encode("utf-8")
+    if not raw.strip():
+        raise RuntimeError("Drive command cat returned empty output")
+    if len(raw) > 65536:
+        raise RuntimeError(f"Drive command too large: {len(raw)}")
+    obj = json.loads(raw.decode("utf-8"))
+    if not isinstance(obj, dict):
+        raise RuntimeError("Drive command is not a JSON object")
+    return obj
 
 
 def fetch_command():
     try:
-        return fetch_drive_command(), "drive"
+        return fetch_drive_command(), "drive", ""
     except Exception as drive_exc:
+        detail = repr(drive_exc)[:1600]
         try:
-            return fetch_json(COMMAND_URL), "github_fallback"
+            return fetch_json(COMMAND_URL), "github_fallback", detail
         except Exception as github_exc:
             raise RuntimeError(f"command read failed: drive={drive_exc!r}; github={github_exc!r}")
 
@@ -227,7 +231,7 @@ def run_repo_task(command):
 
 
 def process_once():
-    cmd, source = fetch_command()
+    cmd, source, source_detail = fetch_command()
     state = load_json(STATE, {"last_id": 0})
     cid = int(cmd.get("id", 0))
     action = str(cmd.get("action", "IDLE")).upper()
@@ -237,7 +241,17 @@ def process_once():
         return
     state.update({"last_id": cid, "last_action": action, "last_source": source})
     save_json(STATE, state)
-    status = {"command_id": cid, "action": action, "status": "RUNNING", "host": os.uname().nodename, "started_unix": time.time(), "watcher": "2.3", "command_source": source}
+    status = {
+        "command_id": cid,
+        "action": action,
+        "status": "RUNNING",
+        "host": os.uname().nodename,
+        "started_unix": time.time(),
+        "watcher": "2.4",
+        "command_source": source,
+    }
+    if source_detail:
+        status["command_source_detail"] = source_detail
     publish_status(status)
     try:
         if action == "GIT_SYNC":
@@ -262,7 +276,7 @@ def process_once():
 
 
 def main():
-    log("OSR watcher 2.3 persistent loop starting")
+    log("OSR watcher 2.4 persistent loop starting")
     while True:
         try:
             self_update_and_exec()
