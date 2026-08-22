@@ -1,5 +1,9 @@
 {
-  "id": 22,
-  "action": "STATUS",
-  "note": "Final fallback diagnostic after raw Drive JSON command rollout."
+  "id": 23,
+  "action": "RUN_REPO_TASK",
+  "task_path": "tools/remote_tasks/osr_drive_command_probe.py",
+  "sha256": "da57495429c159427590052c780bc016ba71649d937e283e3e14c0c744515606",
+  "args": [],
+  "timeout_seconds": 120,
+  "note": "Read-only rclone diagnostic with verified task SHA after raw Drive JSON rollout."
 }
