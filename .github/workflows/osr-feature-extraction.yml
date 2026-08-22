@@ -1,0 +1,189 @@
+name: OSR 508GB Feature Extraction
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/feature_extraction_request.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: osr-feature-extraction
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      workers: ${{ steps.plan.outputs.workers }}
+      worker_count: ${{ steps.plan.outputs.worker_count }}
+      limit_per_worker: ${{ steps.plan.outputs.limit_per_worker }}
+      run_id: ${{ steps.plan.outputs.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - id: plan
+        shell: python
+        run: |
+          import json, os
+          req=json.load(open('control/feature_extraction_request.json',encoding='utf-8'))
+          assert req.get('action') == 'FEATURE_EXTRACT', req
+          n=int(req.get('worker_count',1)); assert 1 <= n <= 20
+          limit=int(req.get('limit_per_worker',0)); assert limit >= 0
+          run_id=str(req.get('run_id') or f"feature-{os.environ['GITHUB_RUN_ID']}")
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write('workers='+json.dumps(list(range(n)))+'\n')
+              f.write(f'worker_count={n}\nlimit_per_worker={limit}\nrun_id={run_id}\n')
+
+  extract:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        worker: ${{ fromJson(needs.plan.outputs.workers) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install extraction dependencies
+        run: python -m pip install --disable-pip-version-check pyarrow==21.0.0 requests==2.32.4 huggingface_hub==0.34.4 pyahocorasick==2.2.0
+      - name: Extract feature store partition
+        run: |
+          python tools/osr_feature_extractor_v1.py \
+            --worker-index '${{ matrix.worker }}' \
+            --worker-count '${{ needs.plan.outputs.worker_count }}' \
+            --limit-per-worker '${{ needs.plan.outputs.limit_per_worker }}' \
+            --out-dir 'out/worker-${{ matrix.worker }}'
+      - name: Upload feature-store partition
+        uses: actions/upload-artifact@v4
+        with:
+          name: osr-features-${{ needs.plan.outputs.run_id }}-worker-${{ matrix.worker }}
+          path: out/worker-${{ matrix.worker }}
+          retention-days: 7
+          compression-level: 0
+
+  reduce:
+    needs: [plan, extract]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pyarrow==21.0.0
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: osr-features-${{ needs.plan.outputs.run_id }}-worker-*
+          path: _feature_results
+      - name: Reduce feature catalog and status
+        shell: python
+        env:
+          RUN_ID: ${{ needs.plan.outputs.run_id }}
+        run: |
+          import collections, hashlib, json, os, pathlib, time
+          import pyarrow.parquet as pq
+
+          root=pathlib.Path('_feature_results')
+          manifests=[]
+          for p in root.rglob('manifest.json'):
+              manifests.append(json.loads(p.read_text('utf-8')))
+
+          schema_bytes=pathlib.Path('control/feature_schema_v1.json').read_bytes()
+          schema=json.loads(schema_bytes.decode('utf-8'))
+          schema_sha=hashlib.sha256(schema_bytes).hexdigest()
+          for m in manifests:
+              if m.get('feature_schema_sha256') != schema_sha:
+                  raise RuntimeError(f"feature schema mismatch: {m.get('feature_schema_sha256')} != {schema_sha}")
+
+          feature_occ=collections.Counter()
+          feature_rows=collections.Counter()
+          feature_family={x['id']:x['family'] for x in schema['features']}
+          pair_rows=collections.Counter()
+          corpus_stats=collections.defaultdict(lambda: collections.Counter())
+          shard_count=0
+
+          for p in root.rglob('feature_totals.parquet'):
+              for r in pq.read_table(p).to_pylist():
+                  fid=r['feature_id']
+                  feature_occ[fid]+=int(r['occurrences'])
+                  feature_rows[fid]+=int(r['rows_with_feature'])
+                  if r.get('family'): feature_family[fid]=r['family']
+          for p in root.rglob('cooccurrence.parquet'):
+              for r in pq.read_table(p).to_pylist():
+                  pair_rows[(r['feature_a'],r['feature_b'])]+=int(r['rows_cooccurring'])
+          for p in root.rglob('shard_features.parquet'):
+              for r in pq.read_table(p).to_pylist():
+                  shard_count+=1
+                  c=corpus_stats[r['corpus']]
+                  for k in ['download_bytes','rows','rows_nonempty','signal_rows','chars','explicit_year_mentions','within_shard_duplicate_rows']:
+                      c[k]+=int(r.get(k) or 0)
+
+          catalog={
+              'format':'osr-feature-catalog/v1',
+              'run_id':os.environ['RUN_ID'],
+              'feature_schema_version':schema.get('version'),
+              'feature_schema_sha256':schema_sha,
+              'shards_scanned':shard_count,
+              'workers_completed':len(manifests),
+              'corpus_stats':{k:dict(v) for k,v in sorted(corpus_stats.items())},
+              'features':[
+                  {
+                      'feature_id':fid,
+                      'family':feature_family.get(fid,'unknown'),
+                      'occurrences':int(feature_occ[fid]),
+                      'rows_with_feature':int(feature_rows[fid])
+                  }
+                  for fid in sorted(feature_occ, key=lambda f:(-feature_rows[f],f))
+              ],
+              'top_cooccurrence':[
+                  {'feature_a':a,'feature_b':b,'rows_cooccurring':int(n)}
+                  for (a,b),n in pair_rows.most_common(500)
+              ],
+              'raw_text_persisted':False,
+              'evidence_contract':'worker artifacts contain sparse row locators + row_sha256; exact source-row recheck required',
+              'created_unix':time.time(),
+          }
+          pathlib.Path('control/feature_catalog.json').write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n','utf-8')
+
+          total_bytes=sum(m.get('bytes_downloaded',0) for m in manifests)
+          elapsed=max([m.get('elapsed_seconds',0) for m in manifests] or [0])
+          status={
+              'status':'PASS' if manifests and shard_count else 'FAILED',
+              'run_id':os.environ['RUN_ID'],
+              'feature_schema_version':schema.get('version'),
+              'feature_schema_sha256':schema_sha,
+              'workers_completed':len(manifests),
+              'shards_scanned':shard_count,
+              'bytes_downloaded':total_bytes,
+              'aggregate_download_GiB':round(total_bytes/1024**3,3),
+              'signal_rows':sum(m.get('signal_rows',0) for m in manifests),
+              'rows_scanned':sum(m.get('rows_scanned',0) for m in manifests),
+              'max_worker_elapsed_seconds':elapsed,
+              'github_run_id':os.environ['GITHUB_RUN_ID'],
+              'github_sha':os.environ['GITHUB_SHA'],
+              'finished_unix':time.time(),
+          }
+          pathlib.Path('control/feature_extraction_status.json').write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n','utf-8')
+          print(json.dumps(status,ensure_ascii=False,indent=2))
+      - name: Commit compact feature catalog + status
+        run: |
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/feature_catalog.json control/feature_extraction_status.json
+          git diff --cached --quiet && exit 0
+          git commit -m "feature-store: catalog ${{ needs.plan.outputs.run_id }}"
+          git pull --rebase origin stage2-direct-miner-v3-1
+          git push origin HEAD:stage2-direct-miner-v3-1
