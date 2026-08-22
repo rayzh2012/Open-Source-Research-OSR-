@@ -55,7 +55,8 @@ cat > "$PLIST" <<PLIST
     <key>RCLONE_CONFIG</key><string>$RCLONE_CONFIG</string>
   </dict>
   <key>RunAtLoad</key><true/>
-  <key>StartInterval</key><integer>5</integer>
+  <key>KeepAlive</key><true/>
+  <key>ThrottleInterval</key><integer>5</integer>
   <key>ProcessType</key><string>Background</string>
   <key>StandardOutPath</key><string>$APP/launchd.out.log</string>
   <key>StandardErrorPath</key><string>$APP/launchd.err.log</string>
@@ -70,7 +71,7 @@ launchctl kickstart -k "gui/$UID/com.rayzh.osr.remote-control"
 
 echo
 echo "✅ OSR Remote Control installed."
-echo "Poll interval: 5 seconds"
+echo "Mode: persistent watcher, internal poll every 5 seconds"
 echo "Python: $PYTHON_BIN"
 echo "Runtime PATH: $RUNTIME_PATH"
 echo "Status: gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_STATUS.json"
