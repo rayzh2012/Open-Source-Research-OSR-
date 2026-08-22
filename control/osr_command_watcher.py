@@ -14,6 +14,7 @@ BRANCH = "stage2-direct-miner-v3-1"
 RAW = f"https://raw.githubusercontent.com/rayzh2012/Open-Source-Research-OSR-/{BRANCH}"
 COMMAND_URL = RAW + "/control/osr_command.json"
 WATCHER_URL = RAW + "/control/osr_command_watcher.py"
+DRIVE_COMMAND = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_COMMAND.txt"
 APP = Path.home() / "Library" / "Application Support" / "OSR Control"
 APP.mkdir(parents=True, exist_ok=True)
 STATE = APP / "state.json"
@@ -76,6 +77,36 @@ def run(cmd, **kwargs):
     return subprocess.run(cmd, text=True, **kwargs)
 
 
+def find_rclone():
+    return shutil.which("rclone") or "/usr/local/bin/rclone"
+
+
+def fetch_drive_command():
+    rclone = find_rclone()
+    p = subprocess.run(
+        [rclone, "cat", "--drive-export-formats", "txt", DRIVE_COMMAND],
+        text=True,
+        capture_output=True,
+        timeout=30,
+    )
+    if p.returncode != 0:
+        raise RuntimeError(f"Drive command read failed: {p.stderr or p.stdout}")
+    obj = json.loads(p.stdout)
+    if not isinstance(obj, dict):
+        raise RuntimeError("Drive command is not a JSON object")
+    return obj
+
+
+def fetch_command():
+    try:
+        return fetch_drive_command(), "drive"
+    except Exception as drive_exc:
+        try:
+            return fetch_json(COMMAND_URL), "github_fallback"
+        except Exception as github_exc:
+            raise RuntimeError(f"command read failed: drive={drive_exc!r}; github={github_exc!r}")
+
+
 def self_update_and_exec():
     remote = fetch_bytes(WATCHER_URL, 20, MAX_TASK_BYTES)
     here = Path(__file__)
@@ -91,8 +122,8 @@ def self_update_and_exec():
 
 def publish_status(obj):
     save_json(STATUS, obj)
-    rclone = shutil.which("rclone")
-    if not rclone:
+    rclone = find_rclone()
+    if not rclone or not Path(rclone).exists():
         raise RuntimeError("rclone not found")
     p = subprocess.run([rclone, "copyto", str(STATUS), REMOTE_STATUS], text=True, capture_output=True)
     if p.returncode != 0:
@@ -185,7 +216,7 @@ def run_repo_task(command):
 
 
 def process_once():
-    cmd = fetch_json(COMMAND_URL)
+    cmd, source = fetch_command()
     state = load_json(STATE, {"last_id": 0})
     cid = int(cmd.get("id", 0))
     action = str(cmd.get("action", "IDLE")).upper()
@@ -193,9 +224,9 @@ def process_once():
         raise RuntimeError(f"Refusing unapproved action: {action}")
     if cid <= int(state.get("last_id", 0)):
         return
-    state.update({"last_id": cid, "last_action": action})
+    state.update({"last_id": cid, "last_action": action, "last_source": source})
     save_json(STATE, state)
-    status = {"command_id": cid, "action": action, "status": "RUNNING", "host": os.uname().nodename, "started_unix": time.time(), "watcher": "2.1"}
+    status = {"command_id": cid, "action": action, "status": "RUNNING", "host": os.uname().nodename, "started_unix": time.time(), "watcher": "2.2", "command_source": source}
     publish_status(status)
     try:
         if action == "GIT_SYNC":
@@ -212,15 +243,15 @@ def process_once():
             save_result(action + "\n")
         status.update({"status": "SUCCESS", "finished_unix": time.time()})
         publish_status(status)
-        log(f"SUCCESS command={cid} action={action}")
+        log(f"SUCCESS command={cid} action={action} source={source}")
     except Exception as exc:
         status.update({"status": "FAILED", "error": repr(exc), "finished_unix": time.time()})
         publish_status(status)
-        log(f"FAILED command={cid} action={action} error={exc!r}")
+        log(f"FAILED command={cid} action={action} source={source} error={exc!r}")
 
 
 def main():
-    log("OSR watcher 2.1 persistent loop starting")
+    log("OSR watcher 2.2 persistent loop starting")
     while True:
         try:
             self_update_and_exec()
