@@ -10,63 +10,75 @@ if ! rclone listremotes | grep -qx 'gdrive:'; then
   exit 1
 fi
 
-BASE='gdrive:龍族古籍源庫｜Dragon Source Corpus'
-CANDIDATES=(
-  "$BASE/BULK_SECONDARY_CORPUS/Literature-zh/literature_zh-00233-of-00233.parquet"
-  "$BASE/BULK_SECONDARY_CORPUS/Literature-zh/data/literature_zh-00233-of-00233.parquet"
-  "$BASE/Literature-zh_229GB/literature_zh-00233-of-00233.parquet"
-  "$BASE/BULK_SECONDARY_CORPUS/ChineseWebText2.0-HighQuality/data/CASIA-LM_ChineseWebText2.0_partial-001554.parquet"
-  "$BASE/BULK_SECONDARY_CORPUS/ChineseWebText2.0-HighQuality/CASIA-LM_ChineseWebText2.0_partial-001554.parquet"
-  "$BASE/ChineseWebText2.0-HighQuality_279GB/data/CASIA-LM_ChineseWebText2.0_partial-001554.parquet"
-  "$BASE/ChineseWebText2.0-HighQuality_279GB/CASIA-LM_ChineseWebText2.0_partial-001554.parquet"
-)
+# Canonical Drive folder IDs, verified from Drive metadata. This avoids all
+# path-name assumptions and bypasses Google Drive for Desktop/FUSE entirely.
+LIT_FOLDER_ID='1Qc4XVjIVv3KPR39NPFHmluMgjk7NwNEA'
+WEB_FOLDER_ID='1P_emXiOUNDxtu3ARLxIbTiJOSAMF7lWD'
 
-REMOTE=''
-SIZE=''
-for p in "${CANDIDATES[@]}"; do
-  j=$(rclone size --json "$p" 2>/dev/null || true)
-  if [[ -n "$j" ]]; then
-    count=$(python3 -c 'import json,sys; j=json.load(sys.stdin); print(j.get("count",0))' <<< "$j" 2>/dev/null || echo 0)
-    bytes=$(python3 -c 'import json,sys; j=json.load(sys.stdin); print(j.get("bytes",0))' <<< "$j" 2>/dev/null || echo 0)
-    if [[ "$count" == "1" && "$bytes" -gt 0 ]]; then
-      REMOTE="$p"
-      SIZE="$bytes"
-      break
-    fi
-  fi
-done
+find_tail() {
+  local folder_id="$1"
+  local needle="$2"
+  rclone lsf gdrive: -R --files-only --drive-root-folder-id "$folder_id" 2>/dev/null | grep -F "$needle" | head -n 1 || true
+}
 
-if [[ -z "$REMOTE" ]]; then
-  echo "Could not find a canonical tail shard at known rclone paths."
-  echo "Run this and paste the output:"
-  echo "rclone lsf '$BASE/BULK_SECONDARY_CORPUS' --dirs-only"
+LIT_REL=$(find_tail "$LIT_FOLDER_ID" 'literature_zh-00233-of-00233.parquet')
+WEB_REL=$(find_tail "$WEB_FOLDER_ID" 'CASIA-LM_ChineseWebText2.0_partial-001554.parquet')
+
+if [[ -n "$LIT_REL" ]]; then
+  ROOT_ID="$LIT_FOLDER_ID"
+  REL="$LIT_REL"
+  LABEL='Literature-zh_229GB'
+elif [[ -n "$WEB_REL" ]]; then
+  ROOT_ID="$WEB_FOLDER_ID"
+  REL="$WEB_REL"
+  LABEL='ChineseWebText2.0-HighQuality_279GB'
+else
+  echo "Could not locate either canonical tail shard by Drive folder ID."
+  echo "Literature folder ID: $LIT_FOLDER_ID"
+  echo "WebText folder ID:    $WEB_FOLDER_ID"
+  echo
+  echo "Diagnostic commands:"
+  echo "rclone lsf gdrive: -R --files-only --drive-root-folder-id '$LIT_FOLDER_ID' | tail -20"
+  echo "rclone lsf gdrive: -R --files-only --drive-root-folder-id '$WEB_FOLDER_ID' | tail -20"
   exit 2
 fi
 
-echo "Remote test file: $REMOTE"
+# With --drive-root-folder-id the remote root is the corpus folder itself.
+REMOTE="gdrive:$REL"
+RC=(--drive-root-folder-id "$ROOT_ID")
+
+SIZE_JSON=$(rclone size --json "$REMOTE" "${RC[@]}")
+SIZE=$(python3 -c 'import json,sys; j=json.load(sys.stdin); print(j.get("bytes",0))' <<< "$SIZE_JSON")
+COUNT=$(python3 -c 'import json,sys; j=json.load(sys.stdin); print(j.get("count",0))' <<< "$SIZE_JSON")
+if [[ "$COUNT" != "1" || "$SIZE" -le 0 ]]; then
+  echo "Resolved shard but rclone size validation failed: $REMOTE" >&2
+  exit 3
+fi
+
+echo "Corpus: $LABEL"
+echo "Drive folder ID: $ROOT_ID"
+echo "Remote test file: $REL"
 echo "Remote size: $SIZE bytes"
 
 echo
 echo "== rclone head 64 MiB benchmark =="
 START=$(python3 -c 'import time; print(time.time())')
-rclone cat "$REMOTE" --head 64M >/dev/null
+rclone cat "$REMOTE" "${RC[@]}" --head 64M >/dev/null
 END=$(python3 -c 'import time; print(time.time())')
 python3 - "$START" "$END" <<'PY'
 import sys
-s,e=map(float,sys.argv[1:])
-t=max(e-s,1e-9)
+s,e=map(float,sys.argv[1:]); t=max(e-s,1e-9)
 print(f"64 MiB head: {64/t:.1f} MiB/s ({t:.2f}s)")
 PY
 
 echo
 echo "== rclone tail 1 MiB benchmark =="
 START=$(python3 -c 'import time; print(time.time())')
-rclone cat "$REMOTE" --tail 1M >/dev/null
+rclone cat "$REMOTE" "${RC[@]}" --tail 1M >/dev/null
 END=$(python3 -c 'import time; print(time.time())')
 python3 - "$START" "$END" <<'PY'
 import sys
-s,e=map(float,sys.argv[1:])
-t=max(e-s,1e-9)
+s,e=map(float,sys.argv[1:]); t=max(e-s,1e-9)
 print(f"1 MiB tail latency: {t:.3f}s")
 PY
 
@@ -76,13 +88,12 @@ TMPDIR=$(mktemp -d /tmp/osr-speed.XXXXXX)
 trap 'rm -rf "$TMPDIR"' EXIT
 LOCAL="$TMPDIR/test.parquet"
 START=$(python3 -c 'import time; print(time.time())')
-rclone copyto "$REMOTE" "$LOCAL" --transfers 1 --checkers 2 --stats 5s --stats-one-line
+rclone copyto "$REMOTE" "$LOCAL" "${RC[@]}" --transfers 1 --checkers 2 --stats 5s --stats-one-line
 END=$(python3 -c 'import time; print(time.time())')
 python3 - "$START" "$END" "$LOCAL" <<'PY'
 import os,sys,time
 s,e=map(float,sys.argv[1:3]); p=sys.argv[3]
-mb=os.path.getsize(p)/1024/1024
-t=max(e-s,1e-9)
+mb=os.path.getsize(p)/1024/1024; t=max(e-s,1e-9)
 print(f"Full shard download: {mb:.1f} MiB at {mb/t:.1f} MiB/s ({t:.2f}s)")
 try:
     import pyarrow.parquet as pq
@@ -94,5 +105,5 @@ else:
 PY
 
 echo
-echo "Interpretation: this bypasses Google Drive for Desktop completely."
-echo "If rclone download is healthy but Drive Desktop stat timed out, OSR should use rclone-to-local-temp streaming/cache, not ~/Library/CloudStorage as the data plane."
+echo "Interpretation: Drive folder IDs + rclone are now the canonical Mac data path."
+echo "Google Drive for Desktop/FUSE is intentionally bypassed."
