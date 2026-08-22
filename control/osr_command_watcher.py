@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -19,12 +20,14 @@ STATE = APP / "state.json"
 STATUS = APP / "OSR_CONTROL_STATUS.json"
 LOG = APP / "osr-control.log"
 RESULT = APP / "last_result.txt"
-ALLOWED = {"IDLE", "STATUS", "GIT_SYNC", "SPEED_TEST", "KIMI_PROBE", "KIMI_RUN"}
+ALLOWED = {"IDLE", "STATUS", "GIT_SYNC", "SPEED_TEST", "KIMI_PROBE", "KIMI_RUN", "RUN_REPO_TASK"}
 REMOTE_STATUS = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_STATUS.json"
 REMOTE_RESULT = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_LAST_RESULT.txt"
 REPO = Path.home() / "Open-Source-Research-OSR-"
 MAX_PROMPT_CHARS = 16000
 POLL_SECONDS = 5
+MAX_TASK_BYTES = 262144
+MAX_TASK_TIMEOUT = 7200
 
 
 def log(msg):
@@ -51,7 +54,7 @@ def cache_bust(url):
     return url + ("&" if "?" in url else "?") + f"_osr_ts={time.time_ns()}"
 
 
-def fetch_bytes(url, timeout=30):
+def fetch_bytes(url, timeout=30, max_bytes=None):
     curl = shutil.which("curl") or "/usr/bin/curl"
     p = subprocess.run(
         [curl, "-fsSL", "--max-time", str(timeout), "-H", "Cache-Control: no-cache", "-H", "Pragma: no-cache", cache_bust(url)],
@@ -59,11 +62,13 @@ def fetch_bytes(url, timeout=30):
     )
     if p.returncode != 0:
         raise RuntimeError(f"curl fetch failed rc={p.returncode}: {(p.stderr or b'').decode('utf-8','replace')}")
+    if max_bytes is not None and len(p.stdout) > max_bytes:
+        raise RuntimeError(f"remote payload too large: {len(p.stdout)} > {max_bytes}")
     return p.stdout
 
 
 def fetch_json(url):
-    return json.loads(fetch_bytes(url).decode("utf-8"))
+    return json.loads(fetch_bytes(url, max_bytes=65536).decode("utf-8"))
 
 
 def run(cmd, **kwargs):
@@ -72,7 +77,7 @@ def run(cmd, **kwargs):
 
 
 def self_update_and_exec():
-    remote = fetch_bytes(WATCHER_URL, 20)
+    remote = fetch_bytes(WATCHER_URL, 20, MAX_TASK_BYTES)
     here = Path(__file__)
     if remote == here.read_bytes():
         return
@@ -136,7 +141,7 @@ def kimi_run(command):
         raise RuntimeError("KIMI_RUN requires a non-empty prompt")
     if len(prompt) > MAX_PROMPT_CHARS:
         raise RuntimeError("KIMI_RUN prompt too long")
-    timeout = max(30, min(int(command.get("timeout_seconds", 1800)), 7200))
+    timeout = max(30, min(int(command.get("timeout_seconds", 1800)), MAX_TASK_TIMEOUT))
     p = run(
         ["/bin/zsh", "-ilc", "exec kimi -p \"$1\"", "osr-kimi", prompt],
         capture_output=True,
@@ -146,6 +151,37 @@ def kimi_run(command):
     save_result(f"KIMI_RUN\nreturncode={p.returncode}\ncwd={REPO}\n\nSTDOUT\n{p.stdout or ''}\n\nSTDERR\n{p.stderr or ''}")
     if p.returncode:
         raise RuntimeError(f"Kimi exited {p.returncode}")
+
+
+def run_repo_task(command):
+    rel = str(command.get("task_path", "")).strip()
+    expected = str(command.get("sha256", "")).strip().lower()
+    if not rel.startswith("tools/remote_tasks/") or not rel.endswith(".py") or ".." in rel:
+        raise RuntimeError("RUN_REPO_TASK path must be tools/remote_tasks/*.py")
+    if len(expected) != 64 or any(c not in "0123456789abcdef" for c in expected):
+        raise RuntimeError("RUN_REPO_TASK requires a valid sha256")
+    raw = fetch_bytes(RAW + "/" + rel, 60, MAX_TASK_BYTES)
+    actual = hashlib.sha256(raw).hexdigest()
+    if actual != expected:
+        raise RuntimeError(f"task sha256 mismatch expected={expected} actual={actual}")
+    args = command.get("args", [])
+    if not isinstance(args, list) or len(args) > 32 or any(not isinstance(x, str) or len(x) > 2048 for x in args):
+        raise RuntimeError("RUN_REPO_TASK args invalid")
+    timeout = max(30, min(int(command.get("timeout_seconds", 1800)), MAX_TASK_TIMEOUT))
+    work = APP / "runtime" / "remote_tasks"
+    work.mkdir(parents=True, exist_ok=True)
+    task = work / Path(rel).name
+    task.write_bytes(raw)
+    os.chmod(task, 0o700)
+    env = os.environ.copy()
+    env["OSR_REPO"] = str(REPO)
+    env["OSR_REMOTE_TASK_SHA256"] = actual
+    p = run([sys.executable, str(task), *args], capture_output=True, cwd=str(REPO), env=env, timeout=timeout)
+    save_result(
+        f"RUN_REPO_TASK\npath={rel}\nsha256={actual}\nreturncode={p.returncode}\n\nSTDOUT\n{p.stdout or ''}\n\nSTDERR\n{p.stderr or ''}"
+    )
+    if p.returncode:
+        raise RuntimeError(f"remote task exited {p.returncode}")
 
 
 def process_once():
@@ -159,7 +195,7 @@ def process_once():
         return
     state.update({"last_id": cid, "last_action": action})
     save_json(STATE, state)
-    status = {"command_id": cid, "action": action, "status": "RUNNING", "host": os.uname().nodename, "started_unix": time.time(), "watcher": "2.0"}
+    status = {"command_id": cid, "action": action, "status": "RUNNING", "host": os.uname().nodename, "started_unix": time.time(), "watcher": "2.1"}
     publish_status(status)
     try:
         if action == "GIT_SYNC":
@@ -170,6 +206,8 @@ def process_once():
             kimi_probe()
         elif action == "KIMI_RUN":
             kimi_run(cmd)
+        elif action == "RUN_REPO_TASK":
+            run_repo_task(cmd)
         elif action in {"STATUS", "IDLE"}:
             save_result(action + "\n")
         status.update({"status": "SUCCESS", "finished_unix": time.time()})
@@ -182,7 +220,7 @@ def process_once():
 
 
 def main():
-    log("OSR watcher 2.0 persistent loop starting")
+    log("OSR watcher 2.1 persistent loop starting")
     while True:
         try:
             self_update_and_exec()
