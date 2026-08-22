@@ -1,7 +1,5 @@
 {
-  "id": 13,
-  "action": "KIMI_RUN",
-  "prompt": "This is the final OSR remote-control smoke test. Do not modify any file. Reply with exactly two lines:\nOSR_KIMI_LOOP_OK\n/Users/hangwu/Open-Source-Research-OSR-",
-  "timeout_seconds": 180,
-  "note": "Final end-to-end verification after watcher 2.0 and Kimi probe success."
+  "id": 14,
+  "action": "IDLE",
+  "note": "Return persistent OSR watcher to idle after successful end-to-end Kimi verification."
 }
