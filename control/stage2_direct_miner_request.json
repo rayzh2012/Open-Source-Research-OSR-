@@ -1,0 +1,8 @@
+{
+  "id": 1,
+  "action": "STAGE2_DIRECT_MINE",
+  "run_id": "stage2-cheap-smoke-001",
+  "worker_count": 2,
+  "limit_per_worker": 1,
+  "purpose": "Two-shard end-to-end direct mining smoke before expanding the 508GB scan."
+}
