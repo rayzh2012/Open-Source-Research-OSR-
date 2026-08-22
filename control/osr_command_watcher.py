@@ -14,8 +14,7 @@ BRANCH = "stage2-direct-miner-v3-1"
 RAW = f"https://raw.githubusercontent.com/rayzh2012/Open-Source-Research-OSR-/{BRANCH}"
 COMMAND_URL = RAW + "/control/osr_command.json"
 WATCHER_URL = RAW + "/control/osr_command_watcher.py"
-DRIVE_COMMAND_DIR = "gdrive:OSR_WORK_SPACE/RemoteControl"
-DRIVE_COMMAND_NAME = "OSR_CONTROL_COMMAND.txt"
+DRIVE_COMMAND = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_COMMAND.json"
 APP = Path.home() / "Library" / "Application Support" / "OSR Control"
 APP.mkdir(parents=True, exist_ok=True)
 STATE = APP / "state.json"
@@ -32,31 +31,31 @@ MAX_TASK_BYTES = 262144
 MAX_TASK_TIMEOUT = 7200
 
 
-def log(msg):
+def log(msg: str) -> None:
     line = f"{time.strftime('%Y-%m-%d %H:%M:%S')} {msg}"
     print(line, flush=True)
     with LOG.open("a", encoding="utf-8") as f:
         f.write(line + "\n")
 
 
-def load_json(path, default):
+def load_json(path: Path, default):
     try:
         return json.loads(path.read_text("utf-8"))
     except Exception:
         return default
 
 
-def save_json(path, obj):
+def save_json(path: Path, obj) -> None:
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", "utf-8")
     os.replace(tmp, path)
 
 
-def cache_bust(url):
+def cache_bust(url: str) -> str:
     return url + ("&" if "?" in url else "?") + f"_osr_ts={time.time_ns()}"
 
 
-def fetch_bytes(url, timeout=30, max_bytes=None):
+def fetch_bytes(url: str, timeout: int = 30, max_bytes: int | None = None) -> bytes:
     curl = shutil.which("curl") or "/usr/bin/curl"
     p = subprocess.run(
         [curl, "-fsSL", "--max-time", str(timeout), "-H", "Cache-Control: no-cache", "-H", "Pragma: no-cache", cache_bust(url)],
@@ -69,45 +68,39 @@ def fetch_bytes(url, timeout=30, max_bytes=None):
     return p.stdout
 
 
-def fetch_json(url):
+def fetch_json(url: str):
     return json.loads(fetch_bytes(url, max_bytes=65536).decode("utf-8"))
 
 
-def run(cmd, **kwargs):
+def run(cmd: list[str], **kwargs):
     log("RUN " + " ".join(cmd[:3]) + (" ..." if len(cmd) > 3 else ""))
     return subprocess.run(cmd, text=True, **kwargs)
 
 
-def find_rclone():
-    return shutil.which("rclone") or "/usr/local/bin/rclone"
+def find_rclone() -> str:
+    path = shutil.which("rclone") or "/usr/local/bin/rclone"
+    if not Path(path).exists():
+        raise RuntimeError("rclone not found")
+    return path
 
 
 def fetch_drive_command():
-    rclone = find_rclone()
     p = subprocess.run(
-        [
-            rclone,
-            "--drive-export-formats",
-            "txt",
-            "--include",
-            DRIVE_COMMAND_NAME,
-            "cat",
-            DRIVE_COMMAND_DIR,
-        ],
+        [find_rclone(), "cat", DRIVE_COMMAND],
         text=True,
         capture_output=True,
         timeout=30,
     )
     if p.returncode != 0:
-        raise RuntimeError(f"Drive command cat failed rc={p.returncode}: {p.stderr or p.stdout}")
+        raise RuntimeError(f"Drive raw command cat failed rc={p.returncode}: {p.stderr or p.stdout}")
     raw = (p.stdout or "").encode("utf-8")
     if not raw.strip():
-        raise RuntimeError("Drive command cat returned empty output")
+        raise RuntimeError("Drive raw command returned empty output")
     if len(raw) > 65536:
-        raise RuntimeError(f"Drive command too large: {len(raw)}")
+        raise RuntimeError(f"Drive raw command too large: {len(raw)}")
     obj = json.loads(raw.decode("utf-8"))
     if not isinstance(obj, dict):
-        raise RuntimeError("Drive command is not a JSON object")
+        raise RuntimeError("Drive raw command is not a JSON object")
     return obj
 
 
@@ -122,7 +115,7 @@ def fetch_command():
             raise RuntimeError(f"command read failed: drive={drive_exc!r}; github={github_exc!r}")
 
 
-def self_update_and_exec():
+def self_update_and_exec() -> None:
     remote = fetch_bytes(WATCHER_URL, 20, MAX_TASK_BYTES)
     here = Path(__file__)
     if remote == here.read_bytes():
@@ -135,11 +128,9 @@ def self_update_and_exec():
     os.execv(sys.executable, [sys.executable, str(here)])
 
 
-def publish_status(obj):
+def publish_status(obj: dict) -> None:
     save_json(STATUS, obj)
     rclone = find_rclone()
-    if not rclone or not Path(rclone).exists():
-        raise RuntimeError("rclone not found")
     p = subprocess.run([rclone, "copyto", str(STATUS), REMOTE_STATUS], text=True, capture_output=True)
     if p.returncode != 0:
         raise RuntimeError(f"status upload failed: {p.stderr or p.stdout}")
@@ -149,11 +140,11 @@ def publish_status(obj):
             raise RuntimeError(f"result upload failed: {p.stderr or p.stdout}")
 
 
-def save_result(text):
+def save_result(text: str) -> None:
     RESULT.write_text(text, "utf-8")
 
 
-def git_sync():
+def git_sync() -> None:
     git = shutil.which("git") or "/usr/bin/git"
     p = run([git, "-C", str(REPO), "pull", "--ff-only"], capture_output=True)
     save_result((p.stdout or "") + (p.stderr or ""))
@@ -161,7 +152,7 @@ def git_sync():
         raise RuntimeError(f"git pull failed: {p.returncode}")
 
 
-def speed_test():
+def speed_test() -> None:
     git_sync()
     p = run(["/bin/zsh", str(REPO / "control/OSR_LOCAL_SPEED_TEST.command")], capture_output=True)
     save_result((p.stdout or "") + (p.stderr or ""))
@@ -169,7 +160,7 @@ def speed_test():
         raise RuntimeError(f"speed test failed: {p.returncode}")
 
 
-def kimi_probe():
+def kimi_probe() -> None:
     p = run(
         ["/bin/zsh", "-ilc", "printf 'kimi_path='; whence -p kimi; kimi --version"],
         capture_output=True,
@@ -181,7 +172,7 @@ def kimi_probe():
         raise RuntimeError(f"Kimi probe exited {p.returncode}")
 
 
-def kimi_run(command):
+def kimi_run(command: dict) -> None:
     prompt = str(command.get("prompt", "")).strip()
     if not prompt:
         raise RuntimeError("KIMI_RUN requires a non-empty prompt")
@@ -199,7 +190,7 @@ def kimi_run(command):
         raise RuntimeError(f"Kimi exited {p.returncode}")
 
 
-def run_repo_task(command):
+def run_repo_task(command: dict) -> None:
     rel = str(command.get("task_path", "")).strip()
     expected = str(command.get("sha256", "")).strip().lower()
     if not rel.startswith("tools/remote_tasks/") or not rel.endswith(".py") or ".." in rel:
@@ -223,14 +214,12 @@ def run_repo_task(command):
     env["OSR_REPO"] = str(REPO)
     env["OSR_REMOTE_TASK_SHA256"] = actual
     p = run([sys.executable, str(task), *args], capture_output=True, cwd=str(REPO), env=env, timeout=timeout)
-    save_result(
-        f"RUN_REPO_TASK\npath={rel}\nsha256={actual}\nreturncode={p.returncode}\n\nSTDOUT\n{p.stdout or ''}\n\nSTDERR\n{p.stderr or ''}"
-    )
+    save_result(f"RUN_REPO_TASK\npath={rel}\nsha256={actual}\nreturncode={p.returncode}\n\nSTDOUT\n{p.stdout or ''}\n\nSTDERR\n{p.stderr or ''}")
     if p.returncode:
         raise RuntimeError(f"remote task exited {p.returncode}")
 
 
-def process_once():
+def process_once() -> None:
     cmd, source, source_detail = fetch_command()
     state = load_json(STATE, {"last_id": 0})
     cid = int(cmd.get("id", 0))
@@ -247,7 +236,7 @@ def process_once():
         "status": "RUNNING",
         "host": os.uname().nodename,
         "started_unix": time.time(),
-        "watcher": "2.4",
+        "watcher": "2.5",
         "command_source": source,
     }
     if source_detail:
@@ -275,8 +264,8 @@ def process_once():
         log(f"FAILED command={cid} action={action} source={source} error={exc!r}")
 
 
-def main():
-    log("OSR watcher 2.4 persistent loop starting")
+def main() -> None:
+    log("OSR watcher 2.5 persistent loop starting")
     while True:
         try:
             self_update_and_exec()
