@@ -1,0 +1,81 @@
+name: Archive Fetch India NE Indonesia Books
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/archive-fetch-india-ne-indonesia.yml'
+      - 'archive-fetch/india-ne-indonesia-20260821.tsv'
+  push:
+    paths:
+      - '.github/workflows/archive-fetch-india-ne-indonesia.yml'
+      - 'archive-fetch/india-ne-indonesia-20260821.tsv'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: matrix
+        name: Build source matrix from manifest
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv, json, os
+          path = 'archive-fetch/india-ne-indonesia-20260821.tsv'
+          with open(path, encoding='utf-8', newline='') as f:
+              rows = list(csv.DictReader(f, delimiter='\t'))
+          matrix = {'include': [
+              {'source_id': r['source_id'], 'url': r['url'], 'filename': r['filename']}
+              for r in rows if r.get('source_id')
+          ]}
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
+              out.write('matrix=' + json.dumps(matrix, separators=(',', ':')) + '\n')
+          PY
+
+  fetch:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Fetch and validate one original source book
+        shell: bash
+        env:
+          SOURCE_ID: ${{ matrix.source_id }}
+          SOURCE_URL: ${{ matrix.url }}
+          FILENAME: ${{ matrix.filename }}
+        run: |
+          set -u
+          mkdir -p downloads
+          printf 'source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n' > downloads/RESULT.tsv
+          out="downloads/$FILENAME"
+          echo "Fetching $SOURCE_ID -> $FILENAME"
+          if ! curl -fL --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 420 "$SOURCE_URL" -o "$out"; then
+            printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$SOURCE_ID" "$FILENAME" "$SOURCE_URL" >> downloads/RESULT.tsv
+            rm -f "$out"
+            exit 0
+          fi
+          size=$(stat -c '%s' "$out" 2>/dev/null || wc -c < "$out")
+          magic=$(head -c 5 "$out" || true)
+          if [[ "$magic" != "%PDF-" ]]; then
+            printf '%s\tNOT_PDF\t%s\t%s\t\t%s\n' "$SOURCE_ID" "$FILENAME" "$size" "$SOURCE_URL" >> downloads/RESULT.tsv
+            mv "$out" "downloads/${FILENAME}.not_pdf"
+            exit 0
+          fi
+          sha=$(sha256sum "$out" | awk '{print $1}')
+          printf '%s\tOK_PDF\t%s\t%s\t%s\t%s\n' "$SOURCE_ID" "$FILENAME" "$size" "$sha" "$SOURCE_URL" >> downloads/RESULT.tsv
+          cat downloads/RESULT.tsv
+      - name: Upload source-book artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-book-${{ matrix.source_id }}
+          path: downloads/
+          compression-level: 0
+          retention-days: 7
