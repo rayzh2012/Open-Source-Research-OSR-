@@ -5,60 +5,92 @@ on:
       - archive-hueting-1936-tobelo-grammar
     paths:
       - '.github/workflows/archive-hueting-1936.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/archive-hueting-1936.yml'
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
   probe:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: archive-hueting-1936-tobelo-grammar
-      - name: Resolve Hueting 1908 HathiTrust item and probe Kern 1893
+      - name: Resolve Hathi item and Google Books page index
         shell: bash
         run: |
           set -u
-          mkdir -p research_tmp
+          mkdir -p out
           ua='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
-          for endpoint in \
-            'https://catalog.hathitrust.org/api/volumes/brief/recordnumber/006298806.json' \
-            'https://catalog.hathitrust.org/api/volumes/brief/oclc/7420160.json' \
-            'https://catalog.hathitrust.org/api/volumes/brief/lccn/09024063.json'; do
-            name=$(printf '%s' "$endpoint" | sed 's#https://catalog.hathitrust.org/api/volumes/brief/##;s#[/.]#_#g')
-            curl -sS -L --connect-timeout 20 --max-time 120 -A "$ua" "$endpoint" -o "research_tmp/hathi_${name}.json" || true
+          printf '%s\n' '=== HATHI BIB API ===' > out/SUMMARY.txt
+          for spec in \
+            'recordnumber/006298806' \
+            'oclc/7420160' \
+            'lccn/09024063'; do
+            fn=$(printf '%s' "$spec" | tr '/' '_')
+            url="https://catalog.hathitrust.org/api/volumes/brief/${spec}.json"
+            curl -sS -L --connect-timeout 20 --max-time 120 -A "$ua" -D "out/hathi_${fn}.headers" "$url" -o "out/hathi_${fn}.json" || true
           done
-          python - <<'PY' > research_tmp/HATHI_SUMMARY.txt
-import glob,json
-for p in sorted(glob.glob('research_tmp/hathi_*.json')):
-    print('\nFILE',p)
-    try:
-      d=json.load(open(p))
-    except Exception as e:
-      print('PARSE_ERROR',e); continue
-    print('records=', list(d.get('records',{})))
+          python - <<'PY' >> out/SUMMARY.txt
+import glob,json,os
+for p in sorted(glob.glob('out/hathi_*.json')):
+    print('\nFILE',os.path.basename(p))
+    try: d=json.load(open(p))
+    except Exception as e: print('PARSE_ERROR',repr(e)); continue
+    print('records',list(d.get('records',{})))
     for it in d.get('items',[]):
-      print('ITEM', {k:it.get(k) for k in ('htid','orig','itemURL','rightsCode','usRightsString','fromRecord','enumcron')})
+        print('ITEM', {k:it.get(k) for k in ('htid','orig','itemURL','rightsCode','usRightsString','fromRecord','enumcron')})
 PY
-          cat research_tmp/HATHI_SUMMARY.txt
+          printf '%s\n' '=== GOOGLE BOOKS VOLUME API ===' >> out/SUMMARY.txt
+          curl -sS -L --connect-timeout 20 --max-time 120 -A "$ua" \
+            'https://www.googleapis.com/books/v1/volumes/U2VwYkm4NBsC' \
+            -o out/google_volume.json || true
+          python - <<'PY' >> out/SUMMARY.txt
+import json
+try:
+ d=json.load(open('out/google_volume.json'))
+ print('id',d.get('id'))
+ print('title',d.get('volumeInfo',{}).get('title'))
+ print('accessInfo', {k:d.get('accessInfo',{}).get(k) for k in ('country','viewability','embeddable','publicDomain','webReaderLink','accessViewStatus')})
+ print('pdf',d.get('accessInfo',{}).get('pdf'))
+ print('epub',d.get('accessInfo',{}).get('epub'))
+except Exception as e: print('GOOGLE_VOLUME_PARSE_ERROR',repr(e))
+PY
+          printf '%s\n' '=== GOOGLE BOOKS SEARCH-WITHIN ===' >> out/SUMMARY.txt
+          i=0
+          for q in hohono h%C3%B4h%C3%B4no vervangwoorden bohon; do
+            i=$((i+1))
+            for url in \
+              "https://books.google.com/books?jscmd=SearchWithinVolume2&q=${q}&vid=U2VwYkm4NBsC" \
+              "https://books.google.com/books?jscmd=SearchWithinVolume2&q=${q}&id=U2VwYkm4NBsC" \
+              "https://books.google.com/books?jscmd=SearchWithinVolume2&q=${q}&vid=U2VwYkm4NBsC&hl=en"; do
+              n=$(printf '%s' "$url" | sha256sum | cut -c1-12)
+              code=$(curl -sS -L --connect-timeout 20 --max-time 120 -A "$ua" -e 'https://books.google.com/' -o "out/gbooks_${i}_${n}.txt" -w '%{http_code}' "$url" || true)
+              bytes=$(wc -c < "out/gbooks_${i}_${n}.txt" 2>/dev/null || echo 0)
+              printf 'SEARCH q=%s http=%s bytes=%s file=%s\n' "$q" "$code" "$bytes" "gbooks_${i}_${n}.txt" >> out/SUMMARY.txt
+              head -c 2000 "out/gbooks_${i}_${n}.txt" | tr '\n' ' ' >> out/SUMMARY.txt || true
+              printf '\n' >> out/SUMMARY.txt
+            done
+          done
+          printf '%s\n' '=== KERN 1893 BRILL RAW ===' >> out/SUMMARY.txt
           kern='https://brill.com/view/journals/bki/42/1/article-p120_11.pdf'
-          code=$(curl -L -sS --connect-timeout 20 --max-time 180 -A "$ua" -o research_tmp/kern1893.bin -w '%{http_code}' "$kern" || true)
-          printf 'http=%s\n' "$code" > research_tmp/KERN_STATUS.txt
-          file research_tmp/kern1893.bin >> research_tmp/KERN_STATUS.txt 2>&1 || true
-          wc -c research_tmp/kern1893.bin >> research_tmp/KERN_STATUS.txt 2>&1 || true
-          if head -c 5 research_tmp/kern1893.bin 2>/dev/null | grep -q '%PDF-'; then
-            mv research_tmp/kern1893.bin research_tmp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf
-            sha256sum research_tmp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf >> research_tmp/KERN_STATUS.txt
+          code=$(curl -L -sS --connect-timeout 20 --max-time 180 -A "$ua" -o out/kern1893.bin -w '%{http_code}' "$kern" || true)
+          printf 'http=%s ' "$code" >> out/SUMMARY.txt
+          file out/kern1893.bin >> out/SUMMARY.txt 2>&1 || true
+          wc -c out/kern1893.bin >> out/SUMMARY.txt 2>&1 || true
+          if head -c 5 out/kern1893.bin 2>/dev/null | grep -q '%PDF-'; then
+            mv out/kern1893.bin out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf
+            sha256sum out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf >> out/SUMMARY.txt
+            pdftotext -layout out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf out/kern1893.txt || true
+            grep -in -E 'saali|Tob[eè]lo|Loloda|vervang|naam|klank' out/kern1893.txt | head -100 > out/kern_hits.txt || true
           else
-            rm -f research_tmp/kern1893.bin
+            rm -f out/kern1893.bin
           fi
-      - name: Commit probe outputs to branch
-        shell: bash
-        run: |
-          git config user.name 'research-archive-bot'
-          git config user.email 'actions@users.noreply.github.com'
-          git add research_tmp/
-          git diff --cached --quiet && exit 0
-          git commit -m 'research: persist Hathi/Kern source probe results'
-          git push origin HEAD:archive-hueting-1936-tobelo-grammar
+          cat out/SUMMARY.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tobelo-taboo-source-breakers
+          path: out/
+          compression-level: 0
+          retention-days: 7
