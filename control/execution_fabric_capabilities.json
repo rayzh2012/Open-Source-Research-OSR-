@@ -1,7 +1,7 @@
 {
-  "version": "v1.0",
-  "updated_at": "2026-08-22T03:50:00-04:00",
-  "goal": "Turn large public corpora into compact reusable derived data while minimizing user interaction, machine-local work, and paid compute.",
+  "version": "v1.1",
+  "updated_at": "2026-08-22T03:58:00-04:00",
+  "goal": "Turn large public corpora into compact reusable structured features while minimizing user interaction, machine-local work, and paid compute.",
   "execution_planes": {
     "default_public_compute": "GitHub Actions standard hosted runners",
     "private_local_state": "OSR Watcher on Mac only when genuinely required",
@@ -13,30 +13,41 @@
       "Replit agent compute"
     ]
   },
+  "primary_product": {
+    "mode": "feature_extraction",
+    "output": "versioned sparse Feature Store in Parquet + compact feature catalog",
+    "layers": [
+      "F0 shard structural features over the complete corpus",
+      "F1 sparse row-level symbolic/domain features",
+      "F1 co-occurrence and temporal hints",
+      "F2 selective deep entity/event extraction over high-signal rows only"
+    ],
+    "status": "IMPLEMENTATION_STARTED"
+  },
   "supported_now": [
+    {
+      "mode": "feature_extraction",
+      "examples": ["length/structure", "script mix on signal rows", "feature-family counts", "temporal hints", "sparse row feature vectors", "co-occurrence"],
+      "output": "Parquet feature-store partitions + compact JSON feature catalog",
+      "status": "ACTIVE_SMOKE"
+    },
     {
       "mode": "direct_query_scan",
       "examples": ["exact substring", "multi-term Aho-Corasick scan", "term frequency", "hit locators", "bounded snippets"],
       "output": "compact query index + shard/row/hash locators",
-      "status": "ACTIVE"
-    },
-    {
-      "mode": "feature_extraction",
-      "examples": ["length", "language/script mix", "keyword-family counts", "structural flags", "document-level features", "row-level features"],
-      "output": "Parquet/JSONL/CSV feature store",
-      "status": "READY_TO_IMPLEMENT"
+      "status": "AUXILIARY_LOCATOR_ONLY"
     },
     {
       "mode": "aggregation",
       "examples": ["counts", "histograms", "top-k", "co-occurrence", "per-shard summaries", "per-corpus summaries"],
       "output": "small reducer tables",
-      "status": "READY_TO_IMPLEMENT"
+      "status": "INTEGRATED_WITH_FEATURE_STORE_V1"
     },
     {
       "mode": "validation",
       "examples": ["schema checks", "row counts", "null rates", "duplicate indicators", "encoding checks", "range checks", "cross-shard invariants"],
       "output": "validation ledger + failure locators",
-      "status": "READY_TO_IMPLEMENT"
+      "status": "PARTIAL_IN_FEATURE_STORE_V1"
     },
     {
       "mode": "transform",
@@ -48,13 +59,13 @@
       "mode": "routing_index",
       "examples": ["which shards are relevant", "term-family routing", "high-yield shard ranking"],
       "output": "small shard-level router",
-      "status": "READY_TO_IMPLEMENT"
+      "status": "OPTIONAL_AUXILIARY"
     },
     {
       "mode": "graph_prep",
       "examples": ["entity mention edges", "co-occurrence edges", "source-row provenance", "candidate relation extraction"],
       "output": "edge/node candidate tables for downstream review",
-      "status": "READY_TO_IMPLEMENT"
+      "status": "FEATURE_STORE_DOWNSTREAM"
     },
     {
       "mode": "specialized_compact_index",
@@ -66,11 +77,19 @@
   "not_default": [
     {
       "mode": "universal_full_text_index",
-      "reason": "Quickwit/Tantivy pilot expanded sampled text by 6.1566x; projected full-corpus storage is economically wasteful"
+      "reason": "Quickwit/Tantivy pilot expanded sampled text by 6.1566x; 508GB is not large enough, and the research workload is not search-heavy enough, to justify Elasticsearch/Quickwit deployment overhead"
+    },
+    {
+      "mode": "elasticsearch_cluster",
+      "reason": "Operational complexity and persistent storage are unnecessary at this corpus scale and workload shape; search is an auxiliary locator problem, not the primary product"
     },
     {
       "mode": "universal_qgram_index",
       "reason": "3-gram pilot expanded sampled text by 1.8198x; useful only for repeated high-value query families"
+    },
+    {
+      "mode": "full_508GB_deep_transformer_pass",
+      "reason": "Deep NER/LLM inference over every byte is economically wasteful. Full-corpus extraction is shallow/deterministic; deep extraction is routed only to high-signal rows."
     },
     {
       "mode": "full_508GB_mac_scan",
@@ -78,15 +97,15 @@
     },
     {
       "mode": "persist_raw_corpus_in_github_artifacts",
-      "reason": "raw data must remain upstream; runners use ephemeral shard hydration and persist only compact derivatives"
+      "reason": "raw data remains upstream; runners use ephemeral shard hydration and persist only compact derivatives"
     }
   ],
   "current_priority": [
-    "finish stage2-query-index-backfill-v1-001 across all 1788 shards",
-    "materialize compact query index and verified corpus statistics",
-    "add generic feature-extraction worker contract",
-    "add validation/aggregation worker contract",
-    "derive shard routing features so future semantic/mining jobs avoid rescanning irrelevant shards"
+    "validate feature-store-v1-smoke-001 on two real shards",
+    "scale Feature Store v1 to all 1788 shards with 20 workers after smoke passes",
+    "persist worker feature partitions and compact catalog",
+    "build selective F2 entity/event extractor over F1 high-signal rows",
+    "derive graph and aggregation layers from Feature Store rather than repeatedly scanning raw corpus"
   ],
   "job_lifecycle": [
     "CLASSIFY",
@@ -99,6 +118,6 @@
     "VERIFY_READBACK",
     "WRITEBACK_NOTION"
   ],
-  "economic_rule": "Build permanent derived data only when expected future I/O saved exceeds its storage/build cost; otherwise scan upstream shards on demand.",
-  "evidence_rule": "Every derived fact must retain source corpus, shard, row or equivalent locator, and hash/provenance sufficient for exact source recheck."
+  "economic_rule": "Prefer feature backfill and selective deep extraction over persistent universal search infrastructure; build an index only when repeated lookup savings exceed storage and operational cost.",
+  "evidence_rule": "Every derived feature must retain source corpus, shard, row or equivalent locator, and hash/provenance sufficient for exact source recheck."
 }
