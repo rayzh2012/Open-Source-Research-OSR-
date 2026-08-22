@@ -6,6 +6,7 @@ RAW="https://raw.githubusercontent.com/rayzh2012/Open-Source-Research-OSR-/$BRAN
 APP="$HOME/Library/Application Support/OSR Control"
 PLIST="$HOME/Library/LaunchAgents/com.rayzh.osr.remote-control.plist"
 REPO="$HOME/Open-Source-Research-OSR-"
+LABEL="com.rayzh.osr.remote-control"
 mkdir -p "$APP" "$HOME/Library/LaunchAgents"
 
 RUNTIME_PATH="$HOME/.local/bin:$HOME/.kimi/bin:/opt/homebrew/bin:/usr/local/bin:/Library/Frameworks/Python.framework/Versions/3.12/bin:/usr/bin:/bin:/usr/sbin:/sbin"
@@ -41,7 +42,7 @@ cat > "$PLIST" <<PLIST
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>Label</key><string>com.rayzh.osr.remote-control</string>
+  <key>Label</key><string>$LABEL</string>
   <key>ProgramArguments</key>
   <array>
     <string>$PYTHON_BIN</string>
@@ -64,13 +65,34 @@ cat > "$PLIST" <<PLIST
 </plist>
 PLIST
 
-launchctl bootout "gui/$UID/com.rayzh.osr.remote-control" >/dev/null 2>&1 || true
+launchctl bootout "gui/$UID/$LABEL" >/dev/null 2>&1 || true
 launchctl bootstrap "gui/$UID" "$PLIST"
-launchctl enable "gui/$UID/com.rayzh.osr.remote-control"
-launchctl kickstart -k "gui/$UID/com.rayzh.osr.remote-control"
+launchctl enable "gui/$UID/$LABEL"
+launchctl kickstart -k "gui/$UID/$LABEL"
+sleep 1
 
 echo
-echo "✅ OSR Remote Control installed."
+echo "=== launchd verification ==="
+if launchctl print "gui/$UID/$LABEL" > "$APP/launchd.print.txt" 2>&1; then
+  grep -E '^[[:space:]]*(state|pid|last exit code) = ' "$APP/launchd.print.txt" || true
+else
+  cat "$APP/launchd.print.txt" >&2 || true
+  echo "launchd job verification failed" >&2
+  tail -n 80 "$APP/launchd.err.log" >&2 2>/dev/null || true
+  exit 2
+fi
+
+if ! pgrep -f "$APP/osr_command_watcher.py" >/dev/null 2>&1; then
+  echo "Watcher process is not running." >&2
+  echo "--- launchd stderr ---" >&2
+  tail -n 80 "$APP/launchd.err.log" >&2 2>/dev/null || true
+  echo "--- watcher log ---" >&2
+  tail -n 80 "$APP/osr-control.log" >&2 2>/dev/null || true
+  exit 3
+fi
+
+echo
+echo "✅ OSR Remote Control installed and watcher process verified."
 echo "Mode: persistent watcher, internal poll every 5 seconds"
 echo "Python: $PYTHON_BIN"
 echo "Runtime PATH: $RUNTIME_PATH"
@@ -78,4 +100,4 @@ echo "Status: gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_STATUS.json"
 echo "Local log: $APP/osr-control.log"
 echo "Launchd stderr: $APP/launchd.err.log"
 echo
-echo "Watcher is self-updating from GitHub on future runs."
+echo "Pending GitHub command will be consumed by the live watcher."
