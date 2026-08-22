@@ -1,7 +1,5 @@
 {
-  "id": 8,
-  "action": "KIMI_RUN",
-  "prompt": "This is an OSR remote-control smoke test after launchd runtime pinning. Do not modify any file. Reply with exactly two lines:\nOSR_KIMI_LOOP_OK\n/Users/hangwu/Open-Source-Research-OSR-",
-  "timeout_seconds": 180,
-  "note": "Queued for immediate consumption after pinned-Python launchd reload."
+  "id": 9,
+  "action": "STATUS",
+  "note": "Fresh liveness probe after pinned-Python launchd reload."
 }
