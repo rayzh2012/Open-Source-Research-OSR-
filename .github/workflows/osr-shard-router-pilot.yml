@@ -1,0 +1,50 @@
+name: OSR Shard Router Pilot
+
+on:
+  push:
+    branches:
+      - stage2-direct-miner-v3-1
+    paths:
+      - control/shard_router_pilot_request.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: osr-shard-router-pilot
+  cancel-in-progress: true
+
+jobs:
+  shard-router-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pyarrow==21.0.0 requests==2.32.4 huggingface_hub==0.34.4 tantivy
+      - name: Validate request
+        shell: python
+        run: |
+          import json
+          req=json.load(open('control/shard_router_pilot_request.json', encoding='utf-8'))
+          assert req.get('action') == 'SHARD_ROUTER_PILOT', req
+          print(req)
+      - name: Build whole-shard bigram routing index pilot
+        run: python tools/osr_shard_router_pilot.py
+      - name: Commit benchmark result
+        if: always()
+        run: |
+          test -f control/shard_router_pilot_result.json
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/shard_router_pilot_result.json
+          if ! git diff --cached --quiet; then
+            git commit -m "OSR shard router pilot result: $GITHUB_RUN_ID"
+            git push origin HEAD:stage2-direct-miner-v3-1
+          fi
