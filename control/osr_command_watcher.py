@@ -5,6 +5,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -23,11 +24,12 @@ REMOTE_STATUS = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_STATUS.json"
 REMOTE_RESULT = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_LAST_RESULT.txt"
 REPO = Path.home() / "Open-Source-Research-OSR-"
 MAX_PROMPT_CHARS = 16000
+POLL_SECONDS = 5
 
 
 def log(msg):
     line = f"{time.strftime('%Y-%m-%d %H:%M:%S')} {msg}"
-    print(line)
+    print(line, flush=True)
     with LOG.open("a", encoding="utf-8") as f:
         f.write(line + "\n")
 
@@ -65,22 +67,21 @@ def fetch_json(url):
 
 
 def run(cmd, **kwargs):
-    log("RUN " + " ".join(cmd))
+    log("RUN " + " ".join(cmd[:3]) + (" ..." if len(cmd) > 3 else ""))
     return subprocess.run(cmd, text=True, **kwargs)
 
 
-def self_update():
-    try:
-        remote = fetch_bytes(WATCHER_URL, 20)
-        here = Path(__file__)
-        if remote != here.read_bytes():
-            tmp = here.with_suffix(".new")
-            tmp.write_bytes(remote)
-            os.chmod(tmp, 0o755)
-            os.replace(tmp, here)
-            log("SELF_UPDATE installed; next tick will use new watcher")
-    except Exception as exc:
-        log(f"SELF_UPDATE skipped: {exc!r}")
+def self_update_and_exec():
+    remote = fetch_bytes(WATCHER_URL, 20)
+    here = Path(__file__)
+    if remote == here.read_bytes():
+        return
+    tmp = here.with_suffix(".new")
+    tmp.write_bytes(remote)
+    os.chmod(tmp, 0o755)
+    os.replace(tmp, here)
+    log("SELF_UPDATE installed; restarting watcher")
+    os.execv(sys.executable, [sys.executable, str(here)])
 
 
 def publish_status(obj):
@@ -88,11 +89,11 @@ def publish_status(obj):
     rclone = shutil.which("rclone")
     if not rclone:
         raise RuntimeError("rclone not found")
-    p = run([rclone, "copyto", str(STATUS), REMOTE_STATUS], capture_output=True)
+    p = subprocess.run([rclone, "copyto", str(STATUS), REMOTE_STATUS], text=True, capture_output=True)
     if p.returncode != 0:
         raise RuntimeError(f"status upload failed: {p.stderr or p.stdout}")
     if RESULT.exists():
-        p = run([rclone, "copyto", str(RESULT), REMOTE_RESULT], capture_output=True)
+        p = subprocess.run([rclone, "copyto", str(RESULT), REMOTE_RESULT], text=True, capture_output=True)
         if p.returncode != 0:
             raise RuntimeError(f"result upload failed: {p.stderr or p.stdout}")
 
@@ -117,77 +118,48 @@ def speed_test():
         raise RuntimeError(f"speed test failed: {p.returncode}")
 
 
-def find_kimi():
-    path = shutil.which("kimi")
-    if path:
-        return path
-    for candidate in (
-        Path.home() / ".local/bin/kimi",
-        Path.home() / ".kimi/bin/kimi",
-        Path.home() / ".cargo/bin/kimi",
-        Path("/opt/homebrew/bin/kimi"),
-        Path("/usr/local/bin/kimi"),
-    ):
-        if candidate.exists() and os.access(candidate, os.X_OK):
-            return str(candidate)
-    try:
-        p = subprocess.run(
-            ["/bin/zsh", "-ilc", "whence -p kimi"],
-            text=True,
-            capture_output=True,
-            timeout=30,
-            cwd=str(REPO),
-        )
-        if p.returncode == 0:
-            for line in reversed((p.stdout or "").splitlines()):
-                candidate = line.strip()
-                if candidate.startswith("/") and Path(candidate).exists() and os.access(candidate, os.X_OK):
-                    return candidate
-    except Exception as exc:
-        log(f"KIMI shell discovery skipped: {exc!r}")
-    return None
-
-
 def kimi_probe():
-    found = find_kimi()
-    lines = [f"kimi: {found or 'NOT_FOUND'}"]
-    if found:
-        p = run([found, "--version"], capture_output=True, cwd=str(REPO), timeout=60)
-        lines += ["\n--version stdout:\n" + (p.stdout or ""), "\n--version stderr:\n" + (p.stderr or ""), f"returncode={p.returncode}"]
-    save_result("\n".join(lines) + "\n")
-    if not found:
-        raise RuntimeError("Kimi CLI not found")
+    p = run(
+        ["/bin/zsh", "-ilc", "printf 'kimi_path='; whence -p kimi; kimi --version"],
+        capture_output=True,
+        cwd=str(REPO),
+        timeout=60,
+    )
+    save_result(f"KIMI_PROBE\nreturncode={p.returncode}\n\nSTDOUT\n{p.stdout or ''}\n\nSTDERR\n{p.stderr or ''}")
+    if p.returncode:
+        raise RuntimeError(f"Kimi probe exited {p.returncode}")
 
 
 def kimi_run(command):
-    found = find_kimi()
-    if not found:
-        raise RuntimeError("Kimi CLI not found")
     prompt = str(command.get("prompt", "")).strip()
     if not prompt:
         raise RuntimeError("KIMI_RUN requires a non-empty prompt")
     if len(prompt) > MAX_PROMPT_CHARS:
         raise RuntimeError("KIMI_RUN prompt too long")
     timeout = max(30, min(int(command.get("timeout_seconds", 1800)), 7200))
-    p = run([found, "-p", prompt], capture_output=True, cwd=str(REPO), timeout=timeout)
+    p = run(
+        ["/bin/zsh", "-ilc", "exec kimi -p \"$1\"", "osr-kimi", prompt],
+        capture_output=True,
+        cwd=str(REPO),
+        timeout=timeout,
+    )
     save_result(f"KIMI_RUN\nreturncode={p.returncode}\ncwd={REPO}\n\nSTDOUT\n{p.stdout or ''}\n\nSTDERR\n{p.stderr or ''}")
     if p.returncode:
         raise RuntimeError(f"Kimi exited {p.returncode}")
 
 
-def main():
-    self_update()
-    state = load_json(STATE, {"last_id": 0})
+def process_once():
     cmd = fetch_json(COMMAND_URL)
+    state = load_json(STATE, {"last_id": 0})
     cid = int(cmd.get("id", 0))
     action = str(cmd.get("action", "IDLE")).upper()
     if action not in ALLOWED:
         raise RuntimeError(f"Refusing unapproved action: {action}")
     if cid <= int(state.get("last_id", 0)):
-        return 0
+        return
     state.update({"last_id": cid, "last_action": action})
     save_json(STATE, state)
-    status = {"command_id": cid, "action": action, "status": "RUNNING", "host": os.uname().nodename, "started_unix": time.time()}
+    status = {"command_id": cid, "action": action, "status": "RUNNING", "host": os.uname().nodename, "started_unix": time.time(), "watcher": "2.0"}
     publish_status(status)
     try:
         if action == "GIT_SYNC":
@@ -203,15 +175,22 @@ def main():
         status.update({"status": "SUCCESS", "finished_unix": time.time()})
         publish_status(status)
         log(f"SUCCESS command={cid} action={action}")
-        return 0
     except Exception as exc:
         status.update({"status": "FAILED", "error": repr(exc), "finished_unix": time.time()})
+        publish_status(status)
+        log(f"FAILED command={cid} action={action} error={exc!r}")
+
+
+def main():
+    log("OSR watcher 2.0 persistent loop starting")
+    while True:
         try:
-            publish_status(status)
-        finally:
-            log(f"FAILED command={cid} action={action} error={exc!r}")
-        return 2
+            self_update_and_exec()
+            process_once()
+        except Exception as exc:
+            log(f"TICK_ERROR {exc!r}")
+        time.sleep(POLL_SECONDS)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
