@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "run_id": "stage2-cheap-smoke-001",
+  "workers_completed": 2,
+  "shards_scanned": 2,
+  "bytes_downloaded": 254764608,
+  "max_worker_elapsed_seconds": 6.081,
+  "aggregate_download_GiB": 0.237,
+  "github_run_id": "32560439619",
+  "github_sha": "a65bda6d66f085693e2230655a2811fd03bf6e2d",
+  "finished_unix": 1787384747.531412
+}
