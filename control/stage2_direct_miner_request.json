@@ -1,8 +1,8 @@
 {
-  "id": 1,
+  "id": 2,
   "action": "STAGE2_DIRECT_MINE",
-  "run_id": "stage2-cheap-smoke-001",
-  "worker_count": 2,
-  "limit_per_worker": 1,
-  "purpose": "Two-shard end-to-end direct mining smoke before expanding the 508GB scan."
+  "run_id": "stage2-cheap-full-001",
+  "worker_count": 20,
+  "limit_per_worker": 0,
+  "purpose": "Full 1788-shard query-directed scan of the 508GB public Hugging Face corpora using standard GitHub-hosted runners only. No paid/larger/GPU runners; no Mac corpus data path."
 }
