@@ -1,9 +1,5 @@
 {
-  "id": 20,
-  "action": "RUN_REPO_TASK",
-  "task_path": "tools/remote_tasks/osr_drive_command_probe.py",
-  "sha256": "92b9d1deb443f631ca5135b6d75b49d8a6e14d7df848716d918cbbe78ef5875d",
-  "args": [],
-  "timeout_seconds": 120,
-  "note": "Read-only rclone diagnostic for Drive-backed command channel."
+  "id": 22,
+  "action": "STATUS",
+  "note": "Final fallback diagnostic after raw Drive JSON command rollout."
 }
