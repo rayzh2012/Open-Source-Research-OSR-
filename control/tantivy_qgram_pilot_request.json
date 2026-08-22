@@ -1,0 +1,6 @@
+{
+  "id": 1,
+  "action": "TANTIVY_QGRAM_PILOT",
+  "purpose": "Benchmark the locked OSR 3-gram locator design using Tantivy NgramTokenizer(3,3) with Basic DocID-only postings and no stored source text.",
+  "requested_at": "2026-08-22T03:35:00-04:00"
+}
