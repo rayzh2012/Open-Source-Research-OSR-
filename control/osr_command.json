@@ -1,5 +1,7 @@
 {
-  "id": 9,
-  "action": "STATUS",
-  "note": "Fresh liveness probe after pinned-Python launchd reload."
+  "id": 10,
+  "action": "KIMI_RUN",
+  "prompt": "This is the final OSR remote-control smoke test after the watcher HTTPS transport was switched from Python urllib to system curl. Do not modify any file. Reply with exactly two lines:\nOSR_KIMI_LOOP_OK\n/Users/hangwu/Open-Source-Research-OSR-",
+  "timeout_seconds": 180,
+  "note": "Final end-to-end Kimi loop verification after Python CA workaround."
 }
