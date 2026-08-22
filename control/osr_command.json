@@ -1,5 +1,5 @@
 {
-  "id": 11,
-  "action": "STATUS",
-  "note": "Staging tick so watcher 1.5 installs watcher 1.6 before Kimi reprobe."
+  "id": 12,
+  "action": "KIMI_PROBE",
+  "note": "Probe Kimi through the persistent zsh-login watcher after KeepAlive bootstrap."
 }
