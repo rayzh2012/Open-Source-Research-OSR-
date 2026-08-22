@@ -1,0 +1,8 @@
+{
+  "id": 1,
+  "action": "FEATURE_EXTRACT",
+  "run_id": "feature-store-v1-smoke-001",
+  "worker_count": 2,
+  "limit_per_worker": 1,
+  "purpose": "Validate sparse feature-store extraction on one representative shard per worker before scaling to all 1788 shards. Main product is structured features, not search index."
+}
