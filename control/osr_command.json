@@ -1,5 +1,7 @@
 {
-  "id": 3,
-  "action": "SPEED_TEST",
-  "note": "Launchd-safe Kimi round-trip smoke test with direct Drive result upload."
+  "id": 4,
+  "action": "KIMI_RUN",
+  "prompt": "This is an OSR remote-control smoke test. Do not modify any file. Reply with exactly two lines:\nOSR_KIMI_LOOP_OK\n/Users/hangwu/Open-Source-Research-OSR-",
+  "timeout_seconds": 180,
+  "note": "Minimal end-to-end Kimi watcher round trip."
 }
