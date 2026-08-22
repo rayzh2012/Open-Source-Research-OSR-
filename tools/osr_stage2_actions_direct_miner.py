@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import time
+from collections import deque
 from pathlib import Path
 
 import pyarrow.parquet as pq
@@ -17,6 +18,55 @@ SOURCES = [
     ("Literature-zh", "Geralt-Targaryen/Literature-zh"),
     ("ChineseWebText2.0-HighQuality", "Morton-Li/ChineseWebText2.0-HighQuality"),
 ]
+
+
+class ExactAutomaton:
+    """Minimal exact Aho-Corasick scanner over the original Unicode text.
+
+    It deliberately performs no normalization: Stage-2 v1 is exact-substring
+    evidence mining.  One pass finds all terms and preserves original offsets for
+    snippets / source-row recheck.
+    """
+
+    def __init__(self, terms: list[str]):
+        self.next: list[dict[str, int]] = [{}]
+        self.fail: list[int] = [0]
+        self.out: list[list[str]] = [[]]
+        for term in terms:
+            if not term:
+                continue
+            state = 0
+            for ch in term:
+                nxt = self.next[state].get(ch)
+                if nxt is None:
+                    nxt = len(self.next)
+                    self.next[state][ch] = nxt
+                    self.next.append({})
+                    self.fail.append(0)
+                    self.out.append([])
+                state = nxt
+            self.out[state].append(term)
+        q: deque[int] = deque()
+        for state in self.next[0].values():
+            q.append(state)
+        while q:
+            r = q.popleft()
+            for ch, s in self.next[r].items():
+                q.append(s)
+                f = self.fail[r]
+                while f and ch not in self.next[f]:
+                    f = self.fail[f]
+                self.fail[s] = self.next[f].get(ch, 0)
+                self.out[s].extend(self.out[self.fail[s]])
+
+    def scan(self, text: str):
+        state = 0
+        for i, ch in enumerate(text):
+            while state and ch not in self.next[state]:
+                state = self.fail[state]
+            state = self.next[state].get(ch, 0)
+            for term in self.out[state]:
+                yield i - len(term) + 1, term
 
 
 def list_parquets(repo: str) -> list[str]:
@@ -46,7 +96,7 @@ def text_col(pf: pq.ParquetFile) -> str:
     return names[0]
 
 
-def scan_file(source: str, repo: str, filename: str, local: Path, pack: dict) -> dict:
+def scan_file(source: str, repo: str, filename: str, local: Path, pack: dict, automaton: ExactAutomaton) -> dict:
     pf = pq.ParquetFile(local)
     colname = text_col(pf)
     terms = pack["terms"]
@@ -66,22 +116,21 @@ def scan_file(source: str, repo: str, filename: str, local: Path, pack: dict) ->
             if not isinstance(text, str) or not text:
                 continue
             rows_scanned += 1; chars_scanned += len(text)
-            for term in terms:
-                n = text.count(term)
-                if not n:
+            row_hash = None
+            for pos, term in automaton.scan(text):
+                counts[term] += 1
+                if len(samples[term]) >= sample_cap:
                     continue
-                counts[term] += n
-                if len(samples[term]) < sample_cap:
-                    pos = text.find(term)
-                    start = max(0, pos - ctx); end = min(len(text), pos + len(term) + ctx)
-                    samples[term].append({
-                        "row": row,
-                        "position": pos,
-                        "snippet": text[start:end],
-                        "row_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
-                    })
+                if row_hash is None:
+                    row_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
+                start = max(0, pos - ctx); end = min(len(text), pos + len(term) + ctx)
+                samples[term].append({
+                    "row": row,
+                    "position": pos,
+                    "snippet": text[start:end],
+                    "row_sha256": row_hash,
+                })
     elapsed = time.time() - t0
-    nonzero = {k: v for k, v in counts.items() if v}
     return {
         "source": source,
         "repo": repo,
@@ -91,7 +140,7 @@ def scan_file(source: str, repo: str, filename: str, local: Path, pack: dict) ->
         "rows_scanned": rows_scanned,
         "chars_scanned": chars_scanned,
         "scan_seconds": round(elapsed, 3),
-        "nonzero_counts": nonzero,
+        "nonzero_counts": {k: v for k, v in counts.items() if v},
         "samples": {k: v for k, v in samples.items() if v},
     }
 
@@ -106,7 +155,14 @@ def main() -> int:
     args = ap.parse_args()
 
     out = Path(args.out_dir); out.mkdir(parents=True, exist_ok=True)
-    pack = json.loads(Path(args.query_pack).read_text("utf-8"))
+    pack_path = Path(args.query_pack)
+    pack_bytes = pack_path.read_bytes()
+    pack = json.loads(pack_bytes.decode("utf-8"))
+    terms = list(dict.fromkeys(str(x) for x in pack["terms"] if str(x)))
+    pack["terms"] = terms
+    automaton = ExactAutomaton(terms)
+    pack_sha256 = hashlib.sha256(pack_bytes).hexdigest()
+
     inventory = []
     for source, repo in SOURCES:
         for filename in list_parquets(repo):
@@ -122,7 +178,7 @@ def main() -> int:
     for n, (source, repo, filename) in enumerate(assigned, 1):
         local = Path("/tmp") / f"osr-{args.worker_index}-{n}.parquet"
         nb, ds, sha = download(repo, filename, local)
-        rec = scan_file(source, repo, filename, local, pack)
+        rec = scan_file(source, repo, filename, local, pack, automaton)
         rec.update({
             "download_bytes": nb,
             "download_seconds": round(ds, 3),
@@ -131,7 +187,12 @@ def main() -> int:
         })
         results.append(rec); bytes_downloaded += nb
         local.unlink(missing_ok=True)
-        print(json.dumps({"progress": f"{n}/{len(assigned)}", "file": filename, "download_mib_s": rec["download_mib_s"], "hits": sum(rec["nonzero_counts"].values())}, ensure_ascii=False), flush=True)
+        print(json.dumps({
+            "progress": f"{n}/{len(assigned)}",
+            "file": filename,
+            "download_mib_s": rec["download_mib_s"],
+            "hits": sum(rec["nonzero_counts"].values()),
+        }, ensure_ascii=False), flush=True)
 
     summary = {
         "status": "PASS",
@@ -141,16 +202,23 @@ def main() -> int:
         "bytes_downloaded": bytes_downloaded,
         "elapsed_seconds": round(time.time() - t_all, 3),
         "query_pack_version": pack.get("version"),
-        "terms": pack["terms"],
+        "query_pack_sha256": pack_sha256,
+        "terms": terms,
         "results": results,
         "runner": os.environ.get("RUNNER_NAME"),
         "github_run_id": os.environ.get("GITHUB_RUN_ID"),
     }
     raw = json.dumps(summary, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-    with gzip.open(out / "result.json.gz", "wb", compresslevel=6) as f:
+    with gzip.open(out / "result.json.gz", "wb", compresslevel=9) as f:
         f.write(raw)
     (out / "summary.json").write_text(json.dumps({k:v for k,v in summary.items() if k != "results"}, ensure_ascii=False, indent=2) + "\n", "utf-8")
-    print(json.dumps({"status":"PASS","worker":args.worker_index,"shards":len(assigned),"MiB":round(bytes_downloaded/1048576,1),"seconds":summary["elapsed_seconds"]}, ensure_ascii=False))
+    print(json.dumps({
+        "status":"PASS",
+        "worker":args.worker_index,
+        "shards":len(assigned),
+        "MiB":round(bytes_downloaded/1048576,1),
+        "seconds":summary["elapsed_seconds"],
+    }, ensure_ascii=False))
     return 0
 
 if __name__ == "__main__":
