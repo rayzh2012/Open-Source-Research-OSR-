@@ -3,91 +3,54 @@ on:
   push:
     paths:
       - '.github/workflows/archive-fetch.yml'
-      - 'archive-fetch/manifest.tsv'
-      - 'myth-engine/myth_engine/acquisition.py'
   pull_request:
     paths:
       - '.github/workflows/archive-fetch.yml'
-      - 'archive-fetch/manifest.tsv'
-      - 'myth-engine/myth_engine/acquisition.py'
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Fetch and validate archive sources
+      - name: Map UGM records around collection 675
         shell: bash
         run: |
-          set -u
-          test -s archive-fetch/manifest.tsv
+          set -euo pipefail
           mkdir -p downloads
-          : > downloads/RESULTS.tsv
-          printf 'source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n' > downloads/RESULTS.tsv
-          while IFS=$'\t' read -r source_id url filename expected_kind; do
-            [[ -z "${source_id:-}" || "$source_id" == source_id ]] && continue
-            kind=$(printf '%s' "${expected_kind:-PDF}" | tr -d '\r' | tr '[:lower:]' '[:upper:]')
-            [[ -z "$kind" ]] && kind=PDF
-            out="downloads/$filename"
-            echo "Fetching $source_id [$kind] -> $filename"
-            rm -f "$out"
-            if ! curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 1800 "$url" -o "$out"; then
-              printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
-              rm -f "$out"
-              continue
+          base='https://langka.lib.ugm.ac.id'
+          ua='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
+          printf 'viewer_id\thttp\ttitle\tserver_filename\tbytes\tsha256\n' > downloads/RESULTS.tsv
+          for id in $(seq 630 730); do
+            jar="downloads/cookie_${id}.txt"; html="downloads/viewer_${id}.html"
+            code=$(curl -L -sS -c "$jar" -b "$jar" --connect-timeout 10 --max-time 30 -A "$ua" "$base/viewer/index/$id" -o "$html" -w '%{http_code}' || true)
+            title=$(python - "$html" <<'PY'
+import re,sys,html as h,os
+p=sys.argv[1]
+s=open(p,encoding='utf-8',errors='ignore').read() if os.path.exists(p) else ''
+m=re.search(r'<div class="metadata[^>]*>.*?<h3>(.*?)</h3>',s,re.S|re.I)
+t=re.sub('<[^>]+>',' ',m.group(1)) if m else ''
+print(' '.join(h.unescape(t).split()))
+PY
+)
+            sf=''; bytes=''; sha=''
+            if [ "$code" = 200 ] && printf '%s' "$title" | grep -Eqi 'Tobeloreesch|Tob[eè]lo'; then
+              curl -sS -L -c "$jar" -b "$jar" -A "$ua" -e "$base/viewer/index/$id" -X POST "$base/viewer/validate_page" -o /dev/null || true
+              curl -sS -L -c "$jar" -b "$jar" -A "$ua" -e "$base/viewer/index/$id" "$base/koleksi/buku/download_file/" -D "downloads/download_${id}.headers" -o "downloads/file_${id}.bin" || true
+              sf=$(sed -n 's/^[Cc]ontent-[Dd]isposition:.*filename=\([^;\r]*\).*/\1/p' "downloads/download_${id}.headers" | tail -1 | tr -d '\r\"' || true)
+              bytes=$(wc -c < "downloads/file_${id}.bin" 2>/dev/null || echo 0)
+              if head -c 5 "downloads/file_${id}.bin" 2>/dev/null | grep -q '%PDF-'; then
+                sha=$(sha256sum "downloads/file_${id}.bin" | awk '{print $1}')
+                mv "downloads/file_${id}.bin" "downloads/${id}_${sf:-download.pdf}"
+              fi
             fi
-            size=$(stat -c '%s' "$out" 2>/dev/null || wc -c < "$out")
-            status=''
-            case "$kind" in
-              PDF)
-                magic=$(head -c 5 "$out" || true)
-                if [[ "$magic" == "%PDF-" ]]; then
-                  status=OK_PDF
-                else
-                  status=NOT_PDF
-                fi
-                ;;
-              TEXT)
-                mime=$(file -b --mime-type "$out" || true)
-                if [[ -s "$out" && "$mime" == text/* ]]; then
-                  status=OK_TEXT
-                else
-                  status=NOT_TEXT
-                fi
-                ;;
-              *)
-                status=UNSUPPORTED_KIND
-                ;;
-            esac
-            if [[ "$status" != OK_PDF && "$status" != OK_TEXT ]]; then
-              printf '%s\t%s\t%s\t%s\t\t%s\n' "$source_id" "$status" "$filename" "$size" "$url" >> downloads/RESULTS.tsv
-              mv "$out" "downloads/${filename}.${status,,}"
-              continue
-            fi
-            sha=$(sha256sum "$out" | awk '{print $1}')
-            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$source_id" "$status" "$filename" "$size" "$sha" "$url" >> downloads/RESULTS.tsv
-          done < archive-fetch/manifest.tsv
+            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$id" "$code" "$title" "$sf" "$bytes" "$sha" >> downloads/RESULTS.tsv
+          done
           cat downloads/RESULTS.tsv
-      - name: Build Myth Engine acquisition metadata
-        env:
-          PYTHONPATH: myth-engine
-        run: |
-          python -m myth_engine.acquisition \
-            archive-fetch/manifest.tsv \
-            downloads/RESULTS.tsv \
-            --stubs-dir downloads/SOURCE_STUBS \
-            --records-jsonl downloads/SOURCE_RECORDS.jsonl
-          find downloads/SOURCE_STUBS -name source.json -print
-      - name: Upload archive bridge artifact
-        uses: actions/upload-artifact@v4
+          rm -f downloads/cookie_*.txt downloads/viewer_*.html downloads/download_*.headers
+      - uses: actions/upload-artifact@v4
         with:
           name: archive-fetch-batch
           path: downloads/
