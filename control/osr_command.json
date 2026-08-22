@@ -1,5 +1,5 @@
 {
-  "id": 0,
-  "action": "IDLE",
-  "note": "Increment id for every command. Allowed actions are IDLE, STATUS, STAGE1_PREFLIGHT."
+  "id": 1,
+  "action": "KIMI_PROBE",
+  "note": "Probe Kimi Code CLI path/version on the registered OSR Mac watcher."
 }
