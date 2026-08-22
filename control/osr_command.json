@@ -1,5 +1,7 @@
 {
-  "id": 5,
-  "action": "STATUS",
-  "note": "Minimal watcher liveness probe after Kimi smoke-test dispatch."
+  "id": 6,
+  "action": "KIMI_RUN",
+  "prompt": "This is an OSR remote-control smoke test. Do not modify any file. Reply with exactly two lines:\nOSR_KIMI_LOOP_OK\n/Users/hangwu/Open-Source-Research-OSR-",
+  "timeout_seconds": 180,
+  "note": "Fresh minimal end-to-end Kimi watcher round trip after watcher reinstall."
 }
