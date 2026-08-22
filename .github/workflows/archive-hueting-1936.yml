@@ -5,44 +5,60 @@ on:
       - archive-hueting-1936-tobelo-grammar
     paths:
       - '.github/workflows/archive-hueting-1936.yml'
-  pull_request:
-    paths:
-      - '.github/workflows/archive-hueting-1936.yml'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   probe:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Query HathiTrust and archive Kern 1893
+        with:
+          ref: archive-hueting-1936-tobelo-grammar
+      - name: Resolve Hueting 1908 HathiTrust item and probe Kern 1893
         shell: bash
         run: |
           set -u
-          mkdir -p out
+          mkdir -p research_tmp
           ua='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
-          hathi='https://catalog.hathitrust.org/api/volumes/brief/oclc/7420160.json'
-          curl -sS -L --connect-timeout 20 --max-time 120 -A "$ua" -D out/hathi.headers "$hathi" -o out/hathi_7420160.json || true
-          echo '--- HATHI ---'
-          cat out/hathi_7420160.json || true
-          echo
+          for endpoint in \
+            'https://catalog.hathitrust.org/api/volumes/brief/recordnumber/006298806.json' \
+            'https://catalog.hathitrust.org/api/volumes/brief/oclc/7420160.json' \
+            'https://catalog.hathitrust.org/api/volumes/brief/lccn/09024063.json'; do
+            name=$(printf '%s' "$endpoint" | sed 's#https://catalog.hathitrust.org/api/volumes/brief/##;s#[/.]#_#g')
+            curl -sS -L --connect-timeout 20 --max-time 120 -A "$ua" "$endpoint" -o "research_tmp/hathi_${name}.json" || true
+          done
+          python - <<'PY' > research_tmp/HATHI_SUMMARY.txt
+import glob,json
+for p in sorted(glob.glob('research_tmp/hathi_*.json')):
+    print('\nFILE',p)
+    try:
+      d=json.load(open(p))
+    except Exception as e:
+      print('PARSE_ERROR',e); continue
+    print('records=', list(d.get('records',{})))
+    for it in d.get('items',[]):
+      print('ITEM', {k:it.get(k) for k in ('htid','orig','itemURL','rightsCode','usRightsString','fromRecord','enumcron')})
+PY
+          cat research_tmp/HATHI_SUMMARY.txt
           kern='https://brill.com/view/journals/bki/42/1/article-p120_11.pdf'
-          if curl -fL --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 300 -A "$ua" -H 'Accept: application/pdf,*/*;q=0.8' "$kern" -o out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf && test "$(head -c 5 out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf)" = '%PDF-'; then
-            echo 'KERN_OK'
-            file out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf
-            wc -c out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf
-            sha256sum out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf | tee out/KERN_SHA256.txt
-            pdftotext -layout out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf out/kern1893.txt || true
-            grep -in -E 'saali|Tob[eè]lo|Loloda|vervang|naam|klank' out/kern1893.txt | head -100 | tee out/kern_hits.txt || true
+          code=$(curl -L -sS --connect-timeout 20 --max-time 180 -A "$ua" -o research_tmp/kern1893.bin -w '%{http_code}' "$kern" || true)
+          printf 'http=%s\n' "$code" > research_tmp/KERN_STATUS.txt
+          file research_tmp/kern1893.bin >> research_tmp/KERN_STATUS.txt 2>&1 || true
+          wc -c research_tmp/kern1893.bin >> research_tmp/KERN_STATUS.txt 2>&1 || true
+          if head -c 5 research_tmp/kern1893.bin 2>/dev/null | grep -q '%PDF-'; then
+            mv research_tmp/kern1893.bin research_tmp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf
+            sha256sum research_tmp/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf >> research_tmp/KERN_STATUS.txt
           else
-            echo 'KERN_DOWNLOAD_FAILED' | tee out/KERN_STATUS.txt
-            rm -f out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf
+            rm -f research_tmp/kern1893.bin
           fi
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tobelo-taboo-source-breakers
-          path: out/
-          compression-level: 0
-          retention-days: 7
+      - name: Commit probe outputs to branch
+        shell: bash
+        run: |
+          git config user.name 'research-archive-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add research_tmp/
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: persist Hathi/Kern source probe results'
+          git push origin HEAD:archive-hueting-1936-tobelo-grammar
