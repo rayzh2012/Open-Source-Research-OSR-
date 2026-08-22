@@ -1,4 +1,4 @@
-name: Map UGM Neighbor Collections
+name: Tobelo Taboo Source Breakers
 on:
   push:
     branches:
@@ -14,42 +14,35 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Map viewer IDs around 675 v2
+      - name: Query HathiTrust and archive Kern 1893
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
           mkdir -p out
-          base='https://langka.lib.ugm.ac.id'
           ua='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
-          printf 'viewer_id\thttp\ttitle\tserver_filename\tbytes\n' > out/RESULTS.tsv
-          for id in $(seq 650 710); do
-            jar="out/cookie_${id}.txt"; html="out/viewer_${id}.html"
-            code=$(curl -L -sS -c "$jar" -b "$jar" --connect-timeout 10 --max-time 30 -A "$ua" "$base/viewer/index/$id" -o "$html" -w '%{http_code}' || true)
-            title=$(python - "$html" <<'PY'
-import re,sys,html as h,os
-p=sys.argv[1]
-s=open(p,encoding='utf-8',errors='ignore').read() if os.path.exists(p) else ''
-m=re.search(r'<div class="metadata[^>]*>.*?<h3>(.*?)</h3>',s,re.S|re.I)
-t=re.sub('<[^>]+>',' ',m.group(1)) if m else ''
-print(' '.join(h.unescape(t).split()))
-PY
-)
-            sf=''; bytes=''
-            if [ "$code" = 200 ] && printf '%s' "$title" | grep -qi 'Tobeloreesch-Hollandsch'; then
-              curl -sS -L -c "$jar" -b "$jar" -A "$ua" -e "$base/viewer/index/$id" -X POST "$base/viewer/validate_page" -o /dev/null || true
-              curl -sS -L -c "$jar" -b "$jar" -A "$ua" -e "$base/viewer/index/$id" "$base/koleksi/buku/download_file/" -D "out/download_${id}.headers" -o "out/file_${id}.bin" || true
-              sf=$(sed -n 's/^[Cc]ontent-[Dd]isposition:.*filename=\([^;\r]*\).*/\1/p' "out/download_${id}.headers" | tail -1 | tr -d '\r\"' || true)
-              bytes=$(wc -c < "out/file_${id}.bin" 2>/dev/null || echo 0)
-            fi
-            printf '%s\t%s\t%s\t%s\t%s\n' "$id" "$code" "$title" "$sf" "$bytes" >> out/RESULTS.tsv
-          done
-          cat out/RESULTS.tsv
+          hathi='https://catalog.hathitrust.org/api/volumes/brief/oclc/7420160.json'
+          curl -sS -L --connect-timeout 20 --max-time 120 -A "$ua" -D out/hathi.headers "$hathi" -o out/hathi_7420160.json || true
+          echo '--- HATHI ---'
+          cat out/hathi_7420160.json || true
+          echo
+          kern='https://brill.com/view/journals/bki/42/1/article-p120_11.pdf'
+          if curl -fL --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 300 -A "$ua" -H 'Accept: application/pdf,*/*;q=0.8' "$kern" -o out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf && test "$(head -c 5 out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf)" = '%PDF-'; then
+            echo 'KERN_OK'
+            file out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf
+            wc -c out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf
+            sha256sum out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf | tee out/KERN_SHA256.txt
+            pdftotext -layout out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf out/kern1893.txt || true
+            grep -in -E 'saali|Tob[eè]lo|Loloda|vervang|naam|klank' out/kern1893.txt | head -100 | tee out/kern_hits.txt || true
+          else
+            echo 'KERN_DOWNLOAD_FAILED' | tee out/KERN_STATUS.txt
+            rm -f out/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf
+          fi
       - uses: actions/upload-artifact@v4
         with:
-          name: ugm-neighbor-map
-          path: out/RESULTS.tsv
+          name: tobelo-taboo-source-breakers
+          path: out/
+          compression-level: 0
           retention-days: 7
-# trigger: 2026-08-21 p167 neighbor-map run
