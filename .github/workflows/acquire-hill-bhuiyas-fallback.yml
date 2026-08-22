@@ -1,0 +1,91 @@
+name: Acquire Hill Bhuiyas Fallback
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/acquire-hill-bhuiyas-fallback.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  discover-fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Discover and fetch alternate full scan
+        shell: bash
+        run: |
+          set -u
+          mkdir -p out
+          curl -A 'Mozilla/5.0' -L --retry 3 'https://openlibrary.org/books/OL643924M.json' -o out/ol_edition.json || true
+          curl -A 'Mozilla/5.0' -L --retry 3 --get --data-urlencode 'title=The hill Bhuiyas of Orissa' --data-urlencode 'author=Sarat Chandra Roy' --data-urlencode 'limit=50' 'https://openlibrary.org/search.json' -o out/ol_search.json || true
+          curl -A 'Mozilla/5.0' -L --retry 3 --get --data-urlencode 'q=title:(The Hill Bhuiyas of Orissa) AND creator:(Sarat Chandra Roy)' --data-urlencode 'fl[]=identifier,title,creator,date,year' --data-urlencode 'rows=100' --data-urlencode 'output=json' 'https://archive.org/advancedsearch.php' -o out/ia.json || true
+          curl -A 'Mozilla/5.0' -L --retry 3 --get --data-urlencode 'q="Hill Bhuiyas" "Sarat Chandra Roy"' --data-urlencode 'fl[]=identifier,title,creator,date,year' --data-urlencode 'rows=100' --data-urlencode 'output=json' 'https://archive.org/advancedsearch.php' -o out/ia_broad.json || true
+          python - <<'PY' | tee out/discovery.txt
+          import json,pathlib
+          ids=[]
+          p=pathlib.Path('out/ol_edition.json')
+          if p.exists() and p.stat().st_size:
+              try:
+                  d=json.load(open(p)); print('OL_EDITION',d)
+                  ia=d.get('ocaid') or d.get('identifiers',{}).get('internet_archive')
+                  if isinstance(ia,str): ids.append(ia)
+                  elif isinstance(ia,list): ids.extend(ia)
+              except Exception as e: print('OL_EDITION_ERR',e)
+          p=pathlib.Path('out/ol_search.json')
+          if p.exists() and p.stat().st_size:
+              try:
+                  d=json.load(open(p))
+                  for x in d.get('docs',[]):
+                      print('OL_SEARCH',x.get('title'),x.get('first_publish_year'),x.get('ia'))
+                      ids.extend(x.get('ia') or [])
+              except Exception as e: print('OL_SEARCH_ERR',e)
+          for fn in ['ia.json','ia_broad.json']:
+              p=pathlib.Path('out')/fn
+              if not p.exists() or not p.stat().st_size: continue
+              try:d=json.load(open(p))
+              except Exception as e: print(fn,'ERR',e); continue
+              for x in d.get('response',{}).get('docs',[]):
+                  print('IA_SEARCH',x)
+                  if x.get('identifier'): ids.append(x['identifier'])
+          ids=list(dict.fromkeys(i for i in ids if i))
+          print('IDS',ids)
+          pathlib.Path('out/ids.txt').write_text('\n'.join(ids))
+          PY
+          found=0
+          while IFS= read -r id; do
+            [[ -z "$id" ]] && continue
+            curl -fL --retry 3 --max-time 90 "https://archive.org/metadata/$id" -o "out/meta_${id//\//_}.json" || continue
+            pdf=$(python - "$id" <<'PY'
+          import json,sys
+          id=sys.argv[1]; fn='out/meta_'+id.replace('/','_')+'.json'; d=json.load(open(fn)); c=[]
+          m=d.get('metadata',{}); print('META',id,m.get('title'),m.get('creator'),m.get('date'),file=sys.stderr)
+          for f in d.get('files',[]):
+              n=f.get('name','')
+              if not n.lower().endswith('.pdf'): continue
+              try:s=int(f.get('size') or 0)
+              except:s=0
+              sc=(60 if '_text.pdf' in n.lower() else 0)+(50 if f.get('source')=='original' else 0)+(10 if s>1_000_000 else 0)
+              c.append((sc,s,n))
+          c.sort(reverse=True)
+          print(c[0][2] if c else '')
+          PY
+          )
+            [[ -z "$pdf" ]] && continue
+            url="https://archive.org/download/$id/$pdf"
+            echo "TRY $url"
+            curl -fL --retry 4 --retry-all-errors --connect-timeout 30 --max-time 1800 "$url" -o out/1935_Roy_The_Hill_Bhuiyas_of_Orissa.pdf || continue
+            if [[ "$(head -c 5 out/1935_Roy_The_Hill_Bhuiyas_of_Orissa.pdf)" == '%PDF-' ]]; then
+              found=1; echo "$url" > out/source_selected.txt; break
+            fi
+          done < out/ids.txt
+          if [[ $found -eq 1 ]]; then
+            stat -c '%s' out/1935_Roy_The_Hill_Bhuiyas_of_Orissa.pdf | tee out/size.txt
+            sha256sum out/1935_Roy_The_Hill_Bhuiyas_of_Orissa.pdf | tee out/sha256.txt
+          else
+            echo 'NOT_FETCHED' > out/status.txt
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roy-hill-bhuiyas-1935-fallback
+          path: out/
+          compression-level: 0
+          retention-days: 7
