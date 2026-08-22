@@ -7,7 +7,8 @@ APP="$HOME/Library/Application Support/OSR Control"
 PLIST="$HOME/Library/LaunchAgents/com.rayzh.osr.remote-control.plist"
 mkdir -p "$APP" "$HOME/Library/LaunchAgents"
 
-export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+RUNTIME_PATH="$HOME/.local/bin:$HOME/.kimi/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export PATH="$RUNTIME_PATH:$PATH"
 
 if ! command -v brew >/dev/null 2>&1; then
   echo "Homebrew is required first: https://brew.sh" >&2
@@ -34,8 +35,12 @@ cat > "$PLIST" <<PLIST
   <key>Label</key><string>com.rayzh.osr.remote-control</string>
   <key>ProgramArguments</key>
   <array><string>/usr/bin/env</string><string>python3</string><string>$APP/osr_command_watcher.py</string></array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key><string>$RUNTIME_PATH</string>
+  </dict>
   <key>RunAtLoad</key><true/>
-  <key>StartInterval</key><integer>30</integer>
+  <key>StartInterval</key><integer>5</integer>
   <key>ProcessType</key><string>Background</string>
   <key>StandardOutPath</key><string>$APP/launchd.out.log</string>
   <key>StandardErrorPath</key><string>$APP/launchd.err.log</string>
@@ -50,9 +55,9 @@ launchctl kickstart -k "gui/$UID/com.rayzh.osr.remote-control"
 
 echo
 echo "✅ OSR Remote Control installed."
-echo "Poll interval: 30 seconds"
+echo "Poll interval: 5 seconds"
+echo "Runtime PATH: $RUNTIME_PATH"
 echo "Status: gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_STATUS.json"
 echo "Local log: $APP/osr-control.log"
 echo
-echo "You can close this window. Future allowlisted runs can be triggered by changing control/osr_command.json in GitHub."
-read -k 1 "?Press any key to close..."
+echo "Watcher is self-updating from GitHub on future runs."
