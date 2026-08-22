@@ -1,5 +1,7 @@
 {
-  "id": 12,
-  "action": "KIMI_PROBE",
-  "note": "Probe Kimi through the persistent zsh-login watcher after KeepAlive bootstrap."
+  "id": 13,
+  "action": "KIMI_RUN",
+  "prompt": "This is the final OSR remote-control smoke test. Do not modify any file. Reply with exactly two lines:\nOSR_KIMI_LOOP_OK\n/Users/hangwu/Open-Source-Research-OSR-",
+  "timeout_seconds": 180,
+  "note": "Final end-to-end verification after watcher 2.0 and Kimi probe success."
 }
