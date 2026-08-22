@@ -14,6 +14,7 @@ from pathlib import Path
 BRANCH = "stage2-direct-miner-v3-1"
 RAW = f"https://raw.githubusercontent.com/rayzh2012/Open-Source-Research-OSR-/{BRANCH}"
 COMMAND_URL = RAW + "/control/osr_command.json"
+WATCHER_URL = RAW + "/control/osr_command_watcher.py"
 APP = Path.home() / "Library" / "Application Support" / "OSR Control"
 APP.mkdir(parents=True, exist_ok=True)
 STATE = APP / "state.json"
@@ -26,11 +27,13 @@ ALLOWED = {
     "GIT_SYNC",
     "SPEED_TEST",
     "KIMI_PROBE",
+    "KIMI_RUN",
     "STAGE1_PREFLIGHT",
 }
 REMOTE_STATUS = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_STATUS.json"
 REMOTE_RESULT = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_LAST_RESULT.txt"
 REPO = Path.home() / "Open-Source-Research-OSR-"
+MAX_PROMPT_CHARS = 16000
 
 
 def log(msg: str) -> None:
@@ -53,21 +56,38 @@ def save_json(path: Path, obj) -> None:
     os.replace(tmp, path)
 
 
+def fetch_bytes(url: str, timeout: int = 30) -> bytes:
+    req = urllib.request.Request(url, headers={"User-Agent": "osr-command-watcher/1.2"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.read()
+
+
 def fetch_json(url: str):
-    req = urllib.request.Request(url, headers={"User-Agent": "osr-command-watcher/1.1"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read().decode("utf-8"))
+    return json.loads(fetch_bytes(url).decode("utf-8"))
 
 
 def download(url: str, path: Path) -> None:
-    req = urllib.request.Request(url, headers={"User-Agent": "osr-command-watcher/1.1"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        path.write_bytes(r.read())
+    path.write_bytes(fetch_bytes(url, timeout=60))
 
 
 def run(cmd: list[str], **kwargs):
     log("RUN " + " ".join(cmd))
     return subprocess.run(cmd, text=True, **kwargs)
+
+
+def self_update() -> None:
+    try:
+        remote = fetch_bytes(WATCHER_URL, timeout=20)
+        here = Path(__file__)
+        local = here.read_bytes()
+        if remote != local:
+            tmp = here.with_suffix(".new")
+            tmp.write_bytes(remote)
+            os.chmod(tmp, 0o755)
+            os.replace(tmp, here)
+            log("SELF_UPDATE installed; next tick will use new watcher")
+    except Exception as exc:
+        log(f"SELF_UPDATE skipped: {exc!r}")
 
 
 def discover_drive_root() -> Path:
@@ -93,10 +113,11 @@ def discover_drive_root() -> Path:
 
 def publish_status(obj: dict) -> None:
     save_json(STATUS, obj)
-    if shutil.which("rclone"):
-        run(["rclone", "copyto", str(STATUS), REMOTE_STATUS], capture_output=True)
+    rclone = shutil.which("rclone")
+    if rclone:
+        run([rclone, "copyto", str(STATUS), REMOTE_STATUS], capture_output=True)
         if RESULT.exists():
-            run(["rclone", "copyto", str(RESULT), REMOTE_RESULT], capture_output=True)
+            run([rclone, "copyto", str(RESULT), REMOTE_RESULT], capture_output=True)
 
 
 def save_result(text: str) -> None:
@@ -106,7 +127,8 @@ def save_result(text: str) -> None:
 def git_sync() -> None:
     if not (REPO / ".git").is_dir():
         raise RuntimeError(f"repo missing: {REPO}")
-    p = run(["git", "-C", str(REPO), "pull", "--ff-only"], capture_output=True)
+    git = shutil.which("git") or "/usr/bin/git"
+    p = run([git, "-C", str(REPO), "pull", "--ff-only"], capture_output=True)
     save_result((p.stdout or "") + (p.stderr or ""))
     if p.returncode != 0:
         raise RuntimeError(f"git pull failed: {p.returncode}")
@@ -121,23 +143,52 @@ def speed_test() -> None:
         raise RuntimeError(f"speed test failed: {p.returncode}")
 
 
+def find_kimi() -> str | None:
+    path = shutil.which("kimi")
+    if path:
+        return path
+    for p in (
+        Path.home() / ".local/bin/kimi",
+        Path.home() / ".kimi/bin/kimi",
+        Path("/opt/homebrew/bin/kimi"),
+        Path("/usr/local/bin/kimi"),
+    ):
+        if p.exists() and os.access(p, os.X_OK):
+            return str(p)
+    return None
+
+
 def kimi_probe() -> None:
-    names = ["kimi", "kimi-code", "kimitool", "k2"]
-    lines = []
-    found = None
-    for name in names:
-        path = shutil.which(name)
-        lines.append(f"{name}: {path or 'NOT_FOUND'}")
-        if path and found is None:
-            found = path
+    found = find_kimi()
+    lines = [f"kimi: {found or 'NOT_FOUND'}"]
     if found:
-        p = run([found, "--version"], capture_output=True)
+        p = run([found, "--version"], capture_output=True, cwd=str(REPO), timeout=60)
         lines.append("\n--version stdout:\n" + (p.stdout or ""))
         lines.append("\n--version stderr:\n" + (p.stderr or ""))
         lines.append(f"returncode={p.returncode}")
-    else:
-        lines.append("\nNo known Kimi CLI executable found on PATH.")
     save_result("\n".join(lines) + "\n")
+    if not found:
+        raise RuntimeError("Kimi CLI not found")
+
+
+def kimi_run(command: dict) -> None:
+    found = find_kimi()
+    if not found:
+        raise RuntimeError("Kimi CLI not found")
+    prompt = str(command.get("prompt", "")).strip()
+    if not prompt:
+        raise RuntimeError("KIMI_RUN requires a non-empty prompt")
+    if len(prompt) > MAX_PROMPT_CHARS:
+        raise RuntimeError(f"KIMI_RUN prompt too long: {len(prompt)} > {MAX_PROMPT_CHARS}")
+    timeout = int(command.get("timeout_seconds", 1800))
+    timeout = max(30, min(timeout, 7200))
+    p = run([found, "-p", prompt], capture_output=True, cwd=str(REPO), timeout=timeout)
+    text = (
+        f"KIMI_RUN\nreturncode={p.returncode}\ncwd={REPO}\n\nSTDOUT\n{p.stdout or ''}\n\nSTDERR\n{p.stderr or ''}"
+    )
+    save_result(text)
+    if p.returncode != 0:
+        raise RuntimeError(f"Kimi exited {p.returncode}")
 
 
 def stage1_preflight(command_id: int) -> None:
@@ -165,6 +216,7 @@ def stage1_preflight(command_id: int) -> None:
 
 
 def main() -> int:
+    self_update()
     state = load_json(STATE, {"last_id": 0})
     cmd = fetch_json(COMMAND_URL)
     command_id = int(cmd.get("id", 0))
@@ -191,6 +243,8 @@ def main() -> int:
             speed_test()
         elif action == "KIMI_PROBE":
             kimi_probe()
+        elif action == "KIMI_RUN":
+            kimi_run(cmd)
         elif action == "STAGE1_PREFLIGHT":
             stage1_preflight(command_id)
         elif action in {"STATUS", "IDLE"}:
