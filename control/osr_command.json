@@ -1,5 +1,5 @@
 {
-  "id": 1,
-  "action": "KIMI_PROBE",
-  "note": "Probe Kimi Code CLI path/version on the registered OSR Mac watcher."
+  "id": 2,
+  "action": "SPEED_TEST",
+  "note": "Temporary transport for Kimi non-interactive round-trip smoke test."
 }
