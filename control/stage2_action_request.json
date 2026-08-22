@@ -1,0 +1,5 @@
+{
+  "id": 1,
+  "action": "SMOKE_ONE_SHARD",
+  "reason": "Validate GitHub-hosted runner -> Hugging Face shard -> Parquet read -> result commit control loop before any Stage-2 scale-out."
+}

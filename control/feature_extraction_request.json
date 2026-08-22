@@ -1,0 +1,8 @@
+{
+  "id": 2,
+  "action": "FEATURE_EXTRACT",
+  "run_id": "feature-store-v1-full-001",
+  "worker_count": 20,
+  "limit_per_worker": 0,
+  "purpose": "Primary 508GB Feature Store v1 backfill across all 1788 Hugging Face Parquet shards. Extract F0 structural features, F1 sparse symbolic/domain row features, temporal hints, and feature co-occurrence. Persist no raw text; retain exact source locators and hashes. Standard GitHub-hosted runners only."
+}

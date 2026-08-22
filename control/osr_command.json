@@ -1,0 +1,5 @@
+{
+  "id": 27,
+  "action": "IDLE",
+  "note": "Safe GitHub fallback idle state behind primary raw Drive JSON command channel."
+}
