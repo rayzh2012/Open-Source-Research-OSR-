@@ -1,0 +1,116 @@
+name: OSR Stage2 Direct Miner
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/stage2_direct_miner_request.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: osr-stage2-direct-miner
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      workers: ${{ steps.p.outputs.workers }}
+      worker_count: ${{ steps.p.outputs.worker_count }}
+      limit_per_worker: ${{ steps.p.outputs.limit_per_worker }}
+      run_id: ${{ steps.p.outputs.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: p
+        shell: python
+        run: |
+          import json, os
+          r=json.load(open('control/stage2_direct_miner_request.json',encoding='utf-8'))
+          assert r.get('action') == 'STAGE2_DIRECT_MINE', r
+          n=int(r.get('worker_count',1)); assert 1 <= n <= 20
+          lim=int(r.get('limit_per_worker',0)); assert lim >= 0
+          rid=str(r.get('run_id') or f"run-{os.environ['GITHUB_RUN_ID']}")
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write('workers='+json.dumps(list(range(n)))+'\n')
+              f.write(f'worker_count={n}\nlimit_per_worker={lim}\nrun_id={rid}\n')
+
+  mine:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        worker: ${{ fromJson(needs.plan.outputs.workers) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pyarrow==21.0.0 requests==2.32.4 huggingface_hub==0.34.4
+      - name: Mine assigned shards
+        run: |
+          python tools/osr_stage2_actions_direct_miner.py \
+            --worker-index '${{ matrix.worker }}' \
+            --worker-count '${{ needs.plan.outputs.worker_count }}' \
+            --limit-per-worker '${{ needs.plan.outputs.limit_per_worker }}' \
+            --out-dir 'out/worker-${{ matrix.worker }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: osr-stage2-${{ needs.plan.outputs.run_id }}-worker-${{ matrix.worker }}
+          path: out/worker-${{ matrix.worker }}
+          retention-days: 7
+
+  reduce:
+    needs: [plan, mine]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: osr-stage2-${{ needs.plan.outputs.run_id }}-worker-*
+          path: _stage2_results
+      - name: Reduce summaries and write status
+        shell: python
+        env:
+          RUN_ID: ${{ needs.plan.outputs.run_id }}
+        run: |
+          import json, os, pathlib, time
+          root=pathlib.Path('_stage2_results')
+          sums=[]
+          for p in root.rglob('summary.json'):
+              try: sums.append(json.loads(p.read_text('utf-8')))
+              except Exception: pass
+          total_shards=sum(x.get('assigned_shards',0) for x in sums)
+          total_bytes=sum(x.get('bytes_downloaded',0) for x in sums)
+          elapsed=max([x.get('elapsed_seconds',0) for x in sums] or [0])
+          status={
+            'status':'PASS' if sums else 'FAILED',
+            'run_id':os.environ['RUN_ID'],
+            'workers_completed':len(sums),
+            'shards_scanned':total_shards,
+            'bytes_downloaded':total_bytes,
+            'max_worker_elapsed_seconds':elapsed,
+            'aggregate_download_GiB':round(total_bytes/1024**3,3),
+            'github_run_id':os.environ['GITHUB_RUN_ID'],
+            'github_sha':os.environ['GITHUB_SHA'],
+            'finished_unix':time.time(),
+          }
+          pathlib.Path('control/stage2_direct_miner_status.json').write_text(json.dumps(status,indent=2)+'\n')
+          print(json.dumps(status,indent=2))
+      - name: Commit compact status
+        run: |
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/stage2_direct_miner_status.json
+          git diff --cached --quiet && exit 0
+          git commit -m "stage2: direct miner status ${{ needs.plan.outputs.run_id }}"
+          git push origin HEAD:stage2-direct-miner-v3-1
