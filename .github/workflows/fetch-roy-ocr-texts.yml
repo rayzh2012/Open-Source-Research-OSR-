@@ -1,0 +1,62 @@
+name: Fetch Roy OCR Texts
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/fetch-roy-ocr-texts.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fetch-text:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - source_id: kharias_vol1_1937
+            ia: in.ernet.dli.2015.46905
+            out: 1937_Roy_The_Kharias_Vol1_OCR.txt
+          - source_id: kharias_vol2_1937
+            ia: in.ernet.dli.2015.21281
+            out: 1937_Roy_The_Kharias_Vol2_OCR.txt
+          - source_id: oraons_1915
+            ia: in.ernet.dli.2015.277270
+            out: 1915_Roy_The_Oraons_of_Chota_Nagpur_OCR.txt
+    steps:
+      - name: Fetch DjVu OCR text
+        shell: bash
+        env:
+          IA: ${{ matrix.ia }}
+          OUT: ${{ matrix.out }}
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 30 --max-time 120 "https://archive.org/metadata/$IA" -o out/meta.json
+          TXT=$(python - <<'PY'
+          import json
+          d=json.load(open('out/meta.json'))
+          c=[]
+          for f in d.get('files',[]):
+              n=f.get('name','')
+              fmt=(f.get('format') or '').lower()
+              if n.lower().endswith('_djvu.txt') or fmt=='djvutxt':
+                  try:s=int(f.get('size') or 0)
+                  except:s=0
+                  c.append((s,n))
+          c.sort(reverse=True)
+          if not c: raise SystemExit('NO_DJVUTXT')
+          print(c[0][1])
+          PY
+          )
+          URL="https://archive.org/download/$IA/$TXT"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 30 --max-time 600 "$URL" -o "out/$OUT"
+          test -s "out/$OUT"
+          wc -c "out/$OUT" | tee out/size.txt
+          sha256sum "out/$OUT" | tee out/sha256.txt
+          echo "$URL" > out/source.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roy-ocr-${{ matrix.source_id }}
+          path: out/
+          compression-level: 6
+          retention-days: 7
