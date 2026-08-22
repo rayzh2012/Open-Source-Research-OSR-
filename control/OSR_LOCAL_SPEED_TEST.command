@@ -1,63 +1,98 @@
 #!/bin/zsh
 set -euo pipefail
-python3 - <<'PY'
-import glob, time
-from pathlib import Path
 
-# Locate only the Google Drive root itself. Do NOT recursively scan My Drive:
-# Drive for Desktop's FUSE layer can timeout on whole-tree traversal.
-roots=[]
-for pat in (
-    str(Path.home()/"Library/CloudStorage/GoogleDrive-*/My Drive"),
-    str(Path.home()/"Library/CloudStorage/GoogleDrive-*/MyDrive"),
-    str(Path.home()/"Google Drive/My Drive"),
-    str(Path.home()/"Google Drive"),
-):
-    roots += [Path(x) for x in glob.glob(pat)]
-root=next((p for p in roots if p.is_dir()),None)
-if not root:
-    raise SystemExit("No Google Drive for Desktop filesystem found under ~/Library/CloudStorage.")
-print("Drive root:",root)
+if ! command -v rclone >/dev/null 2>&1; then
+  echo "rclone not found" >&2
+  exit 1
+fi
+if ! rclone listremotes | grep -qx 'gdrive:'; then
+  echo "gdrive: remote not configured" >&2
+  exit 1
+fi
 
-base = root / "龍族古籍源庫｜Dragon Source Corpus"
-# Exact candidate locations from the current acquisition config plus legacy folder names.
-candidates = [
-    base / "BULK_SECONDARY_CORPUS/Literature-zh/literature_zh-00233-of-00233.parquet",
-    base / "BULK_SECONDARY_CORPUS/Literature-zh/data/literature_zh-00233-of-00233.parquet",
-    base / "Literature-zh_229GB/literature_zh-00233-of-00233.parquet",
-    base / "BULK_SECONDARY_CORPUS/ChineseWebText2.0-HighQuality/data/CASIA-LM_ChineseWebText2.0_partial-001554.parquet",
-    base / "BULK_SECONDARY_CORPUS/ChineseWebText2.0-HighQuality/CASIA-LM_ChineseWebText2.0_partial-001554.parquet",
-    base / "ChineseWebText2.0-HighQuality_279GB/data/CASIA-LM_ChineseWebText2.0_partial-001554.parquet",
-    base / "ChineseWebText2.0-HighQuality_279GB/CASIA-LM_ChineseWebText2.0_partial-001554.parquet",
-]
-file=next((p for p in candidates if p.is_file()),None)
-if not file:
-    print("No tail shard at known local paths. Checked:")
-    for p in candidates: print(" -",p)
-    raise SystemExit("Known corpus path not locally visible; do NOT recursively scan My Drive.")
+BASE='gdrive:龍族古籍源庫｜Dragon Source Corpus'
+CANDIDATES=(
+  "$BASE/BULK_SECONDARY_CORPUS/Literature-zh/literature_zh-00233-of-00233.parquet"
+  "$BASE/BULK_SECONDARY_CORPUS/Literature-zh/data/literature_zh-00233-of-00233.parquet"
+  "$BASE/Literature-zh_229GB/literature_zh-00233-of-00233.parquet"
+  "$BASE/BULK_SECONDARY_CORPUS/ChineseWebText2.0-HighQuality/data/CASIA-LM_ChineseWebText2.0_partial-001554.parquet"
+  "$BASE/BULK_SECONDARY_CORPUS/ChineseWebText2.0-HighQuality/CASIA-LM_ChineseWebText2.0_partial-001554.parquet"
+  "$BASE/ChineseWebText2.0-HighQuality_279GB/data/CASIA-LM_ChineseWebText2.0_partial-001554.parquet"
+  "$BASE/ChineseWebText2.0-HighQuality_279GB/CASIA-LM_ChineseWebText2.0_partial-001554.parquet"
+)
 
-print("Test file:",file)
-size=file.stat().st_size
-sample=min(size,64*1024*1024)
-start=time.perf_counter(); n=0
-with file.open('rb') as f:
-    while n<sample:
-        b=f.read(min(8*1024*1024,sample-n))
-        if not b: break
-        n+=len(b)
-elapsed=time.perf_counter()-start
-print(f"Sequential first {n/1024/1024:.1f} MiB: {n/1024/1024/elapsed:.1f} MiB/s ({elapsed:.2f}s)")
-start=time.perf_counter()
-with file.open('rb') as f:
-    f.seek(max(0,size-1024*1024)); f.read(1024*1024)
-elapsed=time.perf_counter()-start
-print(f"Random tail 1 MiB: {elapsed:.3f}s")
+REMOTE=''
+SIZE=''
+for p in "${CANDIDATES[@]}"; do
+  j=$(rclone size --json "$p" 2>/dev/null || true)
+  if [[ -n "$j" ]]; then
+    count=$(python3 -c 'import json,sys; j=json.load(sys.stdin); print(j.get("count",0))' <<< "$j" 2>/dev/null || echo 0)
+    bytes=$(python3 -c 'import json,sys; j=json.load(sys.stdin); print(j.get("bytes",0))' <<< "$j" 2>/dev/null || echo 0)
+    if [[ "$count" == "1" && "$bytes" -gt 0 ]]; then
+      REMOTE="$p"
+      SIZE="$bytes"
+      break
+    fi
+  fi
+done
+
+if [[ -z "$REMOTE" ]]; then
+  echo "Could not find a canonical tail shard at known rclone paths."
+  echo "Run this and paste the output:"
+  echo "rclone lsf '$BASE/BULK_SECONDARY_CORPUS' --dirs-only"
+  exit 2
+fi
+
+echo "Remote test file: $REMOTE"
+echo "Remote size: $SIZE bytes"
+
+echo
+echo "== rclone head 64 MiB benchmark =="
+START=$(python3 -c 'import time; print(time.time())')
+rclone cat "$REMOTE" --head 64M >/dev/null
+END=$(python3 -c 'import time; print(time.time())')
+python3 - "$START" "$END" <<'PY'
+import sys
+s,e=map(float,sys.argv[1:])
+t=max(e-s,1e-9)
+print(f"64 MiB head: {64/t:.1f} MiB/s ({t:.2f}s)")
+PY
+
+echo
+echo "== rclone tail 1 MiB benchmark =="
+START=$(python3 -c 'import time; print(time.time())')
+rclone cat "$REMOTE" --tail 1M >/dev/null
+END=$(python3 -c 'import time; print(time.time())')
+python3 - "$START" "$END" <<'PY'
+import sys
+s,e=map(float,sys.argv[1:])
+t=max(e-s,1e-9)
+print(f"1 MiB tail latency: {t:.3f}s")
+PY
+
+echo
+echo "== one-shard real local hydration test =="
+TMPDIR=$(mktemp -d /tmp/osr-speed.XXXXXX)
+trap 'rm -rf "$TMPDIR"' EXIT
+LOCAL="$TMPDIR/test.parquet"
+START=$(python3 -c 'import time; print(time.time())')
+rclone copyto "$REMOTE" "$LOCAL" --transfers 1 --checkers 2 --stats 5s --stats-one-line
+END=$(python3 -c 'import time; print(time.time())')
+python3 - "$START" "$END" "$LOCAL" <<'PY'
+import os,sys,time
+s,e=map(float,sys.argv[1:3]); p=sys.argv[3]
+mb=os.path.getsize(p)/1024/1024
+t=max(e-s,1e-9)
+print(f"Full shard download: {mb:.1f} MiB at {mb/t:.1f} MiB/s ({t:.2f}s)")
 try:
     import pyarrow.parquet as pq
 except Exception:
-    print("pyarrow missing; install with: python3 -m pip install --user pyarrow")
+    print("pyarrow missing; footer test skipped")
 else:
-    start=time.perf_counter(); pf=pq.ParquetFile(file); md=pf.metadata; elapsed=time.perf_counter()-start
-    print(f"Parquet footer open: {elapsed:.3f}s | rows={md.num_rows} row_groups={md.num_row_groups}")
-print("\nRule of thumb: >=30 MiB/s sequential and sub-2s footer/tail is workable; >=80 MiB/s is very comfortable for identity/preflight.")
+    t0=time.perf_counter(); pf=pq.ParquetFile(p); md=pf.metadata; dt=time.perf_counter()-t0
+    print(f"Local Parquet footer: {dt:.3f}s | rows={md.num_rows} row_groups={md.num_row_groups}")
 PY
+
+echo
+echo "Interpretation: this bypasses Google Drive for Desktop completely."
+echo "If rclone download is healthy but Drive Desktop stat timed out, OSR should use rclone-to-local-temp streaming/cache, not ~/Library/CloudStorage as the data plane."
