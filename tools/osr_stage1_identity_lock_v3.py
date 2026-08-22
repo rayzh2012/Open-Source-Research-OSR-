@@ -4,8 +4,8 @@
 Purpose:
 - discover exactly 233 Literature-zh shards and 1555 ChineseWebText2.0 shards
 - validate ordinal continuity
-- bind each shard to size, mtime, edge fingerprints, row count, row-group count,
-  and Arrow schema fingerprint
+- bind each shard to absolute canonical path, size, mtime, edge fingerprints,
+  row count, row-group count, and Arrow schema fingerprint
 - emit a canonical JSONL manifest plus a root SHA-256 digest
 - emit STAGE1_V3_VERIFIED.json only after every invariant passes
 
@@ -24,12 +24,12 @@ import re
 import sys
 import time
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, List, Tuple
 
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-VERSION = "osr-stage1-identity-lock-v3.0"
+VERSION = "osr-stage1-identity-lock-v3.1"
 EDGE_BYTES = 1024 * 1024
 EXPECTED = {
     "Literature-zh": 233,
@@ -61,7 +61,6 @@ def edge_sha256(path: Path, edge_bytes: int = EDGE_BYTES) -> Tuple[str, str]:
 
 
 def schema_sha256(schema: pa.Schema) -> str:
-    # Arrow IPC schema serialization is deterministic for a fixed schema definition.
     return sha256_bytes(schema.serialize().to_pybytes())
 
 
@@ -70,8 +69,6 @@ def find_unique_dir(root: Path, name: str) -> Path:
     if direct.is_dir():
         return direct
     matches: List[Path] = []
-    # The corpus folders are expected under MyDrive. Avoid descending into shard folders
-    # once a match is found; directory walking does not read file contents.
     for base, dirs, _files in os.walk(root):
         if name in dirs:
             matches.append(Path(base) / name)
@@ -113,6 +110,7 @@ def inspect_shard(source: str, ordinal: int, path: Path, source_root: Path) -> d
         "source": source,
         "ordinal": ordinal,
         "filename": path.name,
+        "canonical_path": str(path),
         "relative_path": str(path.relative_to(source_root)),
         "size_bytes": int(st.st_size),
         "mtime_ns": int(st.st_mtime_ns),
@@ -125,8 +123,9 @@ def inspect_shard(source: str, ordinal: int, path: Path, source_root: Path) -> d
     sig_fields = {
         k: rec[k]
         for k in (
-            "source", "ordinal", "filename", "relative_path", "size_bytes", "mtime_ns",
-            "first_edge_sha256", "last_edge_sha256", "rows", "row_groups", "schema_sha256"
+            "source", "ordinal", "filename", "canonical_path", "relative_path",
+            "size_bytes", "mtime_ns", "first_edge_sha256", "last_edge_sha256",
+            "rows", "row_groups", "schema_sha256"
         )
     }
     rec["source_signature_sha256"] = sha256_bytes(canonical_json(sig_fields))
@@ -137,7 +136,6 @@ def write_atomic(path: Path, data: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_bytes(data)
-    # Read-back before replace catches Drive write truncation/corruption.
     if sha256_bytes(tmp.read_bytes()) != sha256_bytes(data):
         raise IOError(f"Read-back verification failed for {tmp}")
     os.replace(tmp, path)
@@ -206,14 +204,12 @@ def main() -> int:
     if len(schema_counts) != 5:
         raise RuntimeError(f"Observed schema fingerprint count {len(schema_counts)} != expected 5: {schema_counts}")
 
-    # Deterministic canonical order and manifest bytes.
     records.sort(key=lambda r: (r["source"], r["ordinal"]))
     manifest_bytes = b"".join(canonical_json(r) for r in records)
     manifest_sha = sha256_bytes(manifest_bytes)
     manifest_path = out_dir / "manifest_canonical_v3.jsonl"
     write_atomic(manifest_path, manifest_bytes)
 
-    # Read back the final manifest itself, not only the temp file.
     final_sha = sha256_bytes(manifest_path.read_bytes())
     if final_sha != manifest_sha:
         raise IOError(f"Final manifest SHA mismatch: {final_sha} != {manifest_sha}")
