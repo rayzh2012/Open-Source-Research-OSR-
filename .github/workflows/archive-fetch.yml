@@ -3,93 +3,90 @@ on:
   push:
     paths:
       - '.github/workflows/archive-fetch.yml'
-      - 'archive-fetch/manifest.tsv'
-      - 'myth-engine/myth_engine/acquisition.py'
   pull_request:
     paths:
       - '.github/workflows/archive-fetch.yml'
-      - 'archive-fetch/manifest.tsv'
-      - 'myth-engine/myth_engine/acquisition.py'
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Fetch and validate archive sources
+      - name: Resolve Hueting 1908 page access
         shell: bash
         run: |
           set -u
-          test -s archive-fetch/manifest.tsv
           mkdir -p downloads
-          : > downloads/RESULTS.tsv
-          printf 'source_id\tstatus\tfilename\tsize_bytes\tsha256\tsource_url\n' > downloads/RESULTS.tsv
-          while IFS=$'\t' read -r source_id url filename expected_kind; do
-            [[ -z "${source_id:-}" || "$source_id" == source_id ]] && continue
-            kind=$(printf '%s' "${expected_kind:-PDF}" | tr -d '\r' | tr '[:lower:]' '[:upper:]')
-            [[ -z "$kind" ]] && kind=PDF
-            out="downloads/$filename"
-            echo "Fetching $source_id [$kind] -> $filename"
-            rm -f "$out"
-            if ! curl -fL --retry 4 --retry-delay 3 --connect-timeout 30 --max-time 1800 "$url" -o "$out"; then
-              printf '%s\tDOWNLOAD_FAILED\t%s\t\t\t%s\n' "$source_id" "$filename" "$url" >> downloads/RESULTS.tsv
-              rm -f "$out"
-              continue
-            fi
-            size=$(stat -c '%s' "$out" 2>/dev/null || wc -c < "$out")
-            status=''
-            case "$kind" in
-              PDF)
-                magic=$(head -c 5 "$out" || true)
-                if [[ "$magic" == "%PDF-" ]]; then
-                  status=OK_PDF
-                else
-                  status=NOT_PDF
-                fi
-                ;;
-              TEXT)
-                mime=$(file -b --mime-type "$out" || true)
-                if [[ -s "$out" && "$mime" == text/* ]]; then
-                  status=OK_TEXT
-                else
-                  status=NOT_TEXT
-                fi
-                ;;
-              *)
-                status=UNSUPPORTED_KIND
-                ;;
-            esac
-            if [[ "$status" != OK_PDF && "$status" != OK_TEXT ]]; then
-              printf '%s\t%s\t%s\t%s\t\t%s\n' "$source_id" "$status" "$filename" "$size" "$url" >> downloads/RESULTS.tsv
-              mv "$out" "downloads/${filename}.${status,,}"
-              continue
-            fi
-            sha=$(sha256sum "$out" | awk '{print $1}')
-            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$source_id" "$status" "$filename" "$size" "$sha" "$url" >> downloads/RESULTS.tsv
-          done < archive-fetch/manifest.tsv
-          cat downloads/RESULTS.tsv
-      - name: Build Myth Engine acquisition metadata
-        env:
-          PYTHONPATH: myth-engine
-        run: |
-          python -m myth_engine.acquisition \
-            archive-fetch/manifest.tsv \
-            downloads/RESULTS.tsv \
-            --stubs-dir downloads/SOURCE_STUBS \
-            --records-jsonl downloads/SOURCE_RECORDS.jsonl
-          find downloads/SOURCE_STUBS -name source.json -print
-      - name: Upload archive bridge artifact
-        uses: actions/upload-artifact@v4
+          ua='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
+          : > downloads/SUMMARY.txt
+          echo '=== HATHITRUST ===' >> downloads/SUMMARY.txt
+          for spec in 'recordnumber/006298806' 'oclc/7420160' 'lccn/09024063'; do
+            fn=$(printf '%s' "$spec" | tr '/' '_')
+            curl -sS -L --connect-timeout 20 --max-time 120 -A "$ua" \
+              "https://catalog.hathitrust.org/api/volumes/brief/${spec}.json" \
+              -D "downloads/hathi_${fn}.headers" -o "downloads/hathi_${fn}.json" || true
+          done
+          python - <<'PY' >> downloads/SUMMARY.txt
+import glob,json,os
+for p in sorted(glob.glob('downloads/hathi_*.json')):
+ print('\n',os.path.basename(p))
+ try: d=json.load(open(p))
+ except Exception as e: print('PARSE_ERROR',repr(e)); continue
+ print('records=',list(d.get('records',{})))
+ for it in d.get('items',[]): print('ITEM=',{k:it.get(k) for k in ('htid','orig','itemURL','rightsCode','usRightsString','fromRecord','enumcron')})
+PY
+          echo '=== GOOGLE VOLUME ===' >> downloads/SUMMARY.txt
+          curl -sS -L --connect-timeout 20 --max-time 120 -A "$ua" \
+            'https://www.googleapis.com/books/v1/volumes/U2VwYkm4NBsC' \
+            -o downloads/google_volume.json || true
+          python - <<'PY' >> downloads/SUMMARY.txt
+import json
+try:
+ d=json.load(open('downloads/google_volume.json'))
+ print('id=',d.get('id'))
+ print('title=',d.get('volumeInfo',{}).get('title'))
+ ai=d.get('accessInfo',{})
+ print('access=',{k:ai.get(k) for k in ('country','viewability','embeddable','publicDomain','webReaderLink','accessViewStatus')})
+ print('pdf=',ai.get('pdf'))
+ print('epub=',ai.get('epub'))
+except Exception as e: print('PARSE_ERROR',repr(e))
+PY
+          echo '=== GOOGLE SEARCHWITHIN ===' >> downloads/SUMMARY.txt
+          i=0
+          for q in hohono h%C3%B4h%C3%B4no vervangwoorden bohon; do
+            i=$((i+1))
+            for mode in vid id; do
+              url="https://books.google.com/books?jscmd=SearchWithinVolume2&q=${q}&${mode}=U2VwYkm4NBsC&hl=en"
+              fn="downloads/gbooks_${i}_${mode}.txt"
+              code=$(curl -sS -L --connect-timeout 20 --max-time 120 -A "$ua" -e 'https://books.google.com/' -o "$fn" -w '%{http_code}' "$url" || true)
+              bytes=$(wc -c < "$fn" 2>/dev/null || echo 0)
+              printf 'q=%s mode=%s http=%s bytes=%s\n' "$q" "$mode" "$code" "$bytes" >> downloads/SUMMARY.txt
+              head -c 4000 "$fn" | tr '\n' ' ' >> downloads/SUMMARY.txt || true
+              printf '\n' >> downloads/SUMMARY.txt
+            done
+          done
+          echo '=== KERN 1893 ===' >> downloads/SUMMARY.txt
+          code=$(curl -L -sS --connect-timeout 20 --max-time 180 -A "$ua" \
+            -o downloads/kern1893.bin -w '%{http_code}' \
+            'https://brill.com/view/journals/bki/42/1/article-p120_11.pdf' || true)
+          printf 'http=%s ' "$code" >> downloads/SUMMARY.txt
+          file downloads/kern1893.bin >> downloads/SUMMARY.txt 2>&1 || true
+          wc -c downloads/kern1893.bin >> downloads/SUMMARY.txt 2>&1 || true
+          if head -c 5 downloads/kern1893.bin 2>/dev/null | grep -q '%PDF-'; then
+            mv downloads/kern1893.bin downloads/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf
+            sha256sum downloads/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf >> downloads/SUMMARY.txt
+            pdftotext -layout downloads/1893_Kern_Woordverwisseling_in_het_Galelareesch.pdf downloads/kern1893.txt || true
+            grep -in -E 'saali|Tob[eè]lo|Loloda|vervang|naam|klank' downloads/kern1893.txt | head -100 > downloads/kern_hits.txt || true
+          else
+            rm -f downloads/kern1893.bin
+          fi
+          cat downloads/SUMMARY.txt
+      - uses: actions/upload-artifact@v4
         with:
-          name: archive-fetch-batch
+          name: hueting-1908-page-breakers
           path: downloads/
           compression-level: 0
           retention-days: 7
