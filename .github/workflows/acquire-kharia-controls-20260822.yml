@@ -1,0 +1,41 @@
+name: Acquire Early Kharia Controls 20260822
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/acquire-kharia-controls-20260822.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - source_id: dalton_ethnology_bengal_1872
+            url: https://upload.wikimedia.org/wikipedia/commons/1/18/Descriptive_Ethnology_of_Bengal.pdf
+            filename: 1872_Dalton_Descriptive_Ethnology_of_Bengal.pdf
+          - source_id: russell_hiralal_vol3_1916
+            url: https://upload.wikimedia.org/wikipedia/commons/9/94/The_tribes_and_castes_of_the_Central_Provinces_of_India_%28IA_tribescastesofce03russ%29.pdf
+            filename: 1916_Russell_Hira_Lal_Tribes_and_Castes_Central_Provinces_Vol3.pdf
+    steps:
+      - name: Fetch and validate original scan
+        shell: bash
+        env:
+          URL: ${{ matrix.url }}
+          OUT: ${{ matrix.filename }}
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          curl -fL --retry 5 --retry-all-errors --connect-timeout 30 --max-time 1800 "$URL" -o "out/$OUT"
+          test "$(head -c 5 "out/$OUT")" = '%PDF-'
+          stat -c '%s' "out/$OUT" | tee out/size.txt
+          sha256sum "out/$OUT" | tee out/sha256.txt
+          echo "$URL" > out/source.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kharia-control-${{ matrix.source_id }}
+          path: out/
+          compression-level: 0
+          retention-days: 7
