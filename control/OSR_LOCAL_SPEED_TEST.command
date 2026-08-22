@@ -43,7 +43,6 @@ else
   exit 2
 fi
 
-# With --drive-root-folder-id the remote root is the corpus folder itself.
 REMOTE="gdrive:$REL"
 RC=(--drive-root-folder-id "$ROOT_ID")
 
@@ -63,7 +62,7 @@ echo "Remote size: $SIZE bytes"
 echo
 echo "== rclone head 64 MiB benchmark =="
 START=$(python3 -c 'import time; print(time.time())')
-rclone cat "$REMOTE" "${RC[@]}" --head 64M >/dev/null
+rclone cat "$REMOTE" "${RC[@]}" --head 67108864 >/dev/null
 END=$(python3 -c 'import time; print(time.time())')
 python3 - "$START" "$END" <<'PY'
 import sys
@@ -74,7 +73,7 @@ PY
 echo
 echo "== rclone tail 1 MiB benchmark =="
 START=$(python3 -c 'import time; print(time.time())')
-rclone cat "$REMOTE" "${RC[@]}" --tail 1M >/dev/null
+rclone cat "$REMOTE" "${RC[@]}" --tail 1048576 >/dev/null
 END=$(python3 -c 'import time; print(time.time())')
 python3 - "$START" "$END" <<'PY'
 import sys
