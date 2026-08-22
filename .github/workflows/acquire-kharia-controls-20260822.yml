@@ -14,7 +14,7 @@ jobs:
       matrix:
         include:
           - source_id: dalton_ethnology_bengal_1872
-            url: https://upload.wikimedia.org/wikipedia/commons/1/18/Descriptive_Ethnology_of_Bengal.pdf
+            url: https://upload.wikimedia.org/wikipedia/commons/7/73/Descriptive_Ethnology_of_Bengal.pdf
             filename: 1872_Dalton_Descriptive_Ethnology_of_Bengal.pdf
           - source_id: russell_hiralal_vol3_1916
             url: https://upload.wikimedia.org/wikipedia/commons/9/94/The_tribes_and_castes_of_the_Central_Provinces_of_India_%28IA_tribescastesofce03russ%29.pdf
