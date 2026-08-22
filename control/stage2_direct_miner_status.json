@@ -1,12 +1,12 @@
 {
   "status": "PASS",
-  "run_id": "stage2-cheap-smoke-001",
-  "workers_completed": 2,
-  "shards_scanned": 2,
-  "bytes_downloaded": 254764608,
-  "max_worker_elapsed_seconds": 6.081,
-  "aggregate_download_GiB": 0.237,
-  "github_run_id": "32560439619",
-  "github_sha": "a65bda6d66f085693e2230655a2811fd03bf6e2d",
-  "finished_unix": 1787384747.531412
+  "run_id": "stage2-cheap-full-001",
+  "workers_completed": 20,
+  "shards_scanned": 1788,
+  "bytes_downloaded": 507947456674,
+  "max_worker_elapsed_seconds": 1111.396,
+  "aggregate_download_GiB": 473.063,
+  "github_run_id": "32560507285",
+  "github_sha": "b9f5341b9ed810d05a6ffa00f09a5559d93e8c04",
+  "finished_unix": 1787385947.7913175
 }
