@@ -28,6 +28,8 @@ ALLOWED = {
     "SPEED_TEST",
     "KIMI_PROBE",
     "KIMI_RUN",
+    "COLAB_PROBE",
+    "COLAB_SMOKE",
     "STAGE1_PREFLIGHT",
 }
 REMOTE_STATUS = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_STATUS.json"
@@ -57,7 +59,7 @@ def save_json(path: Path, obj) -> None:
 
 
 def fetch_bytes(url: str, timeout: int = 30) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": "osr-command-watcher/1.2"})
+    req = urllib.request.Request(url, headers={"User-Agent": "osr-command-watcher/1.3"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read()
 
@@ -183,12 +185,61 @@ def kimi_run(command: dict) -> None:
     timeout = int(command.get("timeout_seconds", 1800))
     timeout = max(30, min(timeout, 7200))
     p = run([found, "-p", prompt], capture_output=True, cwd=str(REPO), timeout=timeout)
-    text = (
-        f"KIMI_RUN\nreturncode={p.returncode}\ncwd={REPO}\n\nSTDOUT\n{p.stdout or ''}\n\nSTDERR\n{p.stderr or ''}"
-    )
+    text = f"KIMI_RUN\nreturncode={p.returncode}\ncwd={REPO}\n\nSTDOUT\n{p.stdout or ''}\n\nSTDERR\n{p.stderr or ''}"
     save_result(text)
     if p.returncode != 0:
         raise RuntimeError(f"Kimi exited {p.returncode}")
+
+
+def find_colab() -> str | None:
+    path = shutil.which("colab")
+    if path:
+        return path
+    for p in (
+        Path.home() / ".local/bin/colab",
+        Path.home() / "Library/Python/3.12/bin/colab",
+        Path.home() / ".local/share/uv/tools/google-colab-cli/bin/colab",
+        Path("/opt/homebrew/bin/colab"),
+        Path("/usr/local/bin/colab"),
+    ):
+        if p.exists() and os.access(p, os.X_OK):
+            return str(p)
+    return None
+
+
+def colab_probe() -> None:
+    found = find_colab()
+    lines = [f"colab: {found or 'NOT_FOUND'}"]
+    if not found:
+        save_result("\n".join(lines) + "\n")
+        raise RuntimeError("Google Colab CLI not found")
+    for args in (["version"], ["--auth=oauth2", "sessions"]):
+        p = run([found, *args], capture_output=True, cwd=str(REPO), timeout=120)
+        lines.append(f"\n$ colab {' '.join(args)}\nreturncode={p.returncode}\nSTDOUT\n{p.stdout or ''}\nSTDERR\n{p.stderr or ''}")
+        if p.returncode != 0:
+            save_result("\n".join(lines) + "\n")
+            raise RuntimeError(f"Colab probe failed: {' '.join(args)}")
+    save_result("\n".join(lines) + "\n")
+
+
+def colab_smoke() -> None:
+    git_sync()
+    found = find_colab()
+    if not found:
+        raise RuntimeError("Google Colab CLI not found")
+    script = REPO / "tools" / "osr_colab_hf_smoke.py"
+    if not script.is_file():
+        raise RuntimeError(f"Colab smoke script missing: {script}")
+    p = run(
+        [found, "--auth=oauth2", "run", "--timeout", "600", str(script)],
+        capture_output=True,
+        cwd=str(REPO),
+        timeout=900,
+    )
+    text = f"COLAB_SMOKE\nreturncode={p.returncode}\n\nSTDOUT\n{p.stdout or ''}\n\nSTDERR\n{p.stderr or ''}"
+    save_result(text)
+    if p.returncode != 0 or "OSR_COLAB_HF_SMOKE_PASS" not in text:
+        raise RuntimeError(f"Colab smoke failed with exit {p.returncode}")
 
 
 def stage1_preflight(command_id: int) -> None:
@@ -228,13 +279,7 @@ def main() -> int:
     state["last_id"] = command_id
     state["last_action"] = action
     save_json(STATE, state)
-    status = {
-        "command_id": command_id,
-        "action": action,
-        "status": "RUNNING",
-        "host": os.uname().nodename,
-        "started_unix": time.time(),
-    }
+    status = {"command_id": command_id, "action": action, "status": "RUNNING", "host": os.uname().nodename, "started_unix": time.time()}
     publish_status(status)
     try:
         if action == "GIT_SYNC":
@@ -245,6 +290,10 @@ def main() -> int:
             kimi_probe()
         elif action == "KIMI_RUN":
             kimi_run(cmd)
+        elif action == "COLAB_PROBE":
+            colab_probe()
+        elif action == "COLAB_SMOKE":
+            colab_smoke()
         elif action == "STAGE1_PREFLIGHT":
             stage1_preflight(command_id)
         elif action in {"STATUS", "IDLE"}:
