@@ -4,6 +4,7 @@ from __future__ import annotations
 import glob
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -18,8 +19,18 @@ APP.mkdir(parents=True, exist_ok=True)
 STATE = APP / "state.json"
 STATUS = APP / "OSR_CONTROL_STATUS.json"
 LOG = APP / "osr-control.log"
-ALLOWED = {"IDLE", "STATUS", "STAGE1_PREFLIGHT"}
+RESULT = APP / "last_result.txt"
+ALLOWED = {
+    "IDLE",
+    "STATUS",
+    "GIT_SYNC",
+    "SPEED_TEST",
+    "KIMI_PROBE",
+    "STAGE1_PREFLIGHT",
+}
 REMOTE_STATUS = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_STATUS.json"
+REMOTE_RESULT = "gdrive:OSR_WORK_SPACE/RemoteControl/OSR_CONTROL_LAST_RESULT.txt"
+REPO = Path.home() / "Open-Source-Research-OSR-"
 
 
 def log(msg: str) -> None:
@@ -43,13 +54,13 @@ def save_json(path: Path, obj) -> None:
 
 
 def fetch_json(url: str):
-    req = urllib.request.Request(url, headers={"User-Agent": "osr-command-watcher/1.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "osr-command-watcher/1.1"})
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.loads(r.read().decode("utf-8"))
 
 
 def download(url: str, path: Path) -> None:
-    req = urllib.request.Request(url, headers={"User-Agent": "osr-command-watcher/1.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "osr-command-watcher/1.1"})
     with urllib.request.urlopen(req, timeout=60) as r:
         path.write_bytes(r.read())
 
@@ -63,7 +74,6 @@ def discover_drive_root() -> Path:
     env = os.environ.get("OSR_DRIVE_ROOT")
     if env and Path(env).is_dir():
         return Path(env)
-
     candidates = [Path("/content/drive/MyDrive")]
     for pat in (
         str(Path.home() / "Library/CloudStorage/GoogleDrive-*/My Drive"),
@@ -73,39 +83,61 @@ def discover_drive_root() -> Path:
     ):
         candidates.extend(Path(p) for p in glob.glob(pat))
     for p in candidates:
-        if p.is_dir():
-            return p
-
-    mount = Path.home() / "OSR-GDrive"
-    mount.mkdir(exist_ok=True)
-    if shutil_which("rclone"):
-        # If already mounted, use it. Otherwise try a daemon mount; this may require macFUSE.
-        probe = run(["rclone", "lsd", "gdrive:"], capture_output=True)
-        if probe.returncode == 0:
-            m = run([
-                "rclone", "mount", "gdrive:", str(mount),
-                "--vfs-cache-mode", "minimal", "--daemon"
-            ], capture_output=True)
-            if m.returncode == 0:
-                for _ in range(20):
-                    if mount.is_dir() and any(mount.iterdir()):
-                        return mount
-                    time.sleep(1)
-    raise RuntimeError(
-        "No local Google Drive filesystem found. Install/enable Google Drive for Desktop, "
-        "or make rclone mount work and set OSR_DRIVE_ROOT."
-    )
-
-
-def shutil_which(name: str):
-    import shutil
-    return shutil.which(name)
+        try:
+            if p.is_dir():
+                return p
+        except OSError:
+            pass
+    raise RuntimeError("No usable local Google Drive filesystem found")
 
 
 def publish_status(obj: dict) -> None:
     save_json(STATUS, obj)
-    if shutil_which("rclone"):
+    if shutil.which("rclone"):
         run(["rclone", "copyto", str(STATUS), REMOTE_STATUS], capture_output=True)
+        if RESULT.exists():
+            run(["rclone", "copyto", str(RESULT), REMOTE_RESULT], capture_output=True)
+
+
+def save_result(text: str) -> None:
+    RESULT.write_text(text, "utf-8")
+
+
+def git_sync() -> None:
+    if not (REPO / ".git").is_dir():
+        raise RuntimeError(f"repo missing: {REPO}")
+    p = run(["git", "-C", str(REPO), "pull", "--ff-only"], capture_output=True)
+    save_result((p.stdout or "") + (p.stderr or ""))
+    if p.returncode != 0:
+        raise RuntimeError(f"git pull failed: {p.returncode}")
+
+
+def speed_test() -> None:
+    git_sync()
+    script = REPO / "control" / "OSR_LOCAL_SPEED_TEST.command"
+    p = run(["/bin/zsh", str(script)], capture_output=True)
+    save_result((p.stdout or "") + (p.stderr or ""))
+    if p.returncode != 0:
+        raise RuntimeError(f"speed test failed: {p.returncode}")
+
+
+def kimi_probe() -> None:
+    names = ["kimi", "kimi-code", "kimitool", "k2"]
+    lines = []
+    found = None
+    for name in names:
+        path = shutil.which(name)
+        lines.append(f"{name}: {path or 'NOT_FOUND'}")
+        if path and found is None:
+            found = path
+    if found:
+        p = run([found, "--version"], capture_output=True)
+        lines.append("\n--version stdout:\n" + (p.stdout or ""))
+        lines.append("\n--version stderr:\n" + (p.stderr or ""))
+        lines.append(f"returncode={p.returncode}")
+    else:
+        lines.append("\nNo known Kimi CLI executable found on PATH.")
+    save_result("\n".join(lines) + "\n")
 
 
 def stage1_preflight(command_id: int) -> None:
@@ -116,21 +148,18 @@ def stage1_preflight(command_id: int) -> None:
     preflight = work / "osr_stage2_preflight_v1.py"
     download(RAW + "/tools/osr_stage1_identity_lock_v3.py", stage1)
     download(RAW + "/tools/osr_stage2_preflight_v1.py", preflight)
-
     out_dir = drive / "OSR_WORK_SPACE" / "Stage1_Identity_v3"
     env = os.environ.copy()
     env["OSR_DRIVE_ROOT"] = str(drive)
     env["OSR_WORKSPACE"] = str(drive / "OSR_WORK_SPACE")
-
-    p1 = run([
-        sys.executable, str(stage1),
-        "--drive-root", str(drive),
-        "--out-dir", str(out_dir),
-    ], env=env)
+    p1 = run([sys.executable, str(stage1), "--drive-root", str(drive), "--out-dir", str(out_dir)], env=env, capture_output=True)
+    text = (p1.stdout or "") + (p1.stderr or "")
     if p1.returncode != 0:
+        save_result(text)
         raise RuntimeError(f"Stage-1 v3 failed with exit {p1.returncode}")
-
-    p2 = run([sys.executable, str(preflight)], env=env)
+    p2 = run([sys.executable, str(preflight)], env=env, capture_output=True)
+    text += "\n" + (p2.stdout or "") + (p2.stderr or "")
+    save_result(text)
     if p2.returncode != 0:
         raise RuntimeError(f"Stage-2 preflight failed with exit {p2.returncode}")
 
@@ -144,8 +173,6 @@ def main() -> int:
         raise RuntimeError(f"Refusing unapproved action: {action}")
     if command_id <= int(state.get("last_id", 0)):
         return 0
-
-    # Claim before execution so a crash never repeats the same command implicitly.
     state["last_id"] = command_id
     state["last_action"] = action
     save_json(STATE, state)
@@ -158,10 +185,16 @@ def main() -> int:
     }
     publish_status(status)
     try:
-        if action == "STAGE1_PREFLIGHT":
+        if action == "GIT_SYNC":
+            git_sync()
+        elif action == "SPEED_TEST":
+            speed_test()
+        elif action == "KIMI_PROBE":
+            kimi_probe()
+        elif action == "STAGE1_PREFLIGHT":
             stage1_preflight(command_id)
         elif action in {"STATUS", "IDLE"}:
-            pass
+            save_result(f"{action}\n")
         status.update({"status": "SUCCESS", "finished_unix": time.time()})
         publish_status(status)
         log(f"SUCCESS command={command_id} action={action}")
