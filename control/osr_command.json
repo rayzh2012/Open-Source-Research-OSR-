@@ -1,5 +1,5 @@
 {
-  "id": 17,
+  "id": 19,
   "action": "STATUS",
-  "note": "Fallback diagnostic: if Drive command read fails, report watcher version and github_fallback source."
+  "note": "Fallback diagnostic for watcher 2.4 Drive command takeover."
 }
