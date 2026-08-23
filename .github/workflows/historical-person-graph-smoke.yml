@@ -29,3 +29,9 @@ jobs:
       - run: PYTHONPATH=tools python tools/osr_historical_person_graph_smoke.py
       - name: Real-source Lv Guang gold-20 deterministic baseline
         run: PYTHONPATH=tools python tools/osr_historical_person_gold20_baseline.py
+      - name: Upload gold-20 baseline graph
+        uses: actions/upload-artifact@v4
+        with:
+          name: lvguang-gold20-baseline
+          path: historical-person-graph/baseline-out/
+          if-no-files-found: error
