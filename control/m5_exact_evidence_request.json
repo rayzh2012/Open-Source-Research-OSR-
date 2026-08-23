@@ -1,0 +1,10 @@
+{
+  "id": 1,
+  "run_id": "m5-exact-evidence-flood-cluster-001",
+  "router_result": "control/m5_router_result.json",
+  "top_n_shards": 12,
+  "terms": ["女娲", "共工", "洪水", "治水", "不周山"],
+  "max_rows_per_shard": 20,
+  "context_chars": 260,
+  "purpose": "Retrieve exact source rows from the highest-ranked M5 shards for the Gonggong-Nuwa-flood hypothesis cluster, preserving row hashes and provenance without rescanning the full corpus."
+}
