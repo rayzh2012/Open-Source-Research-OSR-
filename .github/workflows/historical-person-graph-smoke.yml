@@ -61,9 +61,20 @@ jobs:
           assert obj['semantic']['metrics']['target_person_unity']==1.0, obj
           print(json.dumps({'status':'EXPECTED_FAIL_PASS','failures':obj['failures']}, ensure_ascii=False))
           PY
+      - name: Kimi Code gold-20 strict regression from pre-extracted fixture
+        env:
+          KIMI_CODE_PRE_EXTRACTED: historical-person-graph/fixtures/lvguang_gold_20_kimi_preextracted.jsonl
+          OUT_DIR: historical-person-graph/kimi-regression-out
+        run: bash historical-person-graph/run_kimi_gold20.sh
       - name: Upload gold-20 baseline graph
         uses: actions/upload-artifact@v4
         with:
           name: lvguang-gold20-baseline
           path: historical-person-graph/baseline-out/
+          if-no-files-found: error
+      - name: Upload Kimi gold-20 regression graph
+        uses: actions/upload-artifact@v4
+        with:
+          name: lvguang-gold20-kimi-regression
+          path: historical-person-graph/kimi-regression-out/
           if-no-files-found: error

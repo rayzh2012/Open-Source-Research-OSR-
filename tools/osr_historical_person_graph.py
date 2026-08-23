@@ -22,6 +22,37 @@ from typing import Any, Iterable, Iterator
 
 import requests
 
+
+class PreExtractedExtractor:
+    """Use cached extractions instead of a live gateway.
+
+    This lets the build run from the current Kimi Code session's output without
+    exposing or configuring Sub2API/API keys. The cache key is the input record's
+    ``id`` field, which the gold-20 fixture provides.
+    """
+
+    MODEL_NAME = "kimi-code-session"
+
+    def __init__(self, path: Path):
+        self.path = path
+        self.cache: dict[str, dict[str, Any]] = {}
+        with path.open("rt", encoding="utf-8") as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                item = json.loads(line)
+                self.cache[str(item["id"])] = item["extraction"]
+
+    def extract(self, source: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+        key = str(source.get("id"))
+        if not key or key not in self.cache:
+            raise KeyError(f"No pre-extraction for source id={key!r} in {self.path}")
+        return validate_extraction(dict(self.cache[key])), {
+            "model": self.MODEL_NAME,
+            "elapsed_seconds": 0.0,
+            "usage": None,
+        }
+
 SLICE_TYPES = {
     "DECISION", "WAR_COMMAND", "POWER", "RELATION", "FAMILY_SUCCESSION",
     "TRUST_BETRAYAL", "GOVERNANCE", "CRISIS", "FAILURE_BLINDSPOT",
@@ -449,8 +480,13 @@ class GraphStore:
 
 
 def run_build(args: argparse.Namespace) -> int:
-    config = GatewayConfig.from_args(args)
-    extractor = ChatExtractor(config)
+    if args.pre_extracted_jsonl:
+        extractor: ChatExtractor | PreExtractedExtractor = PreExtractedExtractor(Path(args.pre_extracted_jsonl))
+        model_name = PreExtractedExtractor.MODEL_NAME
+    else:
+        config = GatewayConfig.from_args(args)
+        extractor = ChatExtractor(config)
+        model_name = config.model
     store = GraphStore(Path(args.db))
     processed = skipped = failed = 0
     try:
@@ -458,7 +494,7 @@ def run_build(args: argparse.Namespace) -> int:
             if args.max_records and processed + failed >= args.max_records:
                 break
             sid = store.source_id(rec)
-            if not args.force and store.has_source_run(sid, config.model):
+            if not args.force and store.has_source_run(sid, model_name):
                 skipped += 1
                 continue
             try:
@@ -511,6 +547,10 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--max-records", type=int, default=0)
     b.add_argument("--force", action="store_true")
     b.add_argument("--fail-fast", action="store_true")
+    b.add_argument(
+        "--pre-extracted-jsonl",
+        help="JSONL file of {id, extraction} records; bypasses live API calls",
+    )
     b.set_defaults(func=run_build)
     e = sub.add_parser("export", help="export an existing SQLite graph to UI JSON")
     e.add_argument("--db", default="historical_person_graph.sqlite")
