@@ -1,0 +1,26 @@
+{
+  "version": "m3-feature-store/v1",
+  "principle": "compact provenance-preserving research features; no raw-corpus duplication",
+  "feature_families": {
+    "entity_term": ["term", "count", "source", "file", "row", "row_sha256"],
+    "cooccurrence": ["term_a", "term_b", "row_count", "sample_locators"],
+    "temporal_hint": ["surface", "row", "row_sha256"],
+    "place_hint": ["surface", "suffix", "row", "row_sha256"],
+    "motif": ["motif", "matched_terms", "row", "row_sha256"],
+    "source_provenance": ["source", "repo", "file", "file_sha256", "rows_scanned", "chars_scanned"]
+  },
+  "motif_map": {
+    "flood_water_control": ["洪水", "治水", "共工"],
+    "cosmic_repair": ["补天", "天柱", "不周山", "女娲"],
+    "dragon_complex": ["应龙", "烛龙", "龙王", "龙神", "龙女", "龙母"],
+    "ancestor_totem": ["虎祖", "虎神", "祖灵", "图腾", "本主"],
+    "ritual_sacrifice": ["祭祀", "祭司", "巫", "人祭", "献祭"],
+    "transformation_otherworld": ["变形", "异兽", "鬼神", "神婚"]
+  },
+  "quality_contract": {
+    "all_features_keep_source_locator": true,
+    "raw_text_persisted": false,
+    "samples_are_bounded": true,
+    "facts_not_inferred_from_cooccurrence": true
+  }
+}
