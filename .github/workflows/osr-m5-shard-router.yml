@@ -1,0 +1,31 @@
+name: OSR M5 Shard Router
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/m5_router_request.json
+      - control/research_aggregation_v1.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  route:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - name: Build ranked shard candidates
+        run: python tools/osr_m5_shard_router_v1.py
+      - name: Commit M5 router result
+        run: |
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/m5_router_result.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'm5: route research query to candidate shards'
+          git pull --rebase origin stage2-direct-miner-v3-1
+          git push origin HEAD:stage2-direct-miner-v3-1
