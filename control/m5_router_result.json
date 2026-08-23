@@ -1,0 +1,1725 @@
+{
+  "format": "osr-shard-router/v1",
+  "run_id": "m5-router-v1-smoke-002",
+  "query_terms": [
+    "女娲",
+    "共工",
+    "洪水",
+    "治水",
+    "不周山"
+  ],
+  "known_terms": [
+    "女娲",
+    "共工",
+    "洪水",
+    "治水",
+    "不周山"
+  ],
+  "unknown_terms": [],
+  "candidate_shards": 1787,
+  "top_k": 50,
+  "ranked_shards": [
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00142-of-00233.parquet",
+      "score": 26.073591,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 8214,
+          "signal": 6.250354
+        },
+        {
+          "term": "治水",
+          "count": 3122,
+          "signal": 5.579694
+        },
+        {
+          "term": "共工",
+          "count": 2332,
+          "signal": 5.377464
+        },
+        {
+          "term": "女娲",
+          "count": 2042,
+          "signal": 5.285421
+        },
+        {
+          "term": "不周山",
+          "count": 172,
+          "signal": 3.580658
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00143-of-00233.parquet",
+      "score": 24.72451,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 5764,
+          "signal": 6.004772
+        },
+        {
+          "term": "共工",
+          "count": 2075,
+          "signal": 5.296532
+        },
+        {
+          "term": "治水",
+          "count": 1877,
+          "signal": 5.227026
+        },
+        {
+          "term": "女娲",
+          "count": 1683,
+          "signal": 5.151418
+        },
+        {
+          "term": "不周山",
+          "count": 79,
+          "signal": 3.04476
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00144-of-00233.parquet",
+      "score": 24.586243,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 7479,
+          "signal": 6.18536
+        },
+        {
+          "term": "共工",
+          "count": 1812,
+          "signal": 5.202601
+        },
+        {
+          "term": "治水",
+          "count": 1693,
+          "signal": 5.155524
+        },
+        {
+          "term": "女娲",
+          "count": 1212,
+          "signal": 4.923922
+        },
+        {
+          "term": "不周山",
+          "count": 88,
+          "signal": 3.118836
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00145-of-00233.parquet",
+      "score": 24.466774,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 6756,
+          "signal": 6.114871
+        },
+        {
+          "term": "治水",
+          "count": 1525,
+          "signal": 5.0831
+        },
+        {
+          "term": "女娲",
+          "count": 1271,
+          "signal": 4.956856
+        },
+        {
+          "term": "共工",
+          "count": 1177,
+          "signal": 4.903619
+        },
+        {
+          "term": "不周山",
+          "count": 134,
+          "signal": 3.408328
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00148-of-00233.parquet",
+      "score": 24.00981,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 5975,
+          "signal": 6.029699
+        },
+        {
+          "term": "女娲",
+          "count": 5185,
+          "signal": 5.931378
+        },
+        {
+          "term": "共工",
+          "count": 952,
+          "signal": 4.756642
+        },
+        {
+          "term": "不周山",
+          "count": 230,
+          "signal": 3.781551
+        },
+        {
+          "term": "治水",
+          "count": 157,
+          "signal": 3.51054
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00202-of-00233.parquet",
+      "score": 23.647868,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 4135,
+          "signal": 5.774502
+        },
+        {
+          "term": "治水",
+          "count": 1875,
+          "signal": 5.226288
+        },
+        {
+          "term": "女娲",
+          "count": 1233,
+          "signal": 4.935824
+        },
+        {
+          "term": "共工",
+          "count": 929,
+          "signal": 4.739701
+        },
+        {
+          "term": "不周山",
+          "count": 71,
+          "signal": 2.971553
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00038-of-00233.parquet",
+      "score": 23.458931,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 2089,
+          "signal": 5.301193
+        },
+        {
+          "term": "女娲",
+          "count": 1920,
+          "signal": 5.242725
+        },
+        {
+          "term": "治水",
+          "count": 1025,
+          "signal": 4.807822
+        },
+        {
+          "term": "共工",
+          "count": 470,
+          "signal": 4.267944
+        },
+        {
+          "term": "不周山",
+          "count": 250,
+          "signal": 3.839246
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00227-of-00233.parquet",
+      "score": 23.391785,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3575,
+          "signal": 5.673619
+        },
+        {
+          "term": "治水",
+          "count": 1963,
+          "signal": 5.258075
+        },
+        {
+          "term": "女娲",
+          "count": 1340,
+          "signal": 4.993486
+        },
+        {
+          "term": "共工",
+          "count": 610,
+          "signal": 4.448401
+        },
+        {
+          "term": "不周山",
+          "count": 76,
+          "signal": 3.018203
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00223-of-00233.parquet",
+      "score": 23.368942,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3778,
+          "signal": 5.711907
+        },
+        {
+          "term": "治水",
+          "count": 1806,
+          "signal": 5.200302
+        },
+        {
+          "term": "女娲",
+          "count": 881,
+          "signal": 4.702955
+        },
+        {
+          "term": "共工",
+          "count": 748,
+          "signal": 4.589612
+        },
+        {
+          "term": "不周山",
+          "count": 94,
+          "signal": 3.164167
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00222-of-00233.parquet",
+      "score": 23.30736,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3397,
+          "signal": 5.638214
+        },
+        {
+          "term": "治水",
+          "count": 1896,
+          "signal": 5.234007
+        },
+        {
+          "term": "女娲",
+          "count": 1086,
+          "signal": 4.84787
+        },
+        {
+          "term": "共工",
+          "count": 799,
+          "signal": 4.63529
+        },
+        {
+          "term": "不周山",
+          "count": 69,
+          "signal": 2.951979
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00190-of-00233.parquet",
+      "score": 23.218784,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3474,
+          "signal": 5.653752
+        },
+        {
+          "term": "治水",
+          "count": 1973,
+          "signal": 5.261597
+        },
+        {
+          "term": "女娲",
+          "count": 1211,
+          "signal": 4.92335
+        },
+        {
+          "term": "共工",
+          "count": 619,
+          "signal": 4.458541
+        },
+        {
+          "term": "不周山",
+          "count": 66,
+          "signal": 2.921543
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00196-of-00233.parquet",
+      "score": 23.194692,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3227,
+          "signal": 5.602625
+        },
+        {
+          "term": "治水",
+          "count": 1666,
+          "signal": 5.144383
+        },
+        {
+          "term": "女娲",
+          "count": 1282,
+          "signal": 4.962826
+        },
+        {
+          "term": "共工",
+          "count": 754,
+          "signal": 4.595145
+        },
+        {
+          "term": "不周山",
+          "count": 63,
+          "signal": 2.889714
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00209-of-00233.parquet",
+      "score": 23.1901,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3367,
+          "signal": 5.632065
+        },
+        {
+          "term": "治水",
+          "count": 1755,
+          "signal": 5.18045
+        },
+        {
+          "term": "女娲",
+          "count": 1093,
+          "signal": 4.852322
+        },
+        {
+          "term": "共工",
+          "count": 775,
+          "signal": 4.614169
+        },
+        {
+          "term": "不周山",
+          "count": 65,
+          "signal": 2.911095
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00176-of-00233.parquet",
+      "score": 23.177016,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3604,
+          "signal": 5.67922
+        },
+        {
+          "term": "治水",
+          "count": 1753,
+          "signal": 5.179659
+        },
+        {
+          "term": "女娲",
+          "count": 1083,
+          "signal": 4.845954
+        },
+        {
+          "term": "共工",
+          "count": 520,
+          "signal": 4.337906
+        },
+        {
+          "term": "不周山",
+          "count": 90,
+          "signal": 3.134277
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00231-of-00233.parquet",
+      "score": 23.167478,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3512,
+          "signal": 5.661294
+        },
+        {
+          "term": "治水",
+          "count": 1720,
+          "signal": 5.166489
+        },
+        {
+          "term": "女娲",
+          "count": 1057,
+          "signal": 4.829119
+        },
+        {
+          "term": "共工",
+          "count": 650,
+          "signal": 4.492373
+        },
+        {
+          "term": "不周山",
+          "count": 76,
+          "signal": 3.018203
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00198-of-00233.parquet",
+      "score": 23.148664,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 4182,
+          "signal": 5.782337
+        },
+        {
+          "term": "治水",
+          "count": 1632,
+          "signal": 5.130093
+        },
+        {
+          "term": "女娲",
+          "count": 929,
+          "signal": 4.739701
+        },
+        {
+          "term": "共工",
+          "count": 500,
+          "signal": 4.310762
+        },
+        {
+          "term": "不周山",
+          "count": 97,
+          "signal": 3.18577
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00226-of-00233.parquet",
+      "score": 23.142468,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3504,
+          "signal": 5.659713
+        },
+        {
+          "term": "治水",
+          "count": 1864,
+          "signal": 5.22221
+        },
+        {
+          "term": "女娲",
+          "count": 938,
+          "signal": 4.746379
+        },
+        {
+          "term": "共工",
+          "count": 621,
+          "signal": 4.460774
+        },
+        {
+          "term": "不周山",
+          "count": 80,
+          "signal": 3.053392
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00213-of-00233.parquet",
+      "score": 23.11226,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3485,
+          "signal": 5.655944
+        },
+        {
+          "term": "治水",
+          "count": 1991,
+          "signal": 5.267891
+        },
+        {
+          "term": "女娲",
+          "count": 1233,
+          "signal": 4.935824
+        },
+        {
+          "term": "共工",
+          "count": 864,
+          "signal": 4.689459
+        },
+        {
+          "term": "不周山",
+          "count": 39,
+          "signal": 2.563141
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00221-of-00233.parquet",
+      "score": 23.079898,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3298,
+          "signal": 5.617711
+        },
+        {
+          "term": "治水",
+          "count": 1769,
+          "signal": 5.185956
+        },
+        {
+          "term": "女娲",
+          "count": 989,
+          "signal": 4.783054
+        },
+        {
+          "term": "共工",
+          "count": 574,
+          "signal": 4.406291
+        },
+        {
+          "term": "不周山",
+          "count": 84,
+          "signal": 3.086884
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00203-of-00233.parquet",
+      "score": 23.039415,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3528,
+          "signal": 5.664445
+        },
+        {
+          "term": "治水",
+          "count": 1881,
+          "signal": 5.228502
+        },
+        {
+          "term": "女娲",
+          "count": 1269,
+          "signal": 4.955764
+        },
+        {
+          "term": "共工",
+          "count": 574,
+          "signal": 4.406291
+        },
+        {
+          "term": "不周山",
+          "count": 54,
+          "signal": 2.784412
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00204-of-00233.parquet",
+      "score": 23.021413,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3961,
+          "signal": 5.744698
+        },
+        {
+          "term": "治水",
+          "count": 1747,
+          "signal": 5.177283
+        },
+        {
+          "term": "女娲",
+          "count": 1177,
+          "signal": 4.903619
+        },
+        {
+          "term": "共工",
+          "count": 589,
+          "signal": 4.424149
+        },
+        {
+          "term": "不周山",
+          "count": 53,
+          "signal": 2.771663
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00155-of-00233.parquet",
+      "score": 23.013321,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3398,
+          "signal": 5.638418
+        },
+        {
+          "term": "治水",
+          "count": 1610,
+          "signal": 5.120688
+        },
+        {
+          "term": "女娲",
+          "count": 1066,
+          "signal": 4.834993
+        },
+        {
+          "term": "共工",
+          "count": 655,
+          "signal": 4.497679
+        },
+        {
+          "term": "不周山",
+          "count": 66,
+          "signal": 2.921543
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00225-of-00233.parquet",
+      "score": 23.005993,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3662,
+          "signal": 5.690288
+        },
+        {
+          "term": "治水",
+          "count": 1790,
+          "signal": 5.194135
+        },
+        {
+          "term": "女娲",
+          "count": 1079,
+          "signal": 4.84339
+        },
+        {
+          "term": "共工",
+          "count": 607,
+          "signal": 4.444988
+        },
+        {
+          "term": "不周山",
+          "count": 58,
+          "signal": 2.833192
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00035-of-00233.parquet",
+      "score": 22.958414,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 2021,
+          "signal": 5.278257
+        },
+        {
+          "term": "女娲",
+          "count": 1730,
+          "signal": 5.170506
+        },
+        {
+          "term": "治水",
+          "count": 857,
+          "signal": 4.683824
+        },
+        {
+          "term": "共工",
+          "count": 710,
+          "signal": 4.553508
+        },
+        {
+          "term": "不周山",
+          "count": 110,
+          "signal": 3.272319
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00174-of-00233.parquet",
+      "score": 22.95378,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3490,
+          "signal": 5.656938
+        },
+        {
+          "term": "治水",
+          "count": 1716,
+          "signal": 5.164875
+        },
+        {
+          "term": "女娲",
+          "count": 1123,
+          "signal": 4.871081
+        },
+        {
+          "term": "共工",
+          "count": 760,
+          "signal": 4.600634
+        },
+        {
+          "term": "不周山",
+          "count": 45,
+          "signal": 2.660252
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00210-of-00233.parquet",
+      "score": 22.869615,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3720,
+          "signal": 5.701181
+        },
+        {
+          "term": "治水",
+          "count": 1905,
+          "signal": 5.237289
+        },
+        {
+          "term": "女娲",
+          "count": 1068,
+          "signal": 4.836292
+        },
+        {
+          "term": "共工",
+          "count": 688,
+          "signal": 4.531712
+        },
+        {
+          "term": "不周山",
+          "count": 39,
+          "signal": 2.563141
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00180-of-00233.parquet",
+      "score": 22.855768,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3615,
+          "signal": 5.681333
+        },
+        {
+          "term": "治水",
+          "count": 1784,
+          "signal": 5.191808
+        },
+        {
+          "term": "女娲",
+          "count": 1304,
+          "signal": 4.974616
+        },
+        {
+          "term": "共工",
+          "count": 810,
+          "signal": 4.64476
+        },
+        {
+          "term": "不周山",
+          "count": 29,
+          "signal": 2.363251
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00212-of-00233.parquet",
+      "score": 22.855077,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3699,
+          "signal": 5.697257
+        },
+        {
+          "term": "治水",
+          "count": 1779,
+          "signal": 5.189863
+        },
+        {
+          "term": "女娲",
+          "count": 1026,
+          "signal": 4.808498
+        },
+        {
+          "term": "共工",
+          "count": 629,
+          "signal": 4.469636
+        },
+        {
+          "term": "不周山",
+          "count": 47,
+          "signal": 2.689824
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00215-of-00233.parquet",
+      "score": 22.845063,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3217,
+          "signal": 5.600473
+        },
+        {
+          "term": "治水",
+          "count": 1640,
+          "signal": 5.133482
+        },
+        {
+          "term": "女娲",
+          "count": 878,
+          "signal": 4.700592
+        },
+        {
+          "term": "共工",
+          "count": 628,
+          "signal": 4.468534
+        },
+        {
+          "term": "不周山",
+          "count": 68,
+          "signal": 2.941981
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00171-of-00233.parquet",
+      "score": 22.844888,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 2834,
+          "signal": 5.512604
+        },
+        {
+          "term": "治水",
+          "count": 1921,
+          "signal": 5.243085
+        },
+        {
+          "term": "女娲",
+          "count": 1101,
+          "signal": 4.857374
+        },
+        {
+          "term": "共工",
+          "count": 684,
+          "signal": 4.527675
+        },
+        {
+          "term": "不周山",
+          "count": 48,
+          "signal": 2.704151
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00194-of-00233.parquet",
+      "score": 22.84213,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3807,
+          "signal": 5.717208
+        },
+        {
+          "term": "治水",
+          "count": 2008,
+          "signal": 5.273784
+        },
+        {
+          "term": "女娲",
+          "count": 1059,
+          "signal": 4.830429
+        },
+        {
+          "term": "共工",
+          "count": 603,
+          "signal": 4.440411
+        },
+        {
+          "term": "不周山",
+          "count": 40,
+          "signal": 2.580299
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00189-of-00233.parquet",
+      "score": 22.831215,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3633,
+          "signal": 5.684776
+        },
+        {
+          "term": "治水",
+          "count": 1901,
+          "signal": 5.235832
+        },
+        {
+          "term": "女娲",
+          "count": 1214,
+          "signal": 4.925064
+        },
+        {
+          "term": "共工",
+          "count": 522,
+          "signal": 4.340562
+        },
+        {
+          "term": "不周山",
+          "count": 44,
+          "signal": 2.644981
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00170-of-00233.parquet",
+      "score": 22.828772,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3360,
+          "signal": 5.630622
+        },
+        {
+          "term": "治水",
+          "count": 1690,
+          "signal": 5.154295
+        },
+        {
+          "term": "女娲",
+          "count": 1306,
+          "signal": 4.975678
+        },
+        {
+          "term": "共工",
+          "count": 540,
+          "signal": 4.364026
+        },
+        {
+          "term": "不周山",
+          "count": 48,
+          "signal": 2.704151
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00199-of-00233.parquet",
+      "score": 22.827021,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3129,
+          "signal": 5.581247
+        },
+        {
+          "term": "治水",
+          "count": 1709,
+          "signal": 5.162043
+        },
+        {
+          "term": "女娲",
+          "count": 912,
+          "signal": 4.726908
+        },
+        {
+          "term": "共工",
+          "count": 647,
+          "signal": 4.48917
+        },
+        {
+          "term": "不周山",
+          "count": 61,
+          "signal": 2.867654
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00029-of-00233.parquet",
+      "score": 22.824131,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 2183,
+          "signal": 5.3317
+        },
+        {
+          "term": "女娲",
+          "count": 1508,
+          "signal": 5.075332
+        },
+        {
+          "term": "治水",
+          "count": 1042,
+          "signal": 4.819218
+        },
+        {
+          "term": "共工",
+          "count": 535,
+          "signal": 4.357588
+        },
+        {
+          "term": "不周山",
+          "count": 105,
+          "signal": 3.240294
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00206-of-00233.parquet",
+      "score": 22.813858,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3500,
+          "signal": 5.658921
+        },
+        {
+          "term": "治水",
+          "count": 1684,
+          "signal": 5.15183
+        },
+        {
+          "term": "女娲",
+          "count": 879,
+          "signal": 4.701381
+        },
+        {
+          "term": "共工",
+          "count": 628,
+          "signal": 4.468534
+        },
+        {
+          "term": "不周山",
+          "count": 58,
+          "signal": 2.833192
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00149-of-00233.parquet",
+      "score": 22.803118,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 5513,
+          "signal": 5.973905
+        },
+        {
+          "term": "女娲",
+          "count": 3064,
+          "signal": 5.566695
+        },
+        {
+          "term": "共工",
+          "count": 653,
+          "signal": 4.495561
+        },
+        {
+          "term": "治水",
+          "count": 135,
+          "signal": 3.406567
+        },
+        {
+          "term": "不周山",
+          "count": 125,
+          "signal": 3.36039
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00159-of-00233.parquet",
+      "score": 22.774052,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3174,
+          "signal": 5.591145
+        },
+        {
+          "term": "治水",
+          "count": 1711,
+          "signal": 5.162853
+        },
+        {
+          "term": "女娲",
+          "count": 851,
+          "signal": 4.678958
+        },
+        {
+          "term": "共工",
+          "count": 594,
+          "signal": 4.430001
+        },
+        {
+          "term": "不周山",
+          "count": 65,
+          "signal": 2.911095
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00232-of-00233.parquet",
+      "score": 22.770061,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3552,
+          "signal": 5.669145
+        },
+        {
+          "term": "治水",
+          "count": 1779,
+          "signal": 5.189863
+        },
+        {
+          "term": "女娲",
+          "count": 1101,
+          "signal": 4.857374
+        },
+        {
+          "term": "共工",
+          "count": 576,
+          "signal": 4.408699
+        },
+        {
+          "term": "不周山",
+          "count": 44,
+          "signal": 2.644981
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00179-of-00233.parquet",
+      "score": 22.764021,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3971,
+          "signal": 5.746446
+        },
+        {
+          "term": "治水",
+          "count": 1813,
+          "signal": 5.202983
+        },
+        {
+          "term": "女娲",
+          "count": 880,
+          "signal": 4.702168
+        },
+        {
+          "term": "共工",
+          "count": 486,
+          "signal": 4.291109
+        },
+        {
+          "term": "不周山",
+          "count": 57,
+          "signal": 2.821315
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00185-of-00233.parquet",
+      "score": 22.746647,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3268,
+          "signal": 5.611377
+        },
+        {
+          "term": "治水",
+          "count": 1791,
+          "signal": 5.194522
+        },
+        {
+          "term": "女娲",
+          "count": 988,
+          "signal": 4.782354
+        },
+        {
+          "term": "共工",
+          "count": 478,
+          "signal": 4.279623
+        },
+        {
+          "term": "不周山",
+          "count": 62,
+          "signal": 2.878771
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00168-of-00233.parquet",
+      "score": 22.733237,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3598,
+          "signal": 5.678065
+        },
+        {
+          "term": "治水",
+          "count": 1705,
+          "signal": 5.160419
+        },
+        {
+          "term": "女娲",
+          "count": 725,
+          "signal": 4.567985
+        },
+        {
+          "term": "共工",
+          "count": 505,
+          "signal": 4.317648
+        },
+        {
+          "term": "不周山",
+          "count": 75,
+          "signal": 3.00912
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00230-of-00233.parquet",
+      "score": 22.719648,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3911,
+          "signal": 5.735892
+        },
+        {
+          "term": "治水",
+          "count": 1964,
+          "signal": 5.258428
+        },
+        {
+          "term": "女娲",
+          "count": 838,
+          "signal": 4.668296
+        },
+        {
+          "term": "共工",
+          "count": 592,
+          "signal": 4.427666
+        },
+        {
+          "term": "不周山",
+          "count": 43,
+          "signal": 2.629366
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00183-of-00233.parquet",
+      "score": 22.713324,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3053,
+          "signal": 5.564202
+        },
+        {
+          "term": "治水",
+          "count": 1818,
+          "signal": 5.204892
+        },
+        {
+          "term": "女娲",
+          "count": 1352,
+          "signal": 4.999663
+        },
+        {
+          "term": "共工",
+          "count": 568,
+          "signal": 4.399018
+        },
+        {
+          "term": "不周山",
+          "count": 38,
+          "signal": 2.54555
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00205-of-00233.parquet",
+      "score": 22.713323,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3805,
+          "signal": 5.716843
+        },
+        {
+          "term": "治水",
+          "count": 1587,
+          "signal": 5.110716
+        },
+        {
+          "term": "女娲",
+          "count": 1187,
+          "signal": 4.909481
+        },
+        {
+          "term": "共工",
+          "count": 552,
+          "signal": 4.379239
+        },
+        {
+          "term": "不周山",
+          "count": 41,
+          "signal": 2.597042
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00217-of-00233.parquet",
+      "score": 22.702195,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 2958,
+          "signal": 5.542289
+        },
+        {
+          "term": "治水",
+          "count": 1596,
+          "signal": 5.114635
+        },
+        {
+          "term": "女娲",
+          "count": 1020,
+          "signal": 4.804435
+        },
+        {
+          "term": "共工",
+          "count": 790,
+          "signal": 4.627445
+        },
+        {
+          "term": "不周山",
+          "count": 42,
+          "signal": 2.613392
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00161-of-00233.parquet",
+      "score": 22.680488,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3345,
+          "signal": 5.627521
+        },
+        {
+          "term": "治水",
+          "count": 1630,
+          "signal": 5.129243
+        },
+        {
+          "term": "女娲",
+          "count": 813,
+          "signal": 4.64732
+        },
+        {
+          "term": "共工",
+          "count": 638,
+          "signal": 4.479472
+        },
+        {
+          "term": "不周山",
+          "count": 55,
+          "signal": 2.796932
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00201-of-00233.parquet",
+      "score": 22.674678,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3633,
+          "signal": 5.684776
+        },
+        {
+          "term": "治水",
+          "count": 1913,
+          "signal": 5.240193
+        },
+        {
+          "term": "女娲",
+          "count": 1033,
+          "signal": 4.813208
+        },
+        {
+          "term": "共工",
+          "count": 509,
+          "signal": 4.323108
+        },
+        {
+          "term": "不周山",
+          "count": 42,
+          "signal": 2.613392
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00173-of-00233.parquet",
+      "score": 22.672117,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3457,
+          "signal": 5.650352
+        },
+        {
+          "term": "治水",
+          "count": 1633,
+          "signal": 5.130518
+        },
+        {
+          "term": "女娲",
+          "count": 1203,
+          "signal": 4.918758
+        },
+        {
+          "term": "共工",
+          "count": 607,
+          "signal": 4.444988
+        },
+        {
+          "term": "不周山",
+          "count": 37,
+          "signal": 2.527501
+        }
+      ]
+    },
+    {
+      "source": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00197-of-00233.parquet",
+      "score": 22.665744,
+      "matched_terms": 5,
+      "evidence": [
+        {
+          "term": "洪水",
+          "count": 3556,
+          "signal": 5.669925
+        },
+        {
+          "term": "治水",
+          "count": 1766,
+          "signal": 5.18478
+        },
+        {
+          "term": "女娲",
+          "count": 974,
+          "signal": 4.772468
+        },
+        {
+          "term": "共工",
+          "count": 507,
+          "signal": 4.320384
+        },
+        {
+          "term": "不周山",
+          "count": 49,
+          "signal": 2.718188
+        }
+      ]
+    }
+  ],
+  "routing_contract": "Router ranks candidate shards only. Any factual conclusion requires exact source-row retrieval/recheck.",
+  "created_unix": 1787455510.9570153
+}
