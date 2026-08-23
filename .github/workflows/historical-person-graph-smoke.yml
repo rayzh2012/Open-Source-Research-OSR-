@@ -5,12 +5,14 @@ on:
     paths:
       - 'tools/osr_historical_person_graph.py'
       - 'tools/osr_historical_person_graph_smoke.py'
+      - 'tools/osr_historical_person_gold20_baseline.py'
       - 'historical-person-graph/**'
       - '.github/workflows/historical-person-graph-smoke.yml'
   pull_request:
     paths:
       - 'tools/osr_historical_person_graph.py'
       - 'tools/osr_historical_person_graph_smoke.py'
+      - 'tools/osr_historical_person_gold20_baseline.py'
       - 'historical-person-graph/**'
       - '.github/workflows/historical-person-graph-smoke.yml'
 
@@ -23,5 +25,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install requests
-      - run: python -m py_compile tools/osr_historical_person_graph.py
+      - run: python -m py_compile tools/osr_historical_person_graph.py tools/osr_historical_person_gold20_baseline.py
       - run: PYTHONPATH=tools python tools/osr_historical_person_graph_smoke.py
+      - name: Real-source Lv Guang gold-20 deterministic baseline
+        run: PYTHONPATH=tools python tools/osr_historical_person_gold20_baseline.py
