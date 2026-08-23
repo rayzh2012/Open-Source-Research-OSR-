@@ -1,0 +1,35 @@
+{
+  "version": "lvguang-gold20-v0.1",
+  "target_person": "吕光",
+  "records": {
+    "LG01": {"slice_any": ["HISTORIOGRAPHY_BIAS", "LANGUAGE_SELF_MODEL"], "event_any": ["other"]},
+    "LG02": {"slice_any": ["DECISION", "WAR_COMMAND"], "event_any": ["war", "speech"]},
+    "LG03": {"slice_any": ["TRUST_BETRAYAL", "RELATION", "POWER"], "event_any": ["speech", "other"]},
+    "LG04": {"slice_any": ["WAR_COMMAND", "DECISION"], "event_any": ["war", "speech"]},
+    "LG05": {"slice_any": ["POWER", "WAR_COMMAND", "GOVERNANCE"], "event_any": ["war", "alliance", "other"]},
+    "LG06": {"slice_any": ["POWER", "CRISIS", "RELATION"], "event_any": ["appointment", "other"]},
+    "LG07": {"slice_any": ["TRUST_BETRAYAL", "FAILURE_BLINDSPOT", "RELATION"], "event_any": ["killing"], "relation_any": ["kills"]},
+    "LG08": {"slice_any": ["TRUST_BETRAYAL", "FAILURE_BLINDSPOT"], "event_any": ["killing"], "relation_any": ["kills"]},
+    "LG09": {"slice_any": ["TRUST_BETRAYAL", "CRISIS", "DYAD_INTERACTION"], "event_any": ["betrayal", "alliance", "other"]},
+    "LG10": {"slice_any": ["TRUST_BETRAYAL", "FAILURE_BLINDSPOT", "GOVERNANCE"], "event_any": ["killing", "betrayal", "other"]},
+    "LG11": {"slice_any": ["GOVERNANCE", "LANGUAGE_SELF_MODEL", "DYAD_INTERACTION"], "event_any": ["governance", "speech", "other"]},
+    "LG12": {"slice_any": ["FAMILY_SUCCESSION", "CRISIS", "DYAD_INTERACTION"], "event_any": ["succession", "speech"]},
+    "LG13": {"slice_any": ["HISTORIOGRAPHY_BIAS", "FAILURE_BLINDSPOT"], "event_any": ["other", "speech"]},
+    "LG14": {"slice_any": ["POWER", "RELATION", "FAILURE_BLINDSPOT"], "event_any": ["appointment", "war", "other"]},
+    "LG15": {"slice_any": ["HISTORIOGRAPHY_BIAS", "POWER"], "event_any": ["war", "other"]},
+    "LG16": {"slice_any": ["DECISION", "POWER", "CRISIS"], "event_any": ["speech", "war", "other"]},
+    "LG17": {"slice_any": ["POWER", "GOVERNANCE"], "event_any": ["appointment", "other"]},
+    "LG18": {"slice_any": ["POWER", "RELATION", "HISTORIOGRAPHY_BIAS"], "event_any": ["alliance", "other"], "must_preserve_variant_group": true},
+    "LG19": {"slice_any": ["POWER", "RELATION", "HISTORIOGRAPHY_BIAS"], "event_any": ["alliance", "other"], "must_preserve_variant_group": true},
+    "LG20": {"slice_any": ["DECISION", "WAR_COMMAND", "CRISIS"], "event_any": ["war", "speech"]}
+  },
+  "strict_thresholds": {
+    "source_coverage": 1.0,
+    "event_coverage": 0.90,
+    "slice_coverage": 0.90,
+    "slice_match": 0.75,
+    "event_match": 0.70,
+    "grounded_evidence": 1.0,
+    "provenance_variant_preservation": 1.0
+  }
+}
