@@ -38,6 +38,29 @@ jobs:
             --graph-json historical-person-graph/baseline-out/lvguang_gold_20.graph.json \
             --expectations historical-person-graph/fixtures/lvguang_gold_20_expectations.json \
             | tee historical-person-graph/baseline-out/audit.json
+      - name: Prove strict gate rejects the weak deterministic baseline
+        shell: bash
+        run: |
+          set +e
+          python tools/osr_historical_person_graph_audit.py \
+            --db historical-person-graph/baseline-out/lvguang_gold_20.sqlite \
+            --graph-json historical-person-graph/baseline-out/lvguang_gold_20.graph.json \
+            --expectations historical-person-graph/fixtures/lvguang_gold_20_expectations.json \
+            --strict > historical-person-graph/baseline-out/strict-audit.json
+          rc=$?
+          set -e
+          test "$rc" -eq 2
+          python - <<'PY'
+          import json
+          p='historical-person-graph/baseline-out/strict-audit.json'
+          obj=json.load(open(p, encoding='utf-8'))
+          failures=' '.join(obj['failures'])
+          assert obj['status']=='FAIL', obj
+          assert 'slice_match<' in failures, failures
+          assert 'relation_match<' in failures, failures
+          assert obj['semantic']['metrics']['target_person_unity']==1.0, obj
+          print(json.dumps({'status':'EXPECTED_FAIL_PASS','failures':obj['failures']}, ensure_ascii=False))
+          PY
       - name: Upload gold-20 baseline graph
         uses: actions/upload-artifact@v4
         with:
