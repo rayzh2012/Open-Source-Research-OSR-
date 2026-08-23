@@ -128,7 +128,9 @@ def semantic_eval(graph_path: Path, expectations_path: Path) -> dict:
             "got_slices": sorted(got_slice), "got_events": sorted(got_event), "got_relations": sorted(got_rel),
         }
 
-    nodes_named = {n.get("name") for n in graph["nodes"]}
+    target = exp.get("target_person")
+    target_nodes = [n for n in graph["nodes"] if n.get("name") == target]
+    target_count = len(target_nodes)
     metrics = {
         "source_coverage": source_cov,
         "event_coverage": event_cov,
@@ -137,7 +139,9 @@ def semantic_eval(graph_path: Path, expectations_path: Path) -> dict:
         "event_match": event_match_n / len(record_ids),
         "relation_match": relation_match_n / relation_required if relation_required else 1.0,
         "provenance_variant_preservation": variant_ok / variant_required if variant_required else 1.0,
-        "target_person_present": exp.get("target_person") in nodes_named,
+        "target_person_present": target_count > 0,
+        "target_person_node_count": target_count,
+        "target_person_unity": 1.0 if target_count == 1 else (1.0 / target_count if target_count else 0.0),
     }
     return {"metrics": metrics, "detail": detail, "thresholds": exp.get("strict_thresholds", {})}
 
