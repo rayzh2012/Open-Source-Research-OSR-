@@ -1,7 +1,7 @@
 {
-  "id": 1,
-  "run_id": "m5-router-v1-smoke-001",
+  "id": 2,
+  "run_id": "m5-router-v1-smoke-002",
   "terms": ["女娲", "共工", "洪水", "治水", "不周山"],
   "top_k": 50,
-  "purpose": "Initial research routing smoke over the completed M2 compact query index. Rank the most relevant shards for a cross-term flood / Gonggong / Nüwa hypothesis cluster without rescanning raw corpus."
+  "purpose": "Trigger M5 shard-router v1 smoke over the completed M2 compact query index. Rank the most relevant shards for a cross-term flood / Gonggong / Nüwa hypothesis cluster without rescanning raw corpus."
 }
