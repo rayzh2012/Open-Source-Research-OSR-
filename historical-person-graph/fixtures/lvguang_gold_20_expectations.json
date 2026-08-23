@@ -1,5 +1,5 @@
 {
-  "version": "lvguang-gold20-v0.1",
+  "version": "lvguang-gold20-v0.2",
   "target_person": "吕光",
   "records": {
     "LG01": {"slice_any": ["HISTORIOGRAPHY_BIAS", "LANGUAGE_SELF_MODEL"], "event_any": ["other"]},
@@ -29,6 +29,8 @@
     "slice_coverage": 0.90,
     "slice_match": 0.75,
     "event_match": 0.70,
+    "relation_match": 1.0,
+    "target_person_unity": 1.0,
     "grounded_evidence": 1.0,
     "provenance_variant_preservation": 1.0
   }
