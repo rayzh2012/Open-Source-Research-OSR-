@@ -1,0 +1,377 @@
+{
+  "schema_version": "historical-person-graph-v0.1.1",
+  "nodes": [
+    {
+      "id": 3,
+      "name": "吴忠",
+      "context": "后秦将军/姚苌部将",
+      "resolution_status": "CANDIDATE",
+      "certainty": "FACT",
+      "aliases": []
+    },
+    {
+      "id": 4,
+      "name": "姚兴",
+      "context": "后秦君主",
+      "resolution_status": "CANDIDATE",
+      "certainty": "FACT",
+      "aliases": []
+    },
+    {
+      "id": 1,
+      "name": "姚苌",
+      "context": "后秦武昭皇帝/姚兴之父",
+      "resolution_status": "CANDIDATE",
+      "certainty": "FACT",
+      "aliases": []
+    },
+    {
+      "id": 2,
+      "name": "苻坚",
+      "context": "前秦君主",
+      "resolution_status": "CANDIDATE",
+      "certainty": "FACT",
+      "aliases": []
+    }
+  ],
+  "edges": [
+    {
+      "id": 1,
+      "source": 2,
+      "target": 1,
+      "relation_type": "appoints",
+      "event_id": 1,
+      "start_text": "",
+      "end_text": "",
+      "certainty": "FACT",
+      "evidence": "苻坚以苌为扬武将军",
+      "source_id": 1
+    },
+    {
+      "id": 2,
+      "source": 1,
+      "target": 2,
+      "relation_type": "subordinate_to",
+      "event_id": 1,
+      "start_text": "",
+      "end_text": "",
+      "certainty": "FACT",
+      "evidence": "为坚将，累有大功",
+      "source_id": 1
+    },
+    {
+      "id": 3,
+      "source": 1,
+      "target": 2,
+      "relation_type": "rebels_against",
+      "event_id": 2,
+      "start_text": "",
+      "end_text": "",
+      "certainty": "FACT",
+      "evidence": "自称大将军、大单于、万年秦王",
+      "source_id": 2
+    },
+    {
+      "id": 4,
+      "source": 1,
+      "target": 2,
+      "relation_type": "enemy_of",
+      "event_id": 2,
+      "start_text": "",
+      "end_text": "",
+      "certainty": "FACT",
+      "evidence": "苌惧，奔于渭北",
+      "source_id": 2
+    },
+    {
+      "id": 5,
+      "source": 1,
+      "target": 3,
+      "relation_type": "commands",
+      "event_id": 3,
+      "start_text": "",
+      "end_text": "",
+      "certainty": "FACT",
+      "evidence": "姚苌遣将军吴忠围之",
+      "source_id": 3
+    },
+    {
+      "id": 6,
+      "source": 2,
+      "target": 3,
+      "relation_type": "captured_by",
+      "event_id": 3,
+      "start_text": "",
+      "end_text": "",
+      "certainty": "FACT",
+      "evidence": "俄而忠至，执坚以归新平",
+      "source_id": 3
+    },
+    {
+      "id": 7,
+      "source": 2,
+      "target": 1,
+      "relation_type": "executed_by",
+      "event_id": 4,
+      "start_text": "",
+      "end_text": "",
+      "certainty": "FACT",
+      "evidence": "苌乃缢坚于新平佛寺中",
+      "source_id": 3
+    },
+    {
+      "id": 8,
+      "source": 1,
+      "target": 4,
+      "relation_type": "father_of",
+      "event_id": 5,
+      "start_text": "",
+      "end_text": "",
+      "certainty": "FACT",
+      "evidence": "苌之长子也",
+      "source_id": 4
+    },
+    {
+      "id": 9,
+      "source": 4,
+      "target": 1,
+      "relation_type": "succeeds",
+      "event_id": 6,
+      "start_text": "",
+      "end_text": "",
+      "certainty": "FACT",
+      "evidence": "太元十九年，僭即帝位",
+      "source_id": 5
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "event_key": "3faccbdd0050e67ed345f61f47b486a903abc0b719dffaecf74ab36cef362d8d",
+      "date_text": "",
+      "event_type": "appointment",
+      "summary": "苻坚以姚苌为扬武将军等职，累有大功",
+      "certainty": "FACT",
+      "evidence": "苻坚以苌为扬武将军",
+      "source_id": 1,
+      "participants": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": 2,
+      "event_key": "a8b8e1b7114b3e43bbbf3d2109425c63c02f8f133f8005740fd375d1c985a308",
+      "date_text": "",
+      "event_type": "betrayal",
+      "summary": "姚苌因惧诛，叛离苻坚，自称万年秦王",
+      "certainty": "FACT",
+      "evidence": "苌乃从纬谋，以太元九年自称大将军、大单于、万年秦王",
+      "source_id": 2,
+      "participants": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": 3,
+      "event_key": "d39c459fcded40c703265660873f8f69aab5a26705c4ab9fb3544264a1b82d53",
+      "date_text": "",
+      "event_type": "war",
+      "summary": "吴忠奉姚苌命围五将山，执苻坚归新平",
+      "certainty": "FACT",
+      "evidence": "俄而忠至，执坚以归新平",
+      "source_id": 3,
+      "participants": [
+        2,
+        3
+      ]
+    },
+    {
+      "id": 4,
+      "event_key": "2ffb688038d746d4aa48c119ccbba4cc89720b792528a3f7d6d1f1fde5d0ed2e",
+      "date_text": "",
+      "event_type": "killing",
+      "summary": "姚苌缢杀苻坚于新平佛寺",
+      "certainty": "FACT",
+      "evidence": "苌乃缢坚于新平佛寺中",
+      "source_id": 3,
+      "participants": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": 5,
+      "event_key": "23aa209b53d668920f1dfeeb167df79c6f832c37da51cc1ea418a2138e8f1052",
+      "date_text": "",
+      "event_type": "succession",
+      "summary": "姚苌立长子姚兴为皇太子",
+      "certainty": "FACT",
+      "evidence": "苌立为皇太子",
+      "source_id": 4,
+      "participants": [
+        1,
+        4
+      ]
+    },
+    {
+      "id": 6,
+      "event_key": "8254062d9aa7a1a383d0abb494fa92a15eb77be6c6c60ca991b6fdc2415f99a2",
+      "date_text": "",
+      "event_type": "succession",
+      "summary": "姚苌死后姚兴秘不发丧，后即位称帝",
+      "certainty": "FACT",
+      "evidence": "太元十九年，僭即帝位",
+      "source_id": 5,
+      "participants": [
+        1,
+        4
+      ]
+    }
+  ],
+  "slices": [
+    {
+      "id": 4,
+      "person_id": 1,
+      "slice_type": "CRISIS",
+      "claim": "姚苌遣将围捕并缢杀苻坚",
+      "event_id": 4,
+      "certainty": "FACT",
+      "evidence": "苌乃缢坚于新平佛寺中",
+      "source_id": 3
+    },
+    {
+      "id": 6,
+      "person_id": 1,
+      "slice_type": "FAMILY_SUCCESSION",
+      "claim": "姚苌立长子姚兴为皇太子",
+      "event_id": 5,
+      "certainty": "FACT",
+      "evidence": "苌立为皇太子",
+      "source_id": 4
+    },
+    {
+      "id": 1,
+      "person_id": 1,
+      "slice_type": "POWER",
+      "claim": "姚苌为苻坚将，历任要职",
+      "event_id": 1,
+      "certainty": "FACT",
+      "evidence": "苻坚以苌为扬武将军",
+      "source_id": 1
+    },
+    {
+      "id": 2,
+      "person_id": 1,
+      "slice_type": "TRUST_BETRAYAL",
+      "claim": "姚苌因苻坚杀赵都而惧，叛秦自立",
+      "event_id": 2,
+      "certainty": "FACT",
+      "evidence": "苌遣龙骧长史赵都诣坚谢罪，坚怒，杀之。苌惧，奔于渭北",
+      "source_id": 2
+    },
+    {
+      "id": 3,
+      "person_id": 2,
+      "slice_type": "CRISIS",
+      "claim": "苻坚被吴忠执送姚苌，终遭缢杀",
+      "event_id": 4,
+      "certainty": "FACT",
+      "evidence": "苌乃缢坚于新平佛寺中",
+      "source_id": 3
+    },
+    {
+      "id": 5,
+      "person_id": 4,
+      "slice_type": "FAMILY_SUCCESSION",
+      "claim": "姚兴为姚苌长子，被立为皇太子",
+      "event_id": 5,
+      "certainty": "FACT",
+      "evidence": "苌之长子也",
+      "source_id": 4
+    },
+    {
+      "id": 7,
+      "person_id": 4,
+      "slice_type": "FAMILY_SUCCESSION",
+      "claim": "姚苌死后姚兴即位称帝",
+      "event_id": 6,
+      "certainty": "FACT",
+      "evidence": "兴乃发丧行服。太元十九年，僭即帝位",
+      "source_id": 5
+    }
+  ],
+  "sources": [
+    {
+      "id": 1,
+      "provenance": {
+        "evidence_tier": "A",
+        "id": "FC01",
+        "input_file": "historical-person-graph/fixtures/fuqin_yaochang_yaoxing_bridge.jsonl",
+        "input_line": 1,
+        "quoted_source": "https://www.zggdwx.com/jinshu/117.html",
+        "source_kind": "primary-public-domain",
+        "source_locator": "载记第十六·姚苌载记·为坚将",
+        "source_title": "晋书"
+      },
+      "row_sha256": "08a78929194f9e58173b2c405987757f7ee2daf57ae7f7be2789d81cb7771f0a"
+    },
+    {
+      "id": 2,
+      "provenance": {
+        "evidence_tier": "A",
+        "id": "FC02",
+        "input_file": "historical-person-graph/fixtures/fuqin_yaochang_yaoxing_bridge.jsonl",
+        "input_line": 2,
+        "quoted_source": "https://www.zggdwx.com/jinshu/117.html",
+        "source_kind": "primary-public-domain",
+        "source_locator": "载记第十六·姚苌载记·叛坚称秦王",
+        "source_title": "晋书"
+      },
+      "row_sha256": "07af30c334fe8aaf9d7470a0caca78aa313f30079339b607e8476809bb8fd341"
+    },
+    {
+      "id": 3,
+      "provenance": {
+        "evidence_tier": "A",
+        "id": "FC03",
+        "input_file": "historical-person-graph/fixtures/fuqin_yaochang_yaoxing_bridge.jsonl",
+        "input_line": 3,
+        "quoted_source": "https://www.zggdwx.com/jinshu/115.html",
+        "source_kind": "primary-public-domain",
+        "source_locator": "载记第十五·苻坚载记下·姚苌缢坚",
+        "source_title": "晋书"
+      },
+      "row_sha256": "fc26ec01f0147ee0290c05dc9cd2c4b49b707b652143c9599e8031c176229e8a"
+    },
+    {
+      "id": 4,
+      "provenance": {
+        "evidence_tier": "A",
+        "id": "FC04",
+        "input_file": "historical-person-graph/fixtures/fuqin_yaochang_yaoxing_bridge.jsonl",
+        "input_line": 4,
+        "quoted_source": "https://www.zggdwx.com/jinshu/117.html",
+        "source_kind": "primary-public-domain",
+        "source_locator": "载记第十七·姚兴载记·兴奔苌",
+        "source_title": "晋书"
+      },
+      "row_sha256": "c02d7236361246b3054d7a87caf783fe23be3c4260228a2c255d257a2dce9e6e"
+    },
+    {
+      "id": 5,
+      "provenance": {
+        "evidence_tier": "A",
+        "id": "FC05",
+        "input_file": "historical-person-graph/fixtures/fuqin_yaochang_yaoxing_bridge.jsonl",
+        "input_line": 5,
+        "quoted_source": "https://www.zggdwx.com/jinshu/118.html",
+        "source_kind": "primary-public-domain",
+        "source_locator": "载记第十七·姚兴载记·兴即位",
+        "source_title": "晋书"
+      },
+      "row_sha256": "b3f27fa226e4ed8af2eee6b798a02ba58fb1f2cf641d910ee40422e4d58175e8"
+    }
+  ]
+}
