@@ -9,35 +9,35 @@ cd "$ROOT"
 
 OUT_DIR="${OUT_DIR:-historical-person-graph/live-out}"
 MODEL="${SUB2API_MODEL:-${KIMI_MODEL:-kimi}}"
-mkdir -p "$OUT_DIR"
+TMP_DIR="$OUT_DIR/.candidate"
+rm -rf "$TMP_DIR"
+mkdir -p "$TMP_DIR"
 
+# Build into a disposable candidate directory. Nothing is promoted until the
+# source-grounding + semantic gold audit passes.
 python tools/osr_historical_person_graph.py build \
   --input historical-person-graph/fixtures/lvguang_gold_20.jsonl \
-  --db "$OUT_DIR/lvguang_gold_20.sqlite" \
-  --graph-json "$OUT_DIR/lvguang_gold_20.graph.json" \
+  --db "$TMP_DIR/lvguang_gold_20.sqlite" \
+  --graph-json "$TMP_DIR/lvguang_gold_20.graph.json" \
   --model "$MODEL" \
   --max-records 20 \
   --fail-fast \
-  | tee "$OUT_DIR/run.log"
+  | tee "$TMP_DIR/run.log"
 
-python - "$OUT_DIR/lvguang_gold_20.graph.json" <<'PY'
-import json, sys
-from pathlib import Path
-p = Path(sys.argv[1])
-obj = json.loads(p.read_text('utf-8'))
-assert len(obj['sources']) == 20, len(obj['sources'])
-assert len(obj['nodes']) >= 1, 'no person nodes extracted'
-assert len(obj['events']) >= 1, 'no events extracted'
-assert len(obj['slices']) >= 1, 'no historical slices extracted'
-print(json.dumps({
-    'status': 'LIVE_PASS',
-    'sources': len(obj['sources']),
-    'nodes': len(obj['nodes']),
-    'edges': len(obj['edges']),
-    'events': len(obj['events']),
-    'slices': len(obj['slices']),
-    'graph_json': str(p),
-}, ensure_ascii=False))
-PY
+python tools/osr_historical_person_graph_audit.py \
+  --db "$TMP_DIR/lvguang_gold_20.sqlite" \
+  --graph-json "$TMP_DIR/lvguang_gold_20.graph.json" \
+  --expectations historical-person-graph/fixtures/lvguang_gold_20_expectations.json \
+  --strict \
+  | tee "$TMP_DIR/audit.json"
 
+# Promote only audited output. A failed audit leaves the candidate isolated for diagnosis.
+mkdir -p "$OUT_DIR"
+mv "$TMP_DIR/lvguang_gold_20.sqlite" "$OUT_DIR/lvguang_gold_20.sqlite"
+mv "$TMP_DIR/lvguang_gold_20.graph.json" "$OUT_DIR/lvguang_gold_20.graph.json"
+mv "$TMP_DIR/run.log" "$OUT_DIR/run.log"
+mv "$TMP_DIR/audit.json" "$OUT_DIR/audit.json"
+rmdir "$TMP_DIR"
+
+echo "LIVE_PASS: audited Kimi output promoted to $OUT_DIR"
 echo "Open historical-person-graph/explorer.html and load: $OUT_DIR/lvguang_gold_20.graph.json"
