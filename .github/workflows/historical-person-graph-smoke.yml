@@ -6,6 +6,7 @@ on:
       - 'tools/osr_historical_person_graph.py'
       - 'tools/osr_historical_person_graph_smoke.py'
       - 'tools/osr_historical_person_gold20_baseline.py'
+      - 'tools/osr_historical_person_graph_audit.py'
       - 'historical-person-graph/**'
       - '.github/workflows/historical-person-graph-smoke.yml'
   pull_request:
@@ -13,6 +14,7 @@ on:
       - 'tools/osr_historical_person_graph.py'
       - 'tools/osr_historical_person_graph_smoke.py'
       - 'tools/osr_historical_person_gold20_baseline.py'
+      - 'tools/osr_historical_person_graph_audit.py'
       - 'historical-person-graph/**'
       - '.github/workflows/historical-person-graph-smoke.yml'
 
@@ -25,10 +27,17 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install requests
-      - run: python -m py_compile tools/osr_historical_person_graph.py tools/osr_historical_person_gold20_baseline.py
+      - run: python -m py_compile tools/osr_historical_person_graph.py tools/osr_historical_person_gold20_baseline.py tools/osr_historical_person_graph_audit.py
       - run: PYTHONPATH=tools python tools/osr_historical_person_graph_smoke.py
       - name: Real-source Lv Guang gold-20 deterministic baseline
         run: PYTHONPATH=tools python tools/osr_historical_person_gold20_baseline.py
+      - name: Audit baseline evidence grounding and report semantic score
+        run: |
+          python tools/osr_historical_person_graph_audit.py \
+            --db historical-person-graph/baseline-out/lvguang_gold_20.sqlite \
+            --graph-json historical-person-graph/baseline-out/lvguang_gold_20.graph.json \
+            --expectations historical-person-graph/fixtures/lvguang_gold_20_expectations.json \
+            | tee historical-person-graph/baseline-out/audit.json
       - name: Upload gold-20 baseline graph
         uses: actions/upload-artifact@v4
         with:
