@@ -13,6 +13,7 @@ def main() -> int:
     ap.add_argument("--explorer", default="historical-person-graph/explorer.html")
     ap.add_argument("--graph-json", required=True)
     ap.add_argument("--output", required=True)
+    ap.add_argument("--label", default="后凉核心关系图 v1（已内嵌 graph.json）")
     args = ap.parse_args()
 
     explorer = Path(args.explorer).read_text("utf-8")
@@ -22,7 +23,7 @@ def main() -> int:
     # Replace the manual file picker with a loaded indicator.
     explorer = explorer.replace(
         '<label class="file">载入 graph.json<input id="file" type="file" accept="application/json,.json"></label>',
-        '<span class="file">后凉核心关系图 v1（已内嵌 graph.json）</span>',
+        f'<span class="file">{args.label}</span>',
     )
 
     # Inject the graph as a typed JSON script block before the main script.
