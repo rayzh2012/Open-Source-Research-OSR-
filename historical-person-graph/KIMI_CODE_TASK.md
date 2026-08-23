@@ -22,11 +22,14 @@ Pipeline under test:
 8. Do not modify `tools/osr_stage2_actions_direct_miner.py`, raw Parquet logic, or Stage-2 checkpoints.
 9. Do not print, commit, or echo API keys.
 10. If a source is research synthesis rather than a primary quote, preserve that provenance and do not upgrade it to primary evidence.
+11. Event/relation/slice `evidence` must be a literal substring of the supplied snippet; invented pseudo-quotes are a hard failure.
 
 ## Inputs
 
 - `historical-person-graph/fixtures/lvguang_gold_20.jsonl`
+- `historical-person-graph/fixtures/lvguang_gold_20_expectations.json`
 - `tools/osr_historical_person_graph.py`
+- `tools/osr_historical_person_graph_audit.py`
 - `historical-person-graph/run_kimi_gold20.sh`
 - `historical-person-graph/explorer.html`
 
@@ -35,6 +38,22 @@ The fixture is deliberately mixed:
 - primary phrase + bounded synthesis;
 - lost-source fragments preserved through later quotation layers;
 - textual variants that must remain variants.
+
+## Lower control already measured
+
+The deterministic baseline is deliberately weak but perfectly grounded:
+
+- source coverage: `1.00`
+- event coverage: `1.00`
+- slice coverage: `1.00`
+- grounded evidence: `1.00` (`41/41` checks)
+- slice match: `0.50`
+- event match: `0.80`
+- relation match: `0.00`
+- target-person unity: `1.00`
+- variant provenance preservation: `1.00`
+
+Kimi must improve semantic extraction without giving back evidence grounding.
 
 ## Execution
 
@@ -54,31 +73,43 @@ bash historical-person-graph/run_kimi_gold20.sh
 
 Do not paste credentials into shell history if a safer environment injection mechanism is available.
 
-## Acceptance criteria
+The runner is fail-closed: it writes to `.candidate`, runs the strict audit, and promotes to `live-out` only on PASS.
 
-The run must produce:
+## Strict acceptance criteria
 
-- exactly 20 source records in SQLite / graph JSON;
-- >= 1 resolved/candidate Lv Guang node;
-- events and Historical Slices for the evidence-bearing records;
+The current gold thresholds are:
+
+- source coverage `>= 1.00`
+- event coverage `>= 0.90`
+- slice coverage `>= 0.90`
+- slice match `>= 0.75`
+- event match `>= 0.70`
+- relation match `>= 1.00` for explicitly required relations (currently LG07/LG08 `kills`)
+- target-person unity `>= 1.00` — the same Lv Guang must not fracture into multiple nodes because free-form context wording changed
+- grounded evidence `>= 1.00`
+- variant provenance preservation `>= 1.00`
+
+Additionally:
+- exactly 20 source records must remain represented;
 - no silent merge of an unrelated same-name person;
-- every event/edge/slice traceable to `source_id` and stored provenance;
-- no source upgraded from synthesis to primary by the extractor;
-- parser survives fenced JSON or surrounding text;
-- repeated run is idempotent unless `--force` is used;
-- explorer can load the produced `lvguang_gold_20.graph.json`.
+- every event/edge/slice must remain traceable to `source_id` and stored provenance;
+- parser must survive fenced JSON or surrounding text;
+- repeated run must be idempotent unless `--force` is used;
+- explorer must load the promoted `lvguang_gold_20.graph.json`.
 
 ## Review targets
 
 After the first run, inspect failures in this order:
 
 1. JSON/API compatibility (`/v1/chat/completions`, response shape, model alias).
-2. Provenance loss or certainty inflation.
-3. Entity resolution mistakes.
-4. Event over-splitting / under-splitting.
-5. Temporal relation edge quality.
-6. Slice assignment quality, especially `TRUST_BETRAYAL`, `WAR_COMMAND`, `FAMILY_SUCCESSION`, `HISTORIOGRAPHY_BIAS`.
-7. UI usefulness for one-hop historical exploration.
+2. Unsupported evidence / pseudo-quotation.
+3. Provenance loss or certainty inflation.
+4. Entity resolution mistakes, especially Lv Guang node fragmentation.
+5. Missing explicit relation edges, especially LG07/LG08 kills.
+6. Event over-splitting / under-splitting.
+7. Temporal relation edge quality.
+8. Slice assignment quality, especially `TRUST_BETRAYAL`, `WAR_COMMAND`, `FAMILY_SUCCESSION`, `HISTORIOGRAPHY_BIAS`.
+9. UI usefulness for one-hop historical exploration.
 
 ## Patch policy
 
@@ -89,7 +120,8 @@ At completion, report:
 - exact model route used (model alias only, no credential);
 - processed / failed counts;
 - node / edge / event / slice counts;
+- complete `audit.json` metric summary;
 - entity-resolution errors found;
-- certainty/provenance errors found;
+- certainty/provenance/grounding errors found;
 - files changed;
 - next highest-information-gain test.
