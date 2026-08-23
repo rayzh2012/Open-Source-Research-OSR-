@@ -1,0 +1,40 @@
+name: OSR M4 Research Aggregation
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/feature_extraction_status.json
+      - control/m4_aggregation_request.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - name: Gate on M3 PASS
+        shell: python
+        run: |
+          import json, pathlib
+          p=pathlib.Path('control/feature_extraction_status.json')
+          if not p.exists(): raise SystemExit('M3 status missing')
+          s=json.load(open(p,encoding='utf-8'))
+          if s.get('status')!='PASS' or int(s.get('shards_scanned',0))<1788:
+              raise SystemExit(f'M3 not complete: {s}')
+      - name: Build compact research aggregation
+        run: python tools/osr_m4_aggregate_v1.py
+      - name: Commit M4 aggregation
+        run: |
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/research_aggregation_v1.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'm4: build research aggregation v1'
+          git pull --rebase origin stage2-direct-miner-v3-1
+          git push origin HEAD:stage2-direct-miner-v3-1
