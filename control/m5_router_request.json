@@ -1,7 +1,7 @@
 {
-  "id": 2,
-  "run_id": "m5-router-v1-smoke-002",
-  "terms": ["女娲", "共工", "洪水", "治水", "不周山"],
+  "id": 3,
+  "run_id": "m5-router-fusion-chronology-001",
+  "terms": ["共工", "不周山", "女娲", "补天", "天柱", "洪水"],
   "top_k": 50,
-  "purpose": "Trigger M5 shard-router v1 smoke over the completed M2 compact query index. Rank the most relevant shards for a cross-term flood / Gonggong / Nüwa hypothesis cluster without rescanning raw corpus."
+  "purpose": "Research routing pass for fusion chronology: identify shards most likely to preserve discussions of when the Gonggong-Buzhou motif became fused with the Nuwa-mends-heaven motif. Use only the completed M2 compact query index; do not rescan the 508GB raw corpus. Counts are routing evidence only, not historical chronology claims."
 }
