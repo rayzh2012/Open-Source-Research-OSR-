@@ -1,0 +1,12 @@
+{
+  "id": 1,
+  "run_id": "dryrun-fusion-chronology-20260824-001",
+  "router_result": "control/m5_router_result.json",
+  "expected_router_run_id": "m5-router-fusion-chronology-001",
+  "top_n_shards": 12,
+  "terms": ["共工", "不周山", "女娲", "补天", "天柱", "洪水"],
+  "max_rows_per_shard": 20,
+  "context_chars": 260,
+  "min_local_terms": 2,
+  "purpose": "Zero-download preflight validation of the OSR research workflow. This file must never trigger the real corpus retrieval workflow."
+}
