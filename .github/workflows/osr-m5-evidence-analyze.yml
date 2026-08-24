@@ -22,11 +22,22 @@ jobs:
         with:
           python-version: '3.12'
       - run: python tools/osr_m5_evidence_analyzer.py
+      - name: Archive run-specific analysis
+        shell: python
+        run: |
+          import json, pathlib, shutil
+          p=pathlib.Path('control/m5_evidence_analysis.json')
+          d=json.loads(p.read_text('utf-8'))
+          run=d.get('run_id')
+          if run:
+              out=pathlib.Path('control/research_runs')/run
+              out.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(p,out/'evidence_analysis.json')
       - name: Commit analysis
         run: |
           git config user.name 'osr-actions-bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add control/m5_evidence_analysis.json
+          git add control/m5_evidence_analysis.json control/research_runs/
           git diff --cached --quiet && exit 0
           git commit -m 'm5: evidence analysis'
           git pull --rebase origin stage2-direct-miner-v3-1
