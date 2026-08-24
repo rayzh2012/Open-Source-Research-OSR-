@@ -1,0 +1,39 @@
+{
+  "format": "osr-research-source-profile/v1",
+  "profile_id": "myth-ming-qing-dense-v1",
+  "priority": "dense-source-first",
+  "purpose": "Mine high-density Ming-Qing and source-rich late-imperial materials first for myth variants, quotations, local cult records, gazetteers, encyclopedic compilations, notebooks, ritual records, and source citations; use earlier Han-Jin texts primarily for final source verification rather than default bulk scanning.",
+  "preferred_source_cues": [
+    "明代", "明朝", "大明", "洪武", "永乐", "宣德", "正统", "成化", "弘治", "正德", "嘉靖", "隆庆", "万历", "天启", "崇祯",
+    "清代", "清朝", "大清", "顺治", "康熙", "雍正", "乾隆", "嘉庆", "道光", "咸丰", "同治", "光绪", "宣统",
+    "方志", "通志", "府志", "州志", "县志", "厅志", "山志", "寺志", "庙志", "祠志",
+    "笔记", "类书", "谱牒", "族谱", "家谱", "神谱", "祠祀", "祀典", "祭祀", "庙祀", "祠庙", "神祠",
+    "四库全书", "四库提要", "古今图书集成", "永乐大典", "续修四库"
+  ],
+  "preferred_source_types": [
+    "local_gazetteer", "gazetteer", "notebook", "encyclopedic_compilation", "ritual_record", "temple_record", "genealogy", "commentary", "quotation_chain"
+  ],
+  "selection": {
+    "require_preferred_source_cue": true,
+    "source_cue_search_scope": ["snippet", "document_head", "metadata"],
+    "rank_source_cue_count_before_general_term_density": true
+  },
+  "budget": {
+    "initial_top_n_shards": 4,
+    "hard_default_top_n_shards": 4,
+    "expand_to_8_only_if": {
+      "minimum_rows_with_source_cue": 20,
+      "minimum_unique_source_titles": 8
+    },
+    "expand_to_12_only_if": {
+      "minimum_rows_with_source_cue": 50,
+      "minimum_unique_source_titles": 20
+    },
+    "rule": "Do not scale raw shard downloads merely because a query is interesting; scale only when evidence yield per downloaded GiB justifies it."
+  },
+  "chronology_policy": {
+    "bulk_priority": ["Ming-Qing", "Song-Yuan", "modern_scholarship_for_citation_routing"],
+    "verification_priority": ["pre-Qin", "Han", "Wei-Jin-Northern-Southern", "Sui-Tang"],
+    "note": "Late dense sources are discovery layers; early texts remain higher-value for dating and historical-textual claims."
+  }
+}
