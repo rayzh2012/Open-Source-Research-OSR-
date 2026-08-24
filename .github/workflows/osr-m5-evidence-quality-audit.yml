@@ -1,0 +1,33 @@
+name: OSR M5 Evidence Quality Audit
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/m5_exact_evidence_result.json
+      - tools/osr_m5_evidence_quality_audit.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tools/osr_m5_evidence_quality_audit.py
+      - name: Commit audit
+        run: |
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/m5_evidence_quality_audit.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'm5: evidence quality audit'
+          git pull --rebase origin stage2-direct-miner-v3-1
+          git push origin HEAD:stage2-direct-miner-v3-1
