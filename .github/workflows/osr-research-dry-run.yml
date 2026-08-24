@@ -1,6 +1,10 @@
 name: OSR Research DRY RUN
 
 on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/m5_exact_evidence_request_dryrun.json
   workflow_dispatch:
     inputs:
       request_path:
@@ -28,7 +32,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Validate request / router / bounds / archive target
+
+      - name: Push-triggered zero-download validation
+        if: github.event_name == 'push'
+        run: python tools/osr_research_preflight.py --request control/m5_exact_evidence_request_dryrun.json
+
+      - name: Manual validation
+        if: github.event_name == 'workflow_dispatch'
         env:
           REQUEST_PATH: ${{ inputs.request_path }}
           ALLOW_EXISTING: ${{ inputs.allow_existing_run }}
@@ -38,6 +48,7 @@ jobs:
           else
             python tools/osr_research_preflight.py --request "$REQUEST_PATH"
           fi
+
       - name: Assert dry-run contract
         run: |
           echo 'DRY RUN contract: no Hugging Face corpus download; no Notion write; no branch write; no paid/larger/GPU runner.'
