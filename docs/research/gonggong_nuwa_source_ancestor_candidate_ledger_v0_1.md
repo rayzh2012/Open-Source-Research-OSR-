@@ -1,4 +1,4 @@
-# Gonggong–Nüwa Source-Ancestor Candidate Ledger v0.1
+# Gonggong–Nüwa Source-Ancestor Candidate Ledger v0.2
 
 Status: **SOURCE-CRITICAL RESEARCH LEDGER**
 
@@ -110,21 +110,43 @@ Status: **SECONDARY RECEPTION / COMPARATIVE MATERIAL**.
 
 These rows are useful for mapping later persistence and reinterpretation, not for dating the original fusion.
 
+### C9 — Tang–Song leishu preserve competing arrangements rather than one fixed causal chain
+Role: **quotation-chain / transmission control**.
+
+New audit of `太平御览 / 艺文类聚` materially sharpens the transmission model:
+
+1. `太平御览` quoting received `列子·汤问` preserves the explicit sequence:
+   - Nüwa repairs heaven and establishes the four poles first;
+   - **`其后`** Gonggong contends with Zhuanxu and strikes Buzhou.
+   This is incompatible with the later causal narrative `Gonggong damage -> Nüwa repairs that damage`.
+
+2. `太平御览` and `艺文类聚` quoting `帝王世纪` place a Gonggong polity / strong lord at the end of Nüwa's reign (`其末有诸侯共工氏...`), but do not say that Gonggong's Buzhou strike caused Nüwa's repair.
+
+3. The same leishu tradition preserves the Huainanzi Nüwa repair passage independently: four poles fail, Nüwa repairs heaven, cuts the Ao's feet, and suppresses flood/disaster. Gonggong is not inserted into that quoted causal frame.
+
+4. Later leishu/encyclopedic preservation therefore demonstrates that the received textual ecosystem continued to carry **multiple orderings and source bundles side by side**, rather than converging everywhere on a single early causal biography.
+
+Status: **STRONG TRANSMISSION EVIDENCE AGAINST RETROJECTING THE LATER FUSED PLOT INTO ALL EARLIER SOURCES**.
+
+Important caveat:
+Leishu are later compilations and must not be used to back-date the wording of the works they quote without textual-history analysis. Their value here is as witnesses to what distinct source configurations were still being transmitted and attributed.
+
 ## Negative result that matters
-Within the current **311-row, top-12-shard, source-critical sample**, no named text earlier than Wang Chong has yet been identified that unambiguously states the full causal chain:
+Within the current **311-row, top-12-shard, source-critical sample**, and in the newly checked leishu quotation chains, no named text earlier than Wang Chong has yet been identified that unambiguously states the full causal chain:
 
 `共工触不周山 → 天穹破坏 → 女娲因此补天/立四极`.
 
 This is a meaningful negative result but **not an exhaustive proof of absence**, because:
 - only one corpus (`Literature-zh`) contributes to this sample;
 - routing is top-shard/high-yield rather than exhaustive source-bibliography sampling;
-- lost works and quotation fragments may survive outside the corpus.
+- lost works and quotation fragments may survive outside the corpus;
+- leishu preserve quotations through later editorial/transmission layers.
 
 ## Current best model
 `separate / variable earlier myth complexes`
 → `learned textual circulation and convergence`
 → **fusion attested explicitly by Wang Chong**
-→ `continued competing arrangements`
+→ `continued competing arrangements (including Nüwa-first / Gonggong-later)`
 → `later clean historical/mythographic canonization (e.g. Sima Zhen)`
 → `modern mass-retelling fusion`.
 
@@ -133,11 +155,12 @@ This is a meaningful negative result but **not an exhaustive proof of absence**,
 - Do not promote `儒书 = a single lost book`.
 - Do not promote `Huainanzi already contained the exact Sima Zhen sequence`.
 - Do not use modern fiction/folklore restatements to date an ancient textual motif.
+- Do not use later leishu quotation order alone to back-date a received Liezi/Diwang Shiji passage.
 - Any proposed pre-Wang ancestor must have exact work/fragment identity, date/transmission argument, and wording sufficient to demonstrate the causal link.
 
 ## Next highest-information searches
 1. Han–Jin quotation/commentary chains around Wang Chong, Gao You, Wang Yi, Ying Shao, Zhang Zhan.
-2. `太平御览 / 艺文类聚 / 初学记` quotations that may preserve lost earlier wording.
-3. Lost-book fragments and leishu quotations using `共工 / 不周 / 女娲 / 五色石 / 四极` in one causal passage.
-4. Dedicated transmission audit of received `列子·汤问`.
-5. Broader source-critical routing only if these compact citation chains fail to identify an earlier witness.
+2. Dedicated textual-history audit of the `列子·汤问` Nüwa-first / Gonggong-later wording.
+3. Track `帝王世纪` fragment transmission and ask whether its Nüwa-era Gonggong notice was ever linked to the Buzhou episode in early quotations.
+4. Search lost-book fragments / `意林` / leishu quotations using `共工 / 不周 / 女娲 / 五色石 / 四极` in one causal passage.
+5. Broader source-critical routing only if compact citation-chain work remains negative.
