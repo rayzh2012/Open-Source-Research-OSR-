@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import os
 import pathlib
+import re
 
 
 def fail(msg: str) -> None:
@@ -9,11 +11,74 @@ def fail(msg: str) -> None:
     raise SystemExit(2)
 
 
+def cost_guard(workflow_path: str | None) -> dict:
+    """Fail closed before any corpus network access if a run could become billable."""
+    token_names = (
+        "HF_TOKEN",
+        "HUGGING_FACE_HUB_TOKEN",
+        "HUGGINGFACE_TOKEN",
+        "HF_HUB_TOKEN",
+    )
+    present_tokens = [name for name in token_names if os.environ.get(name)]
+    if present_tokens:
+        fail(f"cost guard: authenticated Hugging Face token present: {present_tokens}")
+
+    repo_visibility = None
+    event_path = os.environ.get("GITHUB_EVENT_PATH")
+    if event_path and pathlib.Path(event_path).exists():
+        try:
+            event = json.loads(pathlib.Path(event_path).read_text("utf-8"))
+            repo = event.get("repository") or {}
+            private = repo.get("private")
+            visibility = repo.get("visibility")
+            repo_visibility = visibility or ("private" if private else "public" if private is False else None)
+            if private is True or visibility == "private":
+                fail("cost guard: repository is private; standard hosted-runner minutes may be billable")
+        except SystemExit:
+            raise
+        except Exception as e:
+            fail(f"cost guard: cannot validate GitHub repository visibility: {e}")
+
+    workflow_runner = None
+    if workflow_path:
+        wp = pathlib.Path(workflow_path)
+        if not wp.exists():
+            fail(f"cost guard: workflow not found: {wp}")
+        text = wp.read_text("utf-8")
+        runners = [x.strip(" '\"") for x in re.findall(r"^\s*runs-on:\s*([^#\n]+)", text, flags=re.M)]
+        allowed = {"ubuntu-latest", "ubuntu-24.04", "ubuntu-22.04", "ubuntu-slim"}
+        if not runners:
+            fail("cost guard: workflow has no statically verifiable runs-on label")
+        bad = [r for r in runners if r not in allowed]
+        if bad:
+            fail(f"cost guard: non-standard or unapproved runner label(s): {bad}")
+        workflow_runner = sorted(set(runners))
+        forbidden_markers = (
+            "secrets.HF_TOKEN",
+            "secrets.HUGGING_FACE_HUB_TOKEN",
+            "secrets.HUGGINGFACE_TOKEN",
+            "secrets.HF_HUB_TOKEN",
+        )
+        found = [m for m in forbidden_markers if m in text]
+        if found:
+            fail(f"cost guard: workflow wires authenticated HF credentials: {found}")
+
+    return {
+        "repo_visibility": repo_visibility,
+        "workflow_runner": workflow_runner,
+        "hf_authentication": "anonymous_public_download_only",
+        "paid_compute_allowed": False,
+    }
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Cheap/no-network preflight for OSR research requests.")
     ap.add_argument("--request", required=True)
+    ap.add_argument("--workflow")
     ap.add_argument("--allow-existing-run", action="store_true")
     args = ap.parse_args()
+
+    cost = cost_guard(args.workflow)
 
     p = pathlib.Path(args.request)
     if not p.exists():
@@ -128,6 +193,7 @@ def main() -> None:
         "status": "DRY_RUN_PASS",
         "network_used": False,
         "writes_performed": False,
+        "cost_guard": cost,
         "request": str(p),
         "run_id": run_id,
         "router_run_id": router_run_id,
