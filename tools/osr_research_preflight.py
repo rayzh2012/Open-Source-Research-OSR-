@@ -2,7 +2,6 @@
 import argparse
 import json
 import pathlib
-import sys
 
 
 def fail(msg: str) -> None:
@@ -39,11 +38,22 @@ def main() -> None:
         if len(set(terms)) != len(terms):
             fail("terms must be unique")
 
+    required = req.get("required_any_terms")
+    if required is not None:
+        if not isinstance(required, list) or not required or not all(isinstance(x, str) and x.strip() for x in required):
+            fail("required_any_terms must be a non-empty list of non-empty strings")
+        if len(set(required)) != len(required):
+            fail("required_any_terms must be unique")
+        if not terms or any(x not in terms for x in required):
+            fail("required_any_terms must be a subset of terms")
+
     numeric_bounds = {
         "top_n_shards": (1, 100),
         "max_rows_per_shard": (1, 500),
         "context_chars": (40, 4000),
         "min_local_terms": (1, len(terms) if terms else 100),
+        "document_head_chars": (0, 10000),
+        "max_occurrences_per_term": (1, 100),
     }
     for key, (lo, hi) in numeric_bounds.items():
         if key in req:
@@ -74,10 +84,10 @@ def main() -> None:
         top_n = int(req.get("top_n_shards", 12))
         if top_n > len(ranked):
             fail(f"top_n_shards={top_n} exceeds ranked_shards={len(ranked)}")
-        required = {"source", "repo", "file"}
+        required_fields = {"source", "repo", "file"}
         for i, row in enumerate(ranked[:top_n]):
-            if not isinstance(row, dict) or not required.issubset(row):
-                fail(f"ranked_shards[{i}] missing one of {sorted(required)}")
+            if not isinstance(row, dict) or not required_fields.issubset(row):
+                fail(f"ranked_shards[{i}] missing one of {sorted(required_fields)}")
 
     archive = pathlib.Path("control/research_runs") / run_id
     existing = archive.exists() and any(archive.iterdir())
@@ -92,6 +102,7 @@ def main() -> None:
         "run_id": run_id,
         "router_run_id": router_run_id,
         "term_count": len(terms or []),
+        "required_any_term_count": len(required or []),
         "top_n_shards": int(req.get("top_n_shards", 0) or 0),
         "archive_target": str(archive),
         "archive_already_exists": existing,
