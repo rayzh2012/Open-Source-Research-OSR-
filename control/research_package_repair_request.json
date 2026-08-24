@@ -1,0 +1,7 @@
+{
+  "run_id": "m5-exact-source-ancestor-smoke-001",
+  "mode": "compact_only",
+  "raw_corpus_download": false,
+  "reason": "Rebuild corrected analyzer/quality/source/graph/notion payload and archive a complete 7-component package without any Hugging Face shard download.",
+  "requested_at": "2026-08-24T15:16:00-04:00"
+}
