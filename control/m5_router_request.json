@@ -1,7 +1,7 @@
 {
-  "id": 3,
-  "run_id": "m5-router-fusion-chronology-001",
-  "terms": ["共工", "不周山", "女娲", "补天", "天柱", "洪水"],
+  "id": 4,
+  "run_id": "m5-router-ming-qing-dense-001",
+  "terms": ["女娲", "共工", "炎帝", "神农", "黄帝", "洪水", "治水", "补天", "不周山", "祭祀", "祖灵", "图腾"],
   "top_k": 50,
-  "purpose": "Research routing pass for fusion chronology: identify shards most likely to preserve discussions of when the Gonggong-Buzhou motif became fused with the Nuwa-mends-heaven motif. Use only the completed M2 compact query index; do not rescan the 508GB raw corpus. Counts are routing evidence only, not historical chronology claims."
+  "purpose": "Rank myth-rich candidate shards from the compact M2 index for a Ming-Qing dense-source smoke. Exact retrieval will apply the source profile and begin with only 4 shards."
 }
