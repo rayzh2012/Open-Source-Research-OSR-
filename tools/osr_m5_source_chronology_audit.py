@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# v1.0.1: explicit trigger after workflow installation; cue-based routing only.
 import collections, json, pathlib, re
 
 SRC=pathlib.Path('control/m5_exact_evidence_result.json')
@@ -37,7 +38,6 @@ for r in rows:
     elif ethno: genre='ethnographic_or_folklore_cues'
     elif classical: genre='classical_text_or_commentary_cues'
     else: genre='unclassified'
-    # Candidate score is only routing priority for source audit, not historical confidence.
     score=fusion_count*10 + min(len(classical),4)*3 + min(len(books),4)*2 + (2 if ethno else 0) - (6 if fiction else 0)
     audited.append({
       'source':r.get('source'),'file':r.get('file'),'row':r.get('row'),'row_sha256':r.get('row_sha256'),
