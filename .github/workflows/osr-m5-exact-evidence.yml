@@ -49,13 +49,7 @@ jobs:
       - name: Graph prep — local textual edges only
         run: python tools/osr_m6_graph_prep.py
 
-      - name: Build and optionally send Notion writeback
-        env:
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID }}
-        run: python tools/osr_notion_writeback.py
-
-      - name: Verify component run IDs agree
+      - name: Verify core component run IDs before writeback
         run: |
           python - <<'PY'
           import json, pathlib
@@ -75,6 +69,27 @@ jobs:
           print(json.dumps({'target':target,'components':vals,'mismatches':bad},ensure_ascii=False,indent=2))
           if bad: raise SystemExit(5)
           PY
+
+      - name: Build and optionally send Notion writeback
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID }}
+        run: python tools/osr_notion_writeback.py
+
+      - name: Archive complete research package + checksums
+        run: python tools/osr_archive_research_package.py
+
+      - name: Verify archive manifest exists and is COMPLETE
+        shell: python
+        run: |
+          import json, pathlib
+          run=json.load(open('control/m5_exact_evidence_summary.json',encoding='utf-8'))['run_id']
+          p=pathlib.Path('control/research_runs')/run/'run_manifest.json'
+          if not p.exists(): raise SystemExit(f'missing run manifest: {p}')
+          m=json.loads(p.read_text('utf-8'))
+          if m.get('status')!='COMPLETE' or m.get('component_count')!=7:
+              raise SystemExit(f'incomplete research package: {m}')
+          print(json.dumps({'status':'PACKAGE_GATE_PASS','run_id':run,'components':m.get('component_count')},ensure_ascii=False))
 
       - name: Commit complete research package once
         run: |
