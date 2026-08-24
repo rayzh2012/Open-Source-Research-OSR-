@@ -64,6 +64,36 @@ def main() -> None:
             if not (lo <= v <= hi):
                 fail(f"{key} out of bounds: {v}, expected {lo}..{hi}")
 
+    profile = None
+    profile_id = None
+    profile_path = req.get("research_profile")
+    if profile_path:
+        pp = pathlib.Path(profile_path)
+        if not pp.exists():
+            fail(f"research profile not found: {pp}")
+        try:
+            profile = json.loads(pp.read_text("utf-8"))
+        except Exception as e:
+            fail(f"invalid research profile JSON: {e}")
+        profile_id = profile.get("profile_id")
+        budget = profile.get("budget") or {}
+        default_top_n = int(budget.get("hard_default_top_n_shards", budget.get("initial_top_n_shards", 4)))
+        top_n = int(req.get("top_n_shards", default_top_n))
+        if top_n > default_top_n:
+            justification = req.get("scale_justification")
+            if not isinstance(justification, dict) or not justification:
+                fail(f"research profile budget gate: top_n_shards={top_n} exceeds default={default_top_n}; scale_justification from a prior yield measurement is required")
+            prior_rows = int(justification.get("prior_rows_with_source_cue", 0) or 0)
+            prior_titles = int(justification.get("prior_unique_source_titles", 0) or 0)
+            if top_n <= 8:
+                gate = budget.get("expand_to_8_only_if") or {}
+            else:
+                gate = budget.get("expand_to_12_only_if") or {}
+            min_rows = int(gate.get("minimum_rows_with_source_cue", 0) or 0)
+            min_titles = int(gate.get("minimum_unique_source_titles", 0) or 0)
+            if prior_rows < min_rows or prior_titles < min_titles:
+                fail(f"research profile scale gate not met: rows {prior_rows}/{min_rows}, unique titles {prior_titles}/{min_titles}")
+
     router_path = req.get("router_result")
     router_run_id = None
     if router_path:
@@ -101,6 +131,7 @@ def main() -> None:
         "request": str(p),
         "run_id": run_id,
         "router_run_id": router_run_id,
+        "research_profile_id": profile_id,
         "term_count": len(terms or []),
         "required_any_term_count": len(required or []),
         "top_n_shards": int(req.get("top_n_shards", 0) or 0),
