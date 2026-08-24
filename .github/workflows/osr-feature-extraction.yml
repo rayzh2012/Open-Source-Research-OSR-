@@ -22,6 +22,7 @@ jobs:
       worker_count: ${{ steps.plan.outputs.worker_count }}
       limit_per_worker: ${{ steps.plan.outputs.limit_per_worker }}
       run_id: ${{ steps.plan.outputs.run_id }}
+      expected_shards: ${{ steps.plan.outputs.expected_shards }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,15 +30,21 @@ jobs:
       - id: plan
         shell: python
         run: |
-          import json, os
+          import json, os, pathlib
           req=json.load(open('control/feature_extraction_request.json',encoding='utf-8'))
           assert req.get('action') == 'FEATURE_EXTRACT', req
           n=int(req.get('worker_count',1)); assert 1 <= n <= 20
           limit=int(req.get('limit_per_worker',0)); assert limit >= 0
           run_id=str(req.get('run_id') or f"feature-{os.environ['GITHUB_RUN_ID']}")
+          if any(x in run_id for x in ('/','\\','..')): raise ValueError('unsafe run_id')
+          m2=json.loads(pathlib.Path('control/stage2_query_index_summary.json').read_text('utf-8'))
+          assert m2.get('status') == 'PASS', 'M2 compact index must be PASS before M3 full'
+          expected=int(m2.get('shards_scanned') or 0)
+          assert expected > 0
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:
               f.write('workers='+json.dumps(list(range(n)))+'\n')
-              f.write(f'worker_count={n}\nlimit_per_worker={limit}\nrun_id={run_id}\n')
+              f.write(f'worker_count={n}\nlimit_per_worker={limit}\nrun_id={run_id}\nexpected_shards={expected}\n')
+          print(json.dumps({'status':'DRY_RUN_PASS','run_id':run_id,'worker_count':n,'limit_per_worker':limit,'expected_shards':expected,'paid_runner':False},ensure_ascii=False))
 
   extract:
     needs: plan
@@ -64,17 +71,19 @@ jobs:
             --worker-count '${{ needs.plan.outputs.worker_count }}' \
             --limit-per-worker '${{ needs.plan.outputs.limit_per_worker }}' \
             --out-dir 'out/worker-${{ matrix.worker }}'
-      - name: Upload feature-store partition
+      - name: Upload feature-store partition even on worker failure
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: osr-features-${{ needs.plan.outputs.run_id }}-worker-${{ matrix.worker }}
           path: out/worker-${{ matrix.worker }}
+          if-no-files-found: warn
           retention-days: 7
           compression-level: 0
 
   reduce:
     needs: [plan, extract]
-    if: always()
+    if: always() && needs.plan.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -84,106 +93,140 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install --disable-pip-version-check pyarrow==21.0.0
-      - uses: actions/download-artifact@v4
+      - name: Download whatever worker artifacts exist
+        continue-on-error: true
+        uses: actions/download-artifact@v4
         with:
           pattern: osr-features-${{ needs.plan.outputs.run_id }}-worker-*
           path: _feature_results
-      - name: Reduce feature catalog and status
+      - name: Reduce feature catalog and always write strict status
         shell: python
         env:
           RUN_ID: ${{ needs.plan.outputs.run_id }}
+          EXPECTED_WORKERS: ${{ needs.plan.outputs.worker_count }}
+          EXPECTED_SHARDS: ${{ needs.plan.outputs.expected_shards }}
+          EXTRACT_JOB_RESULT: ${{ needs.extract.result }}
         run: |
-          import collections, hashlib, json, os, pathlib, time
+          import collections, hashlib, json, os, pathlib, time, traceback
           import pyarrow.parquet as pq
 
           root=pathlib.Path('_feature_results')
+          root.mkdir(exist_ok=True)
+          expected_workers=int(os.environ['EXPECTED_WORKERS'])
+          expected_shards=int(os.environ['EXPECTED_SHARDS'])
+          errors=[]
           manifests=[]
           for p in root.rglob('manifest.json'):
-              manifests.append(json.loads(p.read_text('utf-8')))
+              try: manifests.append(json.loads(p.read_text('utf-8')))
+              except Exception as e: errors.append(f'manifest_read:{p}:{e!r}')
 
           schema_bytes=pathlib.Path('control/feature_schema_v1.json').read_bytes()
           schema=json.loads(schema_bytes.decode('utf-8'))
           schema_sha=hashlib.sha256(schema_bytes).hexdigest()
+          bad_schema=[]
+          failed_shards=[]
+          completed_from_manifests=0
+          assigned_from_manifests=0
           for m in manifests:
               if m.get('feature_schema_sha256') != schema_sha:
-                  raise RuntimeError(f"feature schema mismatch: {m.get('feature_schema_sha256')} != {schema_sha}")
+                  bad_schema.append({'worker_index':m.get('worker_index'),'got':m.get('feature_schema_sha256')})
+              completed_from_manifests += int(m.get('completed_shards') or 0)
+              assigned_from_manifests += int(m.get('assigned_shards') or 0)
+              failed_shards.extend(m.get('failures') or [])
 
-          feature_occ=collections.Counter()
-          feature_rows=collections.Counter()
+          feature_occ=collections.Counter(); feature_rows=collections.Counter()
           feature_family={x['id']:x['family'] for x in schema['features']}
-          pair_rows=collections.Counter()
-          corpus_stats=collections.defaultdict(lambda: collections.Counter())
-          shard_count=0
+          pair_rows=collections.Counter(); corpus_stats=collections.defaultdict(lambda: collections.Counter())
+          shard_keys=set()
 
-          for p in root.rglob('feature_totals.parquet'):
-              for r in pq.read_table(p).to_pylist():
-                  fid=r['feature_id']
-                  feature_occ[fid]+=int(r['occurrences'])
-                  feature_rows[fid]+=int(r['rows_with_feature'])
-                  if r.get('family'): feature_family[fid]=r['family']
-          for p in root.rglob('cooccurrence.parquet'):
-              for r in pq.read_table(p).to_pylist():
-                  pair_rows[(r['feature_a'],r['feature_b'])]+=int(r['rows_cooccurring'])
-          for p in root.rglob('shard_features.parquet'):
-              for r in pq.read_table(p).to_pylist():
-                  shard_count+=1
-                  c=corpus_stats[r['corpus']]
-                  for k in ['download_bytes','rows','rows_nonempty','signal_rows','chars','explicit_year_mentions','within_shard_duplicate_rows']:
-                      c[k]+=int(r.get(k) or 0)
+          def read_rows(pattern):
+              for p in root.rglob(pattern):
+                  try:
+                      for r in pq.read_table(p).to_pylist(): yield r
+                  except Exception as e:
+                      errors.append(f'parquet_read:{p}:{e!r}')
 
-          catalog={
-              'format':'osr-feature-catalog/v1',
-              'run_id':os.environ['RUN_ID'],
-              'feature_schema_version':schema.get('version'),
-              'feature_schema_sha256':schema_sha,
-              'shards_scanned':shard_count,
-              'workers_completed':len(manifests),
-              'corpus_stats':{k:dict(v) for k,v in sorted(corpus_stats.items())},
-              'features':[
-                  {
-                      'feature_id':fid,
-                      'family':feature_family.get(fid,'unknown'),
-                      'occurrences':int(feature_occ[fid]),
-                      'rows_with_feature':int(feature_rows[fid])
-                  }
-                  for fid in sorted(feature_occ, key=lambda f:(-feature_rows[f],f))
-              ],
-              'top_cooccurrence':[
-                  {'feature_a':a,'feature_b':b,'rows_cooccurring':int(n)}
-                  for (a,b),n in pair_rows.most_common(500)
-              ],
-              'raw_text_persisted':False,
-              'evidence_contract':'worker artifacts contain sparse row locators + row_sha256; exact source-row recheck required',
-              'created_unix':time.time(),
-          }
-          pathlib.Path('control/feature_catalog.json').write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n','utf-8')
+          for r in read_rows('feature_totals.parquet'):
+              fid=r['feature_id']; feature_occ[fid]+=int(r['occurrences']); feature_rows[fid]+=int(r['rows_with_feature'])
+              if r.get('family'): feature_family[fid]=r['family']
+          for r in read_rows('cooccurrence.parquet'):
+              pair_rows[(r['feature_a'],r['feature_b'])]+=int(r['rows_cooccurring'])
+          for r in read_rows('shard_features.parquet'):
+              key=(r.get('corpus'),r.get('repo'),r.get('shard'))
+              shard_keys.add(key)
+              c=corpus_stats[r['corpus']]
+              c['shards_scanned']+=1
+              for k in ['download_bytes','rows','rows_nonempty','signal_rows','chars','explicit_year_mentions','within_shard_duplicate_rows']:
+                  c[k]+=int(r.get(k) or 0)
 
-          total_bytes=sum(m.get('bytes_downloaded',0) for m in manifests)
-          elapsed=max([m.get('elapsed_seconds',0) for m in manifests] or [0])
+          shard_count=len(shard_keys)
+          workers_completed=len(manifests)
+          total_bytes=sum(int(m.get('bytes_downloaded') or 0) for m in manifests)
+          elapsed=max([float(m.get('elapsed_seconds') or 0) for m in manifests] or [0])
+          strict_complete=(
+              os.environ.get('EXTRACT_JOB_RESULT') == 'success' and
+              workers_completed == expected_workers and
+              shard_count == expected_shards and
+              completed_from_manifests == expected_shards and
+              assigned_from_manifests == expected_shards and
+              not failed_shards and not bad_schema and not errors
+          )
+
           status={
-              'status':'PASS' if manifests and shard_count else 'FAILED',
+              'status':'PASS' if strict_complete else ('PARTIAL' if shard_count or manifests else 'FAILED'),
               'run_id':os.environ['RUN_ID'],
               'feature_schema_version':schema.get('version'),
               'feature_schema_sha256':schema_sha,
-              'workers_completed':len(manifests),
+              'extract_job_result':os.environ.get('EXTRACT_JOB_RESULT'),
+              'expected_workers':expected_workers,
+              'workers_completed':workers_completed,
+              'expected_shards':expected_shards,
+              'assigned_shards_from_manifests':assigned_from_manifests,
+              'completed_shards_from_manifests':completed_from_manifests,
               'shards_scanned':shard_count,
+              'failed_shards_count':len(failed_shards),
+              'bad_schema_workers':bad_schema,
+              'reducer_errors':errors[:100],
               'bytes_downloaded':total_bytes,
               'aggregate_download_GiB':round(total_bytes/1024**3,3),
-              'signal_rows':sum(m.get('signal_rows',0) for m in manifests),
-              'rows_scanned':sum(m.get('rows_scanned',0) for m in manifests),
+              'signal_rows':sum(int(m.get('signal_rows') or 0) for m in manifests),
+              'rows_scanned':sum(int(m.get('rows_scanned') or 0) for m in manifests),
               'max_worker_elapsed_seconds':elapsed,
               'github_run_id':os.environ['GITHUB_RUN_ID'],
               'github_sha':os.environ['GITHUB_SHA'],
+              'strict_pass_rule':'extract=success AND workers=expected AND unique shards=expected AND assigned=completed=expected AND failures=0 AND schema/reducer errors=0',
               'finished_unix':time.time(),
           }
           pathlib.Path('control/feature_extraction_status.json').write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n','utf-8')
+
+          if shard_count:
+              catalog={
+                  'format':'osr-feature-catalog/v1.1',
+                  'run_id':os.environ['RUN_ID'],
+                  'status':status['status'],
+                  'feature_schema_version':schema.get('version'),
+                  'feature_schema_sha256':schema_sha,
+                  'shards_scanned':shard_count,
+                  'expected_shards':expected_shards,
+                  'workers_completed':workers_completed,
+                  'expected_workers':expected_workers,
+                  'corpus_stats':{k:dict(v) for k,v in sorted(corpus_stats.items())},
+                  'features':[{'feature_id':fid,'family':feature_family.get(fid,'unknown'),'occurrences':int(feature_occ[fid]),'rows_with_feature':int(feature_rows[fid])} for fid in sorted(feature_occ,key=lambda f:(-feature_rows[f],f))],
+                  'top_cooccurrence':[{'feature_a':a,'feature_b':b,'rows_cooccurring':int(n)} for (a,b),n in pair_rows.most_common(500)],
+                  'raw_text_persisted':False,
+                  'evidence_contract':'worker artifacts contain sparse row locators + row_sha256; exact source-row recheck required',
+                  'created_unix':time.time(),
+              }
+              pathlib.Path('control/feature_catalog.json').write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n','utf-8')
           print(json.dumps(status,ensure_ascii=False,indent=2))
-      - name: Commit compact feature catalog + status
+      - name: Commit compact feature status/catalog even when partial
+        if: always()
         run: |
           git config user.name 'osr-actions-bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add control/feature_catalog.json control/feature_extraction_status.json
+          git add control/feature_extraction_status.json
+          test -f control/feature_catalog.json && git add control/feature_catalog.json || true
           git diff --cached --quiet && exit 0
-          git commit -m "feature-store: catalog ${{ needs.plan.outputs.run_id }}"
+          git commit -m "feature-store: status ${{ needs.plan.outputs.run_id }}"
           git pull --rebase origin stage2-direct-miner-v3-1
           git push origin HEAD:stage2-direct-miner-v3-1
