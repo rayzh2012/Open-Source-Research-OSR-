@@ -1,0 +1,40 @@
+name: OSR M5 Exact Evidence Retrieval
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/m5_exact_evidence_request.json
+      - tools/osr_m5_exact_evidence.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: osr-m5-exact-evidence
+  cancel-in-progress: false
+
+jobs:
+  retrieve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pyarrow==21.0.0 requests==2.32.4 huggingface_hub==0.34.4
+      - name: Retrieve exact source rows
+        run: python tools/osr_m5_exact_evidence.py
+      - name: Commit evidence package
+        run: |
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/m5_exact_evidence_result.json control/m5_exact_evidence_summary.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'm5: exact evidence result'
+          git pull --rebase origin stage2-direct-miner-v3-1
+          git push origin HEAD:stage2-direct-miner-v3-1
