@@ -5,7 +5,6 @@ on:
     branches: [stage2-direct-miner-v3-1]
     paths:
       - control/m5_exact_evidence_request.json
-      - tools/osr_m5_exact_evidence.py
   workflow_dispatch:
 
 permissions:
@@ -33,7 +32,7 @@ jobs:
         run: |
           git config user.name 'osr-actions-bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add control/m5_exact_evidence_result.json control/m5_exact_evidence_summary.json
+          git add control/m5_exact_evidence_result.json control/m5_exact_evidence_summary.json control/research_runs/
           git diff --cached --quiet && exit 0
           git commit -m 'm5: exact evidence result'
           git pull --rebase origin stage2-direct-miner-v3-1
