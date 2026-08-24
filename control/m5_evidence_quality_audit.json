@@ -1,0 +1,47 @@
+{
+  "format": "osr-m5-evidence-quality-audit/v2",
+  "run_id": "m5-exact-evidence-flood-cluster-002",
+  "rows": 240,
+  "unique_full_row_hashes": 240,
+  "exact_row_duplicate_fraction": 0.0,
+  "unique_shards": 12,
+  "source_corpora": [
+    "Literature-zh"
+  ],
+  "source_corpus_count": 1,
+  "modern_marker_rows": 52,
+  "classical_marker_rows": 45,
+  "repeated_snippet_rows": 2,
+  "mean_row_matched_terms": 2.408,
+  "mean_local_matched_terms": 1.271,
+  "locality": {
+    "row_five_term_rows": 8,
+    "local_five_term_rows": 0,
+    "five_term_retention": 0.0,
+    "row_four_plus_term_rows": 25,
+    "local_four_plus_term_rows": 0,
+    "four_plus_retention": 0.0,
+    "local_two_plus_rows": 62
+  },
+  "selection_bias": {
+    "router_top_n_shards": 12,
+    "bounded_rows_per_shard": true,
+    "prevalence_inference_allowed": false
+  },
+  "risk_flags": [
+    "single_source_corpus_in_retrieved_sample",
+    "repeated_snippets_present",
+    "row_level_five_term_inflation_vs_local_window",
+    "row_level_four_plus_inflation_vs_local_window",
+    "top_shard_bounded_sampling_not_prevalence_estimate",
+    "source_identity_date_genre_not_yet_audited"
+  ],
+  "quality_gate": {
+    "local_window_required_for_default_graph": true,
+    "requires_independent_source_corpora": true,
+    "requires_source_identity_audit": true,
+    "requires_date_genre_audit": true,
+    "historical_fact_upgrade_allowed": false
+  },
+  "note": "Marker counts are heuristic contamination cues only. This sample is deliberately enriched by router rank and per-shard caps; it cannot estimate full-corpus prevalence. Source identity, edition, date, genre, and independent-source corroboration remain mandatory for historical inference."
+}
