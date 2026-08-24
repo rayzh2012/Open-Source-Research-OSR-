@@ -1,15 +1,22 @@
 name: OSR M4 Research Aggregation
 
 on:
+  workflow_run:
+    workflows: ["OSR 508GB Feature Extraction"]
+    types: [completed]
+    branches: [stage2-direct-miner-v3-1]
   push:
     branches: [stage2-direct-miner-v3-1]
     paths:
-      - control/feature_extraction_status.json
       - control/m4_aggregation_request.json
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: osr-m4-aggregate
+  cancel-in-progress: false
 
 jobs:
   aggregate:
@@ -18,22 +25,50 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: stage2-direct-miner-v3-1
-      - name: Gate on M3 PASS
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Gate on strict M3 PASS
         shell: python
         run: |
           import json, pathlib
           p=pathlib.Path('control/feature_extraction_status.json')
           if not p.exists(): raise SystemExit('M3 status missing')
           s=json.load(open(p,encoding='utf-8'))
-          if s.get('status')!='PASS' or int(s.get('shards_scanned',0))<1788:
-              raise SystemExit(f'M3 not complete: {s}')
+          required={
+            'status':'PASS',
+            'expected_workers':20,
+            'workers_completed':20,
+            'expected_shards':1788,
+            'shards_scanned':1788,
+            'failed_shards_count':0,
+          }
+          bad={k:{'expected':v,'got':s.get(k)} for k,v in required.items() if s.get(k)!=v}
+          if bad: raise SystemExit(f'M3 strict gate failed: {bad}')
+          if int(s.get('completed_shards_from_manifests',0)) != 1788:
+              raise SystemExit(f"M3 manifest completion mismatch: {s.get('completed_shards_from_manifests')}")
+          print(json.dumps({'status':'M3_GATE_PASS','run_id':s.get('run_id'),'shards':s.get('shards_scanned')},ensure_ascii=False))
       - name: Build compact research aggregation
         run: python tools/osr_m4_aggregate_v1.py
-      - name: Commit M4 aggregation
+      - name: Build and optionally send Notion writeback
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID }}
+        run: python tools/osr_m3_m4_notion_writeback.py
+      - name: Verify M4 input points to current M3 run
+        shell: python
+        run: |
+          import json
+          s=json.load(open('control/feature_extraction_status.json',encoding='utf-8'))
+          a=json.load(open('control/research_aggregation_v1.json',encoding='utf-8'))
+          if a.get('inputs',{}).get('feature_run_id') != s.get('run_id'):
+              raise SystemExit('M4/M3 run-id mismatch')
+          print({'status':'RUN_ID_MATCH','run_id':s.get('run_id')})
+      - name: Commit M4 aggregation + writeback payload
         run: |
           git config user.name 'osr-actions-bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add control/research_aggregation_v1.json
+          git add control/research_aggregation_v1.json control/m3_m4_notion_writeback.json
           git diff --cached --quiet && exit 0
           git commit -m 'm4: build research aggregation v1'
           git pull --rebase origin stage2-direct-miner-v3-1
