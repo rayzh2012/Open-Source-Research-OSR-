@@ -14,6 +14,17 @@ expected=req.get('expected_router_run_id')
 if expected and router.get('run_id') != expected:
     raise RuntimeError(f"router run mismatch: expected {expected}, got {router.get('run_id')}")
 
+profile={}
+profile_path=req.get('research_profile')
+if profile_path:
+    pp=pathlib.Path(profile_path)
+    if not pp.exists(): raise RuntimeError(f'research profile not found: {pp}')
+    profile=json.loads(pp.read_text('utf-8'))
+profile_id=profile.get('profile_id')
+profile_cues=list(profile.get('preferred_source_cues') or [])
+profile_selection=profile.get('selection') or {}
+require_profile_cue=bool(profile_selection.get('require_preferred_source_cue',False))
+
 # Preserve the previous current-pointer result before replacing it.
 if CURRENT.exists():
     previous=json.loads(CURRENT.read_text('utf-8'))
@@ -41,6 +52,10 @@ rows=[]; bytes_dl=0
 
 META_NAME_RE=re.compile(r'(^|_)(title|name|author|creator|source|book|journal|publication|publisher|date|year|time|url|uri|id|document_id|doc_id)($|_)',re.I)
 
+def cue_hits(text,cues):
+    if not text or not cues: return []
+    return [c for c in cues if c in text]
+
 def best_window(text,present):
     centers=[]
     for t in present:
@@ -50,22 +65,23 @@ def best_window(text,present):
             if p<0: break
             centers.append(p); seen+=1; start=p+len(t)
     if not centers:
-        return '',[],None,[]
+        return '',[],None,[],[]
     best=None
     for p in centers:
         s=max(0,p-ctx); e=min(len(text),p+ctx)
         sn=text[s:e]
         local=[t for t in terms if t in sn]
         required_local=[t for t in required_any_terms if t in sn]
+        local_profile=cue_hits(sn,profile_cues)
         poss=[]
         for t in local:
             q=sn.find(t)
             if q>=0: poss.append((q,q+len(t)))
         span=(max(x[1] for x in poss)-min(x[0] for x in poss)) if len(poss)>=2 else None
-        # Source-critical windows win first; then overall term density; then compactness.
-        score=(len(required_local),len(local),-(span if span is not None else 10**9))
-        if best is None or score>best[0]: best=(score,sn,local,span,required_local)
-    return best[1],best[2],best[3],best[4]
+        # Research-profile source cues win first; then source-critical terms; then term density and compactness.
+        score=(len(local_profile),len(required_local),len(local),-(span if span is not None else 10**9))
+        if best is None or score>best[0]: best=(score,sn,local,span,required_local,local_profile)
+    return best[1],best[2],best[3],best[4],best[5]
 
 def clean_meta(v):
     if v is None or isinstance(v,(bool,int,float)): return v
@@ -104,38 +120,49 @@ for rank,sh in enumerate(router['ranked_shards'][:top_n],1):
             present=[t for t in terms if t in text]
             if len(present)<2: continue
             if required_any and not (required_any & set(present)): continue
-            snippet,local_terms,local_span,required_local=best_window(text,present)
+            snippet,local_terms,local_span,required_local,local_profile=best_window(text,present)
             if len(local_terms)<min_local: continue
             if required_any and not required_local: continue
             metadata={k:clean_meta(dct[k][i]) for k in meta_cols if dct[k][i] is not None}
+            head=text[:head_chars]
+            profile_blob='\n'.join([snippet,head,json.dumps(metadata,ensure_ascii=False)])
+            profile_hits=cue_hits(profile_blob,profile_cues)
+            if require_profile_cue and not profile_hits: continue
             candidates.append({
                 'ranked_shard':rank,'source':sh['source'],'repo':repo,'file':fn,'row':ridx,
                 'row_sha256':hashlib.sha256(text.encode()).hexdigest(),
                 'matched_terms':present,'matched_term_count':len(present),
                 'local_terms':local_terms,'local_term_count':len(local_terms),'local_span_chars':local_span,
                 'required_local_terms':required_local,'required_local_term_count':len(required_local),
-                'text_length_chars':len(text),'document_head':text[:head_chars],
+                'research_profile_id':profile_id,'source_profile_hits':profile_hits,'source_profile_hit_count':len(profile_hits),
+                'local_source_profile_hits':local_profile,
+                'text_length_chars':len(text),'document_head':head,
                 'metadata':metadata,'snippet':snippet
             })
-    candidates.sort(key=lambda r:(-r['required_local_term_count'],-r['local_term_count'],-r['matched_term_count'],r['local_span_chars'] if r['local_span_chars'] is not None else 10**9,r['row']))
+    candidates.sort(key=lambda r:(-r['source_profile_hit_count'],-r['required_local_term_count'],-r['local_term_count'],-r['matched_term_count'],r['local_span_chars'] if r['local_span_chars'] is not None else 10**9,r['row']))
     rows.extend(candidates[:cap])
     local_file.unlink(missing_ok=True)
 
-rows.sort(key=lambda r:(-r['required_local_term_count'],-r['local_term_count'],-r['matched_term_count'],r['ranked_shard'],r['row']))
+rows.sort(key=lambda r:(-r['source_profile_hit_count'],-r['required_local_term_count'],-r['local_term_count'],-r['matched_term_count'],r['ranked_shard'],r['row']))
+unique_titles=sorted({str((r.get('metadata') or {}).get('title')).strip() for r in rows if (r.get('metadata') or {}).get('title')})
 out={
-  'format':'osr-exact-evidence/v2.2','run_id':req['run_id'],'router_run_id':router.get('run_id'),
+  'format':'osr-exact-evidence/v2.3','run_id':req['run_id'],'router_run_id':router.get('run_id'),
+  'research_profile':profile_path,'research_profile_id':profile_id,
   'terms':terms,'required_any_terms':required_any_terms,'top_n_shards':top_n,'min_local_terms':min_local,'rows_found':len(rows),
-  'bytes_downloaded':bytes_dl,'selection_mode':'required-source-term + best-local-window-per-shard','rows':rows
+  'bytes_downloaded':bytes_dl,'selection_mode':'source-profile + required-source-term + best-local-window-per-shard','rows':rows
 }
 summary={
   'status':'PASS','run_id':req['run_id'],'router_run_id':router.get('run_id'),'query_term_count':len(terms),
+  'research_profile_id':profile_id,'source_profile_required':require_profile_cue,
   'required_any_term_count':len(required_any_terms),'top_n_shards':top_n,'rows_found':len(rows),'bytes_downloaded':bytes_dl,
+  'rows_with_source_profile_cue':sum(1 for r in rows if r.get('source_profile_hit_count',0)>0),
+  'unique_source_titles':len(unique_titles),
   'all_query_term_rows':sum(1 for r in rows if r['local_term_count']==len(terms)),
   'four_plus_local_term_rows':sum(1 for r in rows if r['local_term_count']>=4),
   'three_plus_local_term_rows':sum(1 for r in rows if r['local_term_count']>=3),
   'rows_with_required_local_term':sum(1 for r in rows if r.get('required_local_term_count',0)>0),
   'rows_with_metadata':sum(1 for r in rows if r.get('metadata')),
-  'min_local_terms':min_local,'selection_mode':'required-source-term + best-local-window-per-shard'
+  'min_local_terms':min_local,'selection_mode':'source-profile + required-source-term + best-local-window-per-shard'
 }
 CURRENT.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n','utf-8')
 CURRENT_SUMMARY.write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n','utf-8')
