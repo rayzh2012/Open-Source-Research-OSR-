@@ -1,10 +1,13 @@
 {
-  "id": 2,
-  "run_id": "m5-exact-evidence-flood-cluster-002",
+  "id": 3,
+  "run_id": "m5-exact-evidence-fusion-chronology-001",
   "router_result": "control/m5_router_result.json",
+  "expected_router_run_id": "m5-router-fusion-chronology-001",
   "top_n_shards": 12,
-  "terms": ["女娲", "共工", "洪水", "治水", "不周山"],
+  "terms": ["共工", "不周山", "女娲", "补天", "天柱", "洪水"],
   "max_rows_per_shard": 20,
   "context_chars": 260,
-  "purpose": "Retrieve exact source rows from the highest-ranked M5 shards for the Gonggong-Nuwa-flood hypothesis cluster, preserving row hashes and provenance without rescanning the full corpus."
+  "min_local_terms": 2,
+  "max_occurrences_per_term": 8,
+  "purpose": "Retrieve the strongest local-window evidence for the chronology of fusion between the Gonggong-Buzhou motif and the Nuwa-mends-heaven motif. Prefer local co-presence over whole-document co-presence, preserve provenance, and archive the run-specific evidence package."
 }
