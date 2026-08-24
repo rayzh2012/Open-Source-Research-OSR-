@@ -5,6 +5,7 @@ on:
     branches: [stage2-direct-miner-v3-1]
     paths:
       - control/m5_exact_evidence_result.json
+      - control/m5_downstream_trigger.json
       - tools/osr_m5_evidence_analyzer.py
   workflow_dispatch:
 
