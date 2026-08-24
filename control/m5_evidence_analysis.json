@@ -1,0 +1,534 @@
+{
+  "format": "osr-m5-evidence-analysis/v2",
+  "run_id": "m5-exact-evidence-flood-cluster-002",
+  "rows_found": 240,
+  "unique_row_hashes": 240,
+  "exact_row_duplicate_fraction": 0.0,
+  "repeated_snippet_rows": 2,
+  "shards_with_evidence": 12,
+  "source_corpora": [
+    "Literature-zh"
+  ],
+  "selection_design": {
+    "router_ranked_top_shards": 12,
+    "max_rows_per_shard": "bounded by retrieval request",
+    "representative_prevalence_sample": false,
+    "warning": "Counts describe the bounded high-yield retrieval sample, not prevalence in the full corpus."
+  },
+  "row_level": {
+    "definition": "terms anywhere in the full source row/document",
+    "matched_term_count_histogram": {
+      "2": 175,
+      "3": 40,
+      "4": 17,
+      "5": 8
+    },
+    "four_plus_term_rows": 25,
+    "five_term_rows": 8,
+    "termset_counts": [
+      {
+        "terms": [
+          "治水",
+          "洪水"
+        ],
+        "rows": 89
+      },
+      {
+        "terms": [
+          "共工",
+          "洪水"
+        ],
+        "rows": 30
+      },
+      {
+        "terms": [
+          "女娲",
+          "洪水"
+        ],
+        "rows": 26
+      },
+      {
+        "terms": [
+          "共工",
+          "治水",
+          "洪水"
+        ],
+        "rows": 20
+      },
+      {
+        "terms": [
+          "共工",
+          "女娲",
+          "治水",
+          "洪水"
+        ],
+        "rows": 14
+      },
+      {
+        "terms": [
+          "女娲",
+          "治水"
+        ],
+        "rows": 13
+      },
+      {
+        "terms": [
+          "不周山",
+          "共工",
+          "女娲",
+          "治水",
+          "洪水"
+        ],
+        "rows": 8
+      },
+      {
+        "terms": [
+          "女娲",
+          "治水",
+          "洪水"
+        ],
+        "rows": 8
+      },
+      {
+        "terms": [
+          "不周山",
+          "共工"
+        ],
+        "rows": 7
+      },
+      {
+        "terms": [
+          "共工",
+          "治水"
+        ],
+        "rows": 5
+      },
+      {
+        "terms": [
+          "不周山",
+          "共工",
+          "女娲"
+        ],
+        "rows": 4
+      },
+      {
+        "terms": [
+          "共工",
+          "女娲",
+          "治水"
+        ],
+        "rows": 3
+      },
+      {
+        "terms": [
+          "共工",
+          "女娲",
+          "洪水"
+        ],
+        "rows": 3
+      },
+      {
+        "terms": [
+          "共工",
+          "女娲"
+        ],
+        "rows": 3
+      },
+      {
+        "terms": [
+          "不周山",
+          "共工",
+          "女娲",
+          "洪水"
+        ],
+        "rows": 2
+      },
+      {
+        "terms": [
+          "不周山",
+          "女娲",
+          "治水",
+          "洪水"
+        ],
+        "rows": 1
+      },
+      {
+        "terms": [
+          "不周山",
+          "女娲",
+          "洪水"
+        ],
+        "rows": 1
+      },
+      {
+        "terms": [
+          "不周山",
+          "共工",
+          "洪水"
+        ],
+        "rows": 1
+      },
+      {
+        "terms": [
+          "不周山",
+          "洪水"
+        ],
+        "rows": 1
+      },
+      {
+        "terms": [
+          "不周山",
+          "女娲"
+        ],
+        "rows": 1
+      }
+    ],
+    "pair_counts": [
+      {
+        "a": "治水",
+        "b": "洪水",
+        "rows": 140
+      },
+      {
+        "a": "共工",
+        "b": "洪水",
+        "rows": 78
+      },
+      {
+        "a": "女娲",
+        "b": "洪水",
+        "rows": 63
+      },
+      {
+        "a": "共工",
+        "b": "治水",
+        "rows": 50
+      },
+      {
+        "a": "女娲",
+        "b": "治水",
+        "rows": 47
+      },
+      {
+        "a": "共工",
+        "b": "女娲",
+        "rows": 37
+      },
+      {
+        "a": "不周山",
+        "b": "共工",
+        "rows": 22
+      },
+      {
+        "a": "不周山",
+        "b": "女娲",
+        "rows": 17
+      },
+      {
+        "a": "不周山",
+        "b": "洪水",
+        "rows": 14
+      },
+      {
+        "a": "不周山",
+        "b": "治水",
+        "rows": 9
+      }
+    ],
+    "pattern_counts": {
+      "gonggong_buzhou_collision": 22,
+      "nuwa_flood": 63,
+      "nuwa_buzhou": 17,
+      "gonggong_flood": 78,
+      "flood_control": 140,
+      "five_term_fusion": 8
+    }
+  },
+  "local_window": {
+    "definition": "terms physically present in the stored ~520-character snippet centered near the earliest hit",
+    "two_plus_term_rows": 62,
+    "four_plus_term_rows": 0,
+    "five_term_rows": 0,
+    "two_plus_retention_vs_row": 0.258333,
+    "four_plus_retention_vs_row": 0.0,
+    "five_term_retention_vs_row": 0.0,
+    "matched_term_count_histogram": {
+      "1": 178,
+      "2": 59,
+      "3": 3
+    },
+    "termset_counts": [
+      {
+        "terms": [
+          "洪水"
+        ],
+        "rows": 87
+      },
+      {
+        "terms": [
+          "治水"
+        ],
+        "rows": 33
+      },
+      {
+        "terms": [
+          "治水",
+          "洪水"
+        ],
+        "rows": 33
+      },
+      {
+        "terms": [
+          "女娲"
+        ],
+        "rows": 32
+      },
+      {
+        "terms": [
+          "共工"
+        ],
+        "rows": 24
+      },
+      {
+        "terms": [
+          "女娲",
+          "治水"
+        ],
+        "rows": 11
+      },
+      {
+        "terms": [
+          "不周山",
+          "共工"
+        ],
+        "rows": 5
+      },
+      {
+        "terms": [
+          "女娲",
+          "洪水"
+        ],
+        "rows": 4
+      },
+      {
+        "terms": [
+          "不周山",
+          "共工",
+          "女娲"
+        ],
+        "rows": 3
+      },
+      {
+        "terms": [
+          "不周山"
+        ],
+        "rows": 2
+      },
+      {
+        "terms": [
+          "共工",
+          "治水"
+        ],
+        "rows": 2
+      },
+      {
+        "terms": [
+          "共工",
+          "女娲"
+        ],
+        "rows": 2
+      },
+      {
+        "terms": [
+          "共工",
+          "洪水"
+        ],
+        "rows": 1
+      },
+      {
+        "terms": [
+          "不周山",
+          "洪水"
+        ],
+        "rows": 1
+      }
+    ],
+    "pair_counts": [
+      {
+        "a": "治水",
+        "b": "洪水",
+        "rows": 33
+      },
+      {
+        "a": "女娲",
+        "b": "治水",
+        "rows": 11
+      },
+      {
+        "a": "不周山",
+        "b": "共工",
+        "rows": 8
+      },
+      {
+        "a": "共工",
+        "b": "女娲",
+        "rows": 5
+      },
+      {
+        "a": "女娲",
+        "b": "洪水",
+        "rows": 4
+      },
+      {
+        "a": "不周山",
+        "b": "女娲",
+        "rows": 3
+      },
+      {
+        "a": "共工",
+        "b": "治水",
+        "rows": 2
+      },
+      {
+        "a": "共工",
+        "b": "洪水",
+        "rows": 1
+      },
+      {
+        "a": "不周山",
+        "b": "洪水",
+        "rows": 1
+      }
+    ],
+    "pattern_counts": {
+      "gonggong_flood": 1,
+      "flood_control": 33,
+      "gonggong_buzhou_collision": 8,
+      "nuwa_buzhou": 3,
+      "nuwa_flood": 4
+    },
+    "median_observed_term_span_chars": 36,
+    "max_observed_term_span_chars": 247
+  },
+  "locality_retention_matrix": [
+    {
+      "row_terms": 2,
+      "local_terms": 1,
+      "rows": 123
+    },
+    {
+      "row_terms": 2,
+      "local_terms": 2,
+      "rows": 52
+    },
+    {
+      "row_terms": 3,
+      "local_terms": 1,
+      "rows": 33
+    },
+    {
+      "row_terms": 3,
+      "local_terms": 2,
+      "rows": 4
+    },
+    {
+      "row_terms": 3,
+      "local_terms": 3,
+      "rows": 3
+    },
+    {
+      "row_terms": 4,
+      "local_terms": 1,
+      "rows": 16
+    },
+    {
+      "row_terms": 4,
+      "local_terms": 2,
+      "rows": 1
+    },
+    {
+      "row_terms": 5,
+      "local_terms": 1,
+      "rows": 6
+    },
+    {
+      "row_terms": 5,
+      "local_terms": 2,
+      "rows": 2
+    }
+  ],
+  "quality_signals": {
+    "modern_marker_rows": 52,
+    "classical_marker_rows": 45,
+    "heuristic_only": true,
+    "requires_source_identity_date_genre_audit": true
+  },
+  "top_shards": [
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00143-of-00233.parquet",
+      "rows": 20
+    },
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00144-of-00233.parquet",
+      "rows": 20
+    },
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00145-of-00233.parquet",
+      "rows": 20
+    },
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00190-of-00233.parquet",
+      "rows": 20
+    },
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00142-of-00233.parquet",
+      "rows": 20
+    },
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00202-of-00233.parquet",
+      "rows": 20
+    },
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00038-of-00233.parquet",
+      "rows": 20
+    },
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00227-of-00233.parquet",
+      "rows": 20
+    },
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00223-of-00233.parquet",
+      "rows": 20
+    },
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00196-of-00233.parquet",
+      "rows": 20
+    },
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00148-of-00233.parquet",
+      "rows": 20
+    },
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00222-of-00233.parquet",
+      "rows": 20
+    }
+  ],
+  "promotion_gate": {
+    "graph_default_signal": "local_window.pair_counts",
+    "row_level_edges_allowed_by_default": false,
+    "historical_fact_upgrade_allowed": false
+  },
+  "interpretation_guardrail": "Row-level co-presence and local-window co-occurrence are different evidence strengths. Neither is historical truth. Source identity, edition/date, genre, duplication, and independent-source audit are required before historical promotion."
+}
