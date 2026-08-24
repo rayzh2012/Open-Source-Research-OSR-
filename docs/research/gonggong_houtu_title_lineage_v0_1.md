@@ -1,4 +1,4 @@
-# Gonggong / Houtu Title-Lineage Audit v0.2
+# Gonggong / Houtu Title-Lineage Audit v0.3
 
 Status: **TEXTUAL RESEARCH NOTE — NOT HISTORICAL-REALITY CLAIM**
 
@@ -84,6 +84,30 @@ The extant `左传·昭公二十九年` does **not** contain the words `佐颛�
 
 Narrative value for Hongming: this is a strong option for a post-conflict political settlement in which a Gonggong descendant is incorporated into Zhuanxu's administrative order as Earth Corrector. Historical-text status remains **VARIANT / LATER QUOTATION**, not primary-text FACT.
 
+## G. Kong Yingda explicitly says `有子` may mean a later descendant, not an immediate son
+`春秋左传正义` on `共工氏有子曰句龙，为后土` gives an unusually direct chronological warning:
+
+`共工有子，谓后世子耳，亦不知句龙之为后土，在于何代。`
+
+This is extremely important for chronology control. Kong Yingda does **not** force Goulong into the immediate biological generation after the Gonggong figure mentioned elsewhere. He explicitly allows `有子` to mean a later descendant and says the generation in which Goulong held the Houtu office is unknown.
+
+The same Zhengyi passage also treats Gonggong as belonging to an old office-name system and distinguishes the later office-holder chronology from the remote ancestral Gonggong horizon.
+
+Status: **PREMODERN EXEGETICAL FACT / STRONG SUPPORT FOR GENERATIONAL FLEXIBILITY**.
+
+Primary/commentary lead:
+- https://ssjdd.snnu.edu.cn/sbw/info/1048/2254.htm
+
+## Additional office evidence from Shangshu
+The received `尚书·尧典` uses `共工` unambiguously as an office in the command to Chui:
+
+`垂，汝共工。`
+
+This does not prove that every mythic `共工氏` is identical to the Yao-era office, but it is direct textual evidence that `共工` can function as an official title rather than only as a personal name.
+
+Primary lead:
+- https://zh.wikisource.org/zh-hans/%E5%B0%9A%E6%9B%B8/%E5%A0%AF%E5%85%B8
+
 ## Textual tension that must remain visible
 The `原道训` wording `宗族残灭，继嗣绝祀` conflicts with any naive continuous biological lineage extending from that exact defeated Gonggong branch. Do not erase this contradiction.
 
@@ -100,18 +124,22 @@ A text-compatible fictional implementation can distinguish:
 
 `GONGGONG OFFICE / CLAN IDENTITY`
 → multiple holders / branches across generations
-→ one descendant/person `句龙`
+→ a later descendant/person `句龙`
 → holds office `后土 (土正)`
 → later cultic language can collapse person + office + deity into the single label `后土`.
+
+Kong Yingda's explicit `谓后世子耳` means Hongming does **not** need to place Goulong immediately after the Buzhou-striking Gonggong. The generation can remain deliberately open until other chronology evidence fixes it.
 
 This model avoids forcing every Gonggong notice and every Houtu notice into one biological lifespan while preserving the transmitted textual ambiguity.
 
 ## Truth-status summary
 - Gao You commentary says `共工，官名` and mentions later descendants — **TEXTUAL FACT (commentarial)**.
 - Gao You commentary distinguishes one Gonggong from the Yao-era Gonggong — **TEXTUAL FACT (commentarial)**.
+- Shangshu uses `共工` as an office assigned to Chui — **TEXTUAL FACT**.
 - Zuo Zhuan defines `土正曰后土` and `句龙，为后土` — **TEXTUAL FACT**.
 - Li Ji says Gonggong's son is `后土` — **TEXTUAL FACT**, compatible with title-for-person compression.
+- Kong Yingda says Gonggong's `有子` means a later descendant and the Houtu generation is unknown — **TEXTUAL FACT (commentarial) / HIGH-VALUE CHRONOLOGY EVIDENCE**.
 - Ying Shao preserves a `句龙佐颛顼` expanded quotation — **TEXTUAL FACT OF EASTERN-HAN QUOTATION / VARIANT**, not extant Zuo Zhuan wording.
 - One historical office system actually existed exactly as described — **NOT ESTABLISHED**.
 - All Gonggong notices refer to one person — **NOT REQUIRED BY THE SOURCES**.
-- Multiple-generation Gonggong is textually defensible — **STRONG INTERPRETIVE MODEL**.
+- Multiple-generation Gonggong is textually defensible — **STRONG INTERPRETIVE MODEL, materially strengthened by Kong Yingda**.
