@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import hashlib, json, pathlib, requests
+import hashlib, json, pathlib, re, requests
 import pyarrow.parquet as pq
 from huggingface_hub import hf_hub_url
 
@@ -32,7 +32,10 @@ cap=int(req.get('max_rows_per_shard',20))
 ctx=int(req.get('context_chars',260))
 min_local=int(req.get('min_local_terms',1))
 max_occurrences_per_term=int(req.get('max_occurrences_per_term',8))
+head_chars=int(req.get('document_head_chars',600))
 rows=[]; bytes_dl=0
+
+META_NAME_RE=re.compile(r'(^|_)(title|name|author|creator|source|book|journal|publication|publisher|date|year|time|url|uri|id|document_id|doc_id)($|_)',re.I)
 
 def best_window(text,present):
     centers=[]
@@ -58,6 +61,13 @@ def best_window(text,present):
         if best is None or score>best[0]: best=(score,sn,local,span)
     return best[1],best[2],best[3]
 
+def clean_meta(v):
+    if v is None or isinstance(v,(bool,int,float)): return v
+    if isinstance(v,str):
+        v=' '.join(v.split())
+        return v[:500]
+    return str(v)[:500]
+
 for rank,sh in enumerate(router['ranked_shards'][:top_n],1):
     repo=sh['repo']; fn=sh['file']; local_file=pathlib.Path('/tmp')/f'evidence-{rank}.parquet'
     url=hf_hub_url(repo, filename=fn, repo_type='dataset')
@@ -68,24 +78,35 @@ for rank,sh in enumerate(router['ranked_shards'][:top_n],1):
                 if b: f.write(b); total+=len(b)
     bytes_dl+=total
     pf=pq.ParquetFile(local_file)
-    names=[f.name for f in pf.schema_arrow if str(f.type) in {'string','large_string'}]
-    col='text' if 'text' in names else names[0]
+    fields=list(pf.schema_arrow)
+    string_names=[f.name for f in fields if str(f.type) in {'string','large_string'}]
+    col='text' if 'text' in string_names else string_names[0]
+    meta_cols=[]
+    for f in fields:
+        if f.name==col: continue
+        typ=str(f.type)
+        if META_NAME_RE.search(f.name) and (typ in {'string','large_string','int32','int64','float','double','bool'} or typ.startswith('timestamp')):
+            meta_cols.append(f.name)
+        if len(meta_cols)>=8: break
+    read_cols=[col]+meta_cols
     candidates=[]; global_row=0
-    for batch in pf.iter_batches(batch_size=256,columns=[col]):
-        arr=batch.column(0)
-        for i in range(len(arr)):
-            text=arr[i].as_py(); ridx=global_row; global_row+=1
+    for batch in pf.iter_batches(batch_size=256,columns=read_cols):
+        dct=batch.to_pydict(); texts=dct[col]
+        for i,text in enumerate(texts):
+            ridx=global_row; global_row+=1
             if not isinstance(text,str) or not text: continue
             present=[t for t in terms if t in text]
             if len(present)<2: continue
             snippet,local_terms,local_span=best_window(text,present)
             if len(local_terms)<min_local: continue
+            metadata={k:clean_meta(dct[k][i]) for k in meta_cols if dct[k][i] is not None}
             candidates.append({
                 'ranked_shard':rank,'source':sh['source'],'repo':repo,'file':fn,'row':ridx,
                 'row_sha256':hashlib.sha256(text.encode()).hexdigest(),
                 'matched_terms':present,'matched_term_count':len(present),
                 'local_terms':local_terms,'local_term_count':len(local_terms),'local_span_chars':local_span,
-                'snippet':snippet
+                'text_length_chars':len(text),'document_head':text[:head_chars],
+                'metadata':metadata,'snippet':snippet
             })
     candidates.sort(key=lambda r:(-r['local_term_count'],-r['matched_term_count'],r['local_span_chars'] if r['local_span_chars'] is not None else 10**9,r['row']))
     rows.extend(candidates[:cap])
@@ -93,7 +114,7 @@ for rank,sh in enumerate(router['ranked_shards'][:top_n],1):
 
 rows.sort(key=lambda r:(-r['local_term_count'],-r['matched_term_count'],r['ranked_shard'],r['row']))
 out={
-  'format':'osr-exact-evidence/v2','run_id':req['run_id'],'router_run_id':router.get('run_id'),
+  'format':'osr-exact-evidence/v2.1','run_id':req['run_id'],'router_run_id':router.get('run_id'),
   'terms':terms,'top_n_shards':top_n,'min_local_terms':min_local,'rows_found':len(rows),
   'bytes_downloaded':bytes_dl,'selection_mode':'best_local_window_per_shard','rows':rows
 }
@@ -103,6 +124,7 @@ summary={
   'all_query_term_rows':sum(1 for r in rows if r['local_term_count']==len(terms)),
   'four_plus_local_term_rows':sum(1 for r in rows if r['local_term_count']>=4),
   'three_plus_local_term_rows':sum(1 for r in rows if r['local_term_count']>=3),
+  'rows_with_metadata':sum(1 for r in rows if r.get('metadata')),
   'min_local_terms':min_local,'selection_mode':'best_local_window_per_shard'
 }
 CURRENT.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n','utf-8')
