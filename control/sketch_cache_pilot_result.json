@@ -1,0 +1,93 @@
+{
+  "format": "osr-sketch-cache-pilot/v1",
+  "shards": [
+    {
+      "file": "literature_zh-00142-of-00233.parquet",
+      "sample_chars": 2000000,
+      "unique_2grams": 280208,
+      "unique_3grams": 918832,
+      "estimates": {
+        "0.01": {
+          "bloom_2gram_bytes": 335727,
+          "bloom_3gram_bytes": 1100883,
+          "bloom_combined_bytes": 1436609
+        },
+        "0.001": {
+          "bloom_2gram_bytes": 503590,
+          "bloom_3gram_bytes": 1651324,
+          "bloom_combined_bytes": 2154913
+        }
+      },
+      "fingerprint_sha256": "239c56d2c4b0b32bbfea17f3c4d40c26dea1ce78f286ce47b8aa9b0c0daa93e9"
+    },
+    {
+      "file": "literature_zh-00149-of-00233.parquet",
+      "sample_chars": 1747143,
+      "unique_2grams": 278948,
+      "unique_3grams": 850248,
+      "estimates": {
+        "0.01": {
+          "bloom_2gram_bytes": 334217,
+          "bloom_3gram_bytes": 1018710,
+          "bloom_combined_bytes": 1352927
+        },
+        "0.001": {
+          "bloom_2gram_bytes": 501325,
+          "bloom_3gram_bytes": 1528065,
+          "bloom_combined_bytes": 2029390
+        }
+      },
+      "fingerprint_sha256": "d53c536cf4ba761bfb15842afa7968a0bca13cd01bbee3cae92c5a4f9ab7f381"
+    },
+    {
+      "file": "literature_zh-00148-of-00233.parquet",
+      "sample_chars": 1941416,
+      "unique_2grams": 275727,
+      "unique_3grams": 883382,
+      "estimates": {
+        "0.01": {
+          "bloom_2gram_bytes": 330358,
+          "bloom_3gram_bytes": 1058409,
+          "bloom_combined_bytes": 1388767
+        },
+        "0.001": {
+          "bloom_2gram_bytes": 495537,
+          "bloom_3gram_bytes": 1587613,
+          "bloom_combined_bytes": 2083150
+        }
+      },
+      "fingerprint_sha256": "d41e27eeab326e2a42141c33339fdbdb0f7e14efe3c0cdbad147aa4e8c5ace5e"
+    },
+    {
+      "file": "literature_zh-00144-of-00233.parquet",
+      "sample_chars": 2000000,
+      "unique_2grams": 180476,
+      "unique_3grams": 621778,
+      "estimates": {
+        "0.01": {
+          "bloom_2gram_bytes": 216235,
+          "bloom_3gram_bytes": 744973,
+          "bloom_combined_bytes": 961207
+        },
+        "0.001": {
+          "bloom_2gram_bytes": 324352,
+          "bloom_3gram_bytes": 1117459,
+          "bloom_combined_bytes": 1441810
+        }
+      },
+      "fingerprint_sha256": "88994ab0b319f02819bb78f2c44a411a36e2fe241d8eac8bd3d71276defcf35c"
+    }
+  ],
+  "created_unix": 1787627861.2297297,
+  "summary": {
+    "shard_count": 4,
+    "sample_chars": 7688559,
+    "mean_unique_2grams": 253839.75,
+    "mean_unique_3grams": 818560.0,
+    "mean_bloom_bytes_fpr_1pct": 1284877.5,
+    "mean_bloom_bytes_fpr_0_1pct": 1927315.75,
+    "projected_1788_shards_mib_fpr_1pct": 2190.9341526031494,
+    "projected_1788_shards_mib_fpr_0_1pct": 3286.4003763198853,
+    "note": "Pilot uses bounded shard text samples. Full-shard gram cardinality may be higher; do not scale without held-out rejection-rate validation."
+  }
+}
