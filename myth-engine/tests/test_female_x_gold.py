@@ -2,7 +2,11 @@ import json
 import unittest
 from pathlib import Path
 
-from myth_engine.female_x import classify_female_x_candidate, iter_female_x
+from myth_engine.female_x import (
+    classify_female_x_candidate,
+    female_x_hit_hash,
+    iter_female_x,
+)
 
 
 GOLD = Path(__file__).resolve().parents[1] / "benchmarks" / "female-x-shanhaijing" / "gold_v1.json"
@@ -36,6 +40,14 @@ class FemaleXGoldTests(unittest.TestCase):
         # Generic lane must not pretend that a longer phrase is one 女X name.
         self.assertNotIn("女子献", found)
         self.assertNotIn("天女曰妭", found)
+
+    def test_same_context_distinct_entities_survive_dedupe_identity(self):
+        context = "有寒荒之国。有二人女祭、女薎。女祭操俎而居两水之间。"
+        nuji = female_x_hit_hash("seed", "女祭", context)
+        numie = female_x_hit_hash("seed", "女薎", context)
+        self.assertNotEqual(nuji, numie)
+        self.assertEqual(nuji, female_x_hit_hash("seed", "女祭", context))
+        self.assertNotEqual(nuji, female_x_hit_hash("discovery", "女祭", context))
 
     def test_textual_relations_never_assert_identity_fact(self):
         relations = self.payload["textual_relations"]
