@@ -29,6 +29,12 @@ on:
           - '10'
           - '20'
 
+# Only the latest research state on a branch is worth scanning. This prevents
+# a burst of query-pack edits from leaving many stale pilot scans in the queue.
+concurrency:
+  group: female-x-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -60,9 +66,6 @@ jobs:
 
       - name: Scan assigned Parquet shards
         env:
-          # CRITICAL COST GUARD:
-          # ordinary pushes are PILOT ONLY. A raw 1,788-shard pass is allowed only
-          # through an explicit workflow_dispatch(mode=full).
           SCAN_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'pilot' }}
           REQUESTED_WORKERS: ${{ github.event_name == 'workflow_dispatch' && inputs.worker_count || '4' }}
         run: |
@@ -98,24 +101,20 @@ jobs:
     if: always()
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: Download all available worker artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: female-x-worker-*
           path: worker-artifacts
           merge-multiple: true
-
       - name: Merge, globally dedupe, rank, and write hard status
         run: |
           python myth-engine/tools/reduce_female_x_scan.py \
             --input-dir worker-artifacts \
             --output-dir final
-
       - name: Upload final evidence bundle
         uses: actions/upload-artifact@v4
         with:
