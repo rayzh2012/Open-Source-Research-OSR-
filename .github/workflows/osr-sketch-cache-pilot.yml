@@ -18,24 +18,30 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install pyarrow requests
+      - run: pip install pyarrow requests huggingface_hub
       - name: Build bounded 4-shard samples
         run: |
           python - <<'PY'
           import json, requests, pyarrow.parquet as pq, pathlib, tempfile
+          from huggingface_hub import hf_hub_url
           req=json.load(open('control/sketch_cache_pilot_request.json'))
           out=[]
           for item in req['shards']:
-              url=item['url']
-              b=requests.get(url, timeout=120).content
-              p=tempfile.NamedTemporaryFile(suffix='.parquet',delete=False)
-              p.write(b); p.close()
+              url=hf_hub_url(item['repo'], filename=item['file'], repo_type='dataset')
+              with requests.get(url, stream=True, timeout=(30,240)) as r:
+                  r.raise_for_status()
+                  p=tempfile.NamedTemporaryFile(suffix='.parquet',delete=False)
+                  for chunk in r.iter_content(8*1024*1024):
+                      if chunk: p.write(chunk)
+                  p.close()
               pf=pq.ParquetFile(p.name)
-              tab=pf.read_row_group(0, columns=['text']) if 'text' in pf.schema.names else pf.read_row_group(0)
-              vals=[]
-              col='text' if 'text' in tab.column_names else tab.column_names[0]
-              for x in tab[col].to_pylist()[:req.get('rows_per_shard',120)]:
-                  if x: vals.append(str(x))
+              col='text' if 'text' in pf.schema.names else pf.schema.names[0]
+              vals=[]; seen=0
+              for batch in pf.iter_batches(batch_size=128, columns=[col]):
+                  for x in batch[col].to_pylist():
+                      if x: vals.append(str(x)); seen+=1
+                      if seen >= req.get('rows_per_shard',120): break
+                  if seen >= req.get('rows_per_shard',120): break
               text='\n'.join(vals)[:req.get('max_chars_per_shard',2000000)]
               out.append({'file':item['file'],'text_sample':text})
           pathlib.Path('control/sketch_cache_pilot_input.jsonl').write_text('\n'.join(json.dumps(x,ensure_ascii=False) for x in out)+'\n','utf-8')
