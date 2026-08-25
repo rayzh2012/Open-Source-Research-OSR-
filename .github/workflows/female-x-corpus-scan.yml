@@ -1,25 +1,26 @@
-name: Female-X 508GB Corpus Scan
+name: Female-X Corpus Entity Compilation
 
 on:
   push:
     branches: [master]
     paths:
       - 'myth-engine/query-packs/female_x_chishui_kunlun_v1.json'
+      - 'myth-engine/query-packs/female_x_stage2_direct_miner_v1.json'
       - 'myth-engine/tools/scan_female_x_corpus.py'
       - 'myth-engine/tools/reduce_female_x_scan.py'
       - '.github/workflows/female-x-corpus-scan.yml'
   workflow_dispatch:
     inputs:
       mode:
-        description: Scan mode
+        description: pilot = compile/test only; full = one intentional 1,788-shard feature compilation
         required: true
-        default: full
+        default: pilot
         type: choice
         options:
           - pilot
           - full
       worker_count:
-        description: Worker count; full corpus is designed for 20
+        description: Full corpus is designed for 20 standard workers
         required: true
         default: '20'
         type: choice
@@ -59,15 +60,16 @@ jobs:
 
       - name: Scan assigned Parquet shards
         env:
-          SCAN_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'full' }}
-          REQUESTED_WORKERS: ${{ github.event_name == 'workflow_dispatch' && inputs.worker_count || '20' }}
+          # CRITICAL COST GUARD:
+          # ordinary pushes are PILOT ONLY. A raw 1,788-shard pass is allowed only
+          # through an explicit workflow_dispatch(mode=full).
+          SCAN_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'pilot' }}
+          REQUESTED_WORKERS: ${{ github.event_name == 'workflow_dispatch' && inputs.worker_count || '4' }}
         run: |
-          # Matrix is statically 20-wide so push-triggered full runs are deterministic.
-          # For a manually requested smaller worker count, workers above the requested
-          # count exit cleanly and the active workers repartition the whole corpus.
           if [ "${{ matrix.worker }}" -ge "$REQUESTED_WORKERS" ]; then
             mkdir -p "out/worker-${{ matrix.worker }}"
-            printf '{"worker_index":${{ matrix.worker }},"skipped":true}\n' > "out/worker-${{ matrix.worker }}/worker-${{ matrix.worker }}-summary.json"
+            printf '{"mode":"%s","worker_index":${{ matrix.worker }},"worker_count":%s,"skipped":true}\n' \
+              "$SCAN_MODE" "$REQUESTED_WORKERS" > "out/worker-${{ matrix.worker }}/worker-${{ matrix.worker }}-summary.json"
             exit 0
           fi
           PYTHONPATH="$GITHUB_WORKSPACE/myth-engine" \
@@ -89,7 +91,7 @@ jobs:
           retention-days: 14
 
   reduce:
-    name: reduce-and-rank
+    name: reduce-rank-and-verify
     runs-on: ubuntu-latest
     timeout-minutes: 60
     needs: scan
@@ -108,7 +110,7 @@ jobs:
           path: worker-artifacts
           merge-multiple: true
 
-      - name: Merge, globally dedupe, and rank 女X candidates
+      - name: Merge, globally dedupe, rank, and write hard status
         run: |
           python myth-engine/tools/reduce_female_x_scan.py \
             --input-dir worker-artifacts \
@@ -117,7 +119,7 @@ jobs:
       - name: Upload final evidence bundle
         uses: actions/upload-artifact@v4
         with:
-          name: female-x-508gb-final
+          name: female-x-corpus-final
           path: final/
           compression-level: 6
           retention-days: 30
