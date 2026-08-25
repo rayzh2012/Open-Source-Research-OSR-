@@ -1,16 +1,19 @@
 {
-  "pack_id": "female-x-chishui-kunlun-v1.1",
-  "purpose": "Discover and split 女X mythic entities across the 508GB corpus; distinguish PERSON/DEITY, RITUAL_PERSON, TOPONYM and other node types before any merge hypothesis.",
-  "epistemic_rule": "Exact strings are retrieval seeds only. No alias or textual-variant edge implies historical identity. unresolved_user_seed items remain unresolved until independently attested.",
+  "pack_id": "female-x-chishui-kunlun-v1.2",
+  "purpose": "Discover and split 女X entities across the 508GB corpus while separating deity/person, ritual person, place, grammar, state/people, and unresolved nodes before any cultural-family inference.",
+  "epistemic_rule": "Exact strings are retrieval seeds only. The grammatical construction 女+core graph is cross-tradition and cannot by itself establish Wa/frog affiliation or entity identity.",
   "seed_groups": {
     "nuchou": ["女丑", "女醜", "女丑之尸", "女丑之屍"],
     "nuwa": ["女娲", "女媧", "娲", "媧", "女娲之肠", "女媧之腸"],
     "nuba_transmission": ["女妭", "女魃", "妭", "魃", "黄帝女妭", "黃帝女妭", "黄帝女魃", "黃帝女魃", "天女曰妭"],
     "chishui_woman": ["赤水女子献", "赤水女子獻", "赤水女子魃", "赤水女子妭"],
     "imperial_daughter_transformation": ["女娃", "女尸", "女屍"],
-    "female_x_known": ["女祭", "女薎", "女戚", "女虔", "女䖍", "女蔑", "女媊"],
+    "shanhaijing_female_x": ["女祭", "女薎", "女戚", "女蔑", "女虔", "女䖍"],
+    "chuci_female_x": ["女歧", "女岐", "女伎"],
+    "astral_control": ["女媊"],
     "negative_toponym_controls": ["女床", "女烝", "女几"],
-    "unresolved_user_seed": ["女俊", "女前", "女拆"]
+    "speech_resolution_candidate": ["女前"],
+    "unresolved_user_seed": ["女俊", "女拆"]
   },
   "textual_relations": [
     {
@@ -21,10 +24,31 @@
       "guard": "Do not count as independent deities unless independent witness evidence survives collation."
     },
     {
+      "a": "女蔑",
+      "b": "女薎",
+      "relation": "LATER_GRAPHIC_OR_TRANSMISSION_VARIANT",
+      "status": "ATTESTED_LATER_VARIANT",
+      "guard": "佩文韵府 preserves 女蔑 while earlier Guo Pu-line text preserves 女薎; compare witnesses rather than count two gods."
+    },
+    {
       "a": "女虔",
       "b": "女䖍",
       "relation": "GRAPHIC_SPELLING_VARIANT",
       "status": "WITNESS_VARIANT"
+    },
+    {
+      "a": "女歧",
+      "b": "女岐/女伎",
+      "relation": "CHUCI_TEXTUAL_VARIANT_CLUSTER",
+      "status": "ATTESTED_VARIANTS",
+      "guard": "Two distinct 女歧 occurrences in 天问 remain separate occurrence nodes until identity is tested."
+    },
+    {
+      "a": "女媊",
+      "b": "女前",
+      "relation": "SPEECH_TO_TEXT_RESOLUTION_CANDIDATE",
+      "status": "HIGH_CONFIDENCE",
+      "guard": "Historical spelling is 女媊; later transmission explicitly glosses 媊音前."
     },
     {
       "a": "赤水女子献",
@@ -38,9 +62,10 @@
     "west_geography": ["西", "西方", "西北", "西海", "大荒西", "流沙", "不周", "昆仑", "昆侖", "西王母", "玄圃"],
     "chishui_water": ["赤水", "黑水", "弱水", "青水", "水", "河", "海", "渊", "淵", "泉", "雨", "旱", "雨师", "雨師"],
     "frog_wa": ["蛙", "鼃", "黾", "黽", "蛙纹", "蛙紋", "女娲", "女媧"],
-    "ritual": ["巫", "祭", "祀", "禱", "祷", "祝", "尸", "屍", "俎", "觛", "神女", "天女", "玉女"],
+    "ritual": ["巫", "祭", "祀", "禱", "祷", "祝", "尸", "屍", "俎", "觛", "神女", "天女", "玉女", "天下祭之"],
     "transformation": ["死", "溺", "化为", "化為", "尸", "屍", "鸟", "鳥", "草", "神"],
-    "mythic_context": ["神", "帝", "山海经", "山海經", "大荒", "海外", "海内", "海內", "古", "经", "經", "传", "傳", "图赞", "圖讚"]
+    "astral": ["星", "太白", "南斗", "明星", "日", "月"],
+    "mythic_context": ["神", "帝", "山海经", "山海經", "楚辞", "楚辭", "天问", "天問", "说文", "說文", "大荒", "海外", "海内", "海內", "古", "经", "經", "传", "傳", "图赞", "圖讚"]
   },
   "female_x_stoplist": ["女子", "女人", "女儿", "女兒", "女主", "女友", "女方", "女孩", "女童", "女装", "女裝", "女星", "女王", "女士", "女工", "女官", "女兵", "女校", "女篮", "女籃", "女足", "女排", "女队", "女隊", "女婿", "女仆", "女僕", "女佣", "女傭"],
   "discovery": {
@@ -49,5 +74,6 @@
     "minimum_anchor_groups": 2,
     "retain_seed_hits_regardless_of_anchor_score": true,
     "type_hint_is_routing_only": true
-  }
+  },
+  "cultural_family_guard": "Wa/frog membership requires an independent evidence bundle such as western geography + water/rain/Chishui + frog/Wa phonology/iconography/ritual/genealogy. 女X form alone has zero positive weight after the 女媊 and 女歧 controls."
 }
