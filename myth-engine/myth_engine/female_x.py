@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 import re
+
+from .core import normalize_text
 
 
 FEMALE_X_RE = re.compile(r"女[\u3400-\u9fff]")
@@ -22,6 +25,18 @@ _PERSON_CUES = (
     "帝女死焉", "生季", "生寿", "生壽", "之尸", "之屍",
 )
 _STATE_CUES = ("之国", "之國", "国名", "國名")
+
+
+def female_x_hit_hash(kind: str, term: str, context: str) -> str:
+    """Stable hit identity for entity-split evidence.
+
+    Context identity and hit identity are intentionally different. Two terms
+    occurring in the same source window (e.g. 女祭 + 女薎) MUST remain two
+    evidence hits, while exact duplicate occurrences of the same term/window
+    collapse deterministically.
+    """
+    payload = f"{kind}|{term}|{normalize_text(context)}"
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def iter_female_x(text: str):
