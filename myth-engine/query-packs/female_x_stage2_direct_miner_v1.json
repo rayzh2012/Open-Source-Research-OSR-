@@ -1,0 +1,49 @@
+{
+  "name": "female_x_chishui_kunlun_stage2_direct_miner_v1",
+  "normalization": "NFC_CASEFOLD",
+  "description": "Known 女X / 赤水-昆仑 / Wa-frog exact-seed locator pack for the existing OSR Stage-2 Direct Miner v3. This pack is retrieval-only: aliases do not assert identity. Unknown 女X discovery is handled separately by the one-time generic entity compilation pass.",
+  "entities": [
+    {"canonical": "女丑", "group": "女X/旱祭", "aliases": ["女丑", "女醜", "女丑之尸"]},
+    {"canonical": "女娲", "group": "女X/Wa/创生修复", "aliases": ["女娲", "女媧", "女娲之肠", "女媧之腸"]},
+    {"canonical": "女妭", "group": "女X/气候天女", "aliases": ["女妭", "天女曰妭"]},
+    {"canonical": "女魃", "group": "女X/后世字形层", "aliases": ["女魃", "黄帝女魃", "黃帝女魃"]},
+    {"canonical": "赤水女子献", "group": "女X/赤水", "aliases": ["赤水女子献", "赤水女子獻", "赤水女子魃", "赤水女子妭"]},
+    {"canonical": "女祭", "group": "女X/祭仪", "aliases": ["女祭"]},
+    {"canonical": "女戚", "group": "女X/未决", "aliases": ["女戚"]},
+    {"canonical": "女虔", "group": "女X/未决", "aliases": ["女虔"]},
+    {"canonical": "女蔑", "group": "女X/未决", "aliases": ["女蔑"]},
+    {"canonical": "女媊", "group": "女X/未决", "aliases": ["女媊"]},
+    {"canonical": "女俊", "group": "女X/口述待校字", "aliases": ["女俊"]},
+    {"canonical": "女前", "group": "女X/口述待校字", "aliases": ["女前"]},
+    {"canonical": "女拆", "group": "女X/口述待校字", "aliases": ["女拆"]},
+
+    {"canonical": "赤水", "group": "地理/水系", "aliases": ["赤水"]},
+    {"canonical": "昆仑", "group": "地理/西方", "aliases": ["昆仑", "昆侖", "昆仑丘", "昆侖丘"]},
+    {"canonical": "西王母", "group": "神系/西方", "aliases": ["西王母"]},
+    {"canonical": "不周", "group": "地理/西方", "aliases": ["不周", "不周山"]},
+    {"canonical": "流沙", "group": "地理/西方", "aliases": ["流沙"]},
+    {"canonical": "黑水", "group": "地理/水系", "aliases": ["黑水"]},
+    {"canonical": "弱水", "group": "地理/水系", "aliases": ["弱水"]},
+    {"canonical": "玄圃", "group": "地理/昆仑仙界", "aliases": ["玄圃"]},
+
+    {"canonical": "蛙", "group": "Wa/图腾", "aliases": ["蛙", "鼃"]},
+    {"canonical": "蛙纹", "group": "Wa/图腾", "aliases": ["蛙纹", "蛙紋"]},
+    {"canonical": "雨师", "group": "水文/神职", "aliases": ["雨师", "雨師"]},
+    {"canonical": "神女", "group": "女性神职", "aliases": ["神女"]},
+    {"canonical": "天女", "group": "女性神职", "aliases": ["天女"]},
+    {"canonical": "玉女", "group": "女性神职", "aliases": ["玉女"]},
+    {"canonical": "巫", "group": "祭仪", "aliases": ["巫"]}
+  ],
+  "sampling": {
+    "per_term_per_shard": 3,
+    "global_per_term": 500,
+    "multi_term_per_shard": 8,
+    "snippet_radius_chars": 350
+  },
+  "epistemic_guards": [
+    "女妭 and 女魃 remain separate retrieval canonicals; later comparison may link them but the scan must not collapse them.",
+    "赤水女子献 variants are retrieval spellings, not automatic proof of identity.",
+    "女俊/女前/女拆 are unresolved speech-to-text seeds and must not be normalized to another historical name without evidence.",
+    "Whole-row co-occurrence is a locator signal only; historical relation requires local-window and source/provenance recheck."
+  ]
+}
