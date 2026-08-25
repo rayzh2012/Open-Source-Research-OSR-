@@ -1,0 +1,112 @@
+{
+  "benchmark_id": "female-x-shanhaijing-gold-v1",
+  "purpose": "Public-domain/manual-gold routing benchmark for 女X entity decomposition. Tests type routing, not historical identity.",
+  "source": {
+    "title": "山海经",
+    "source_status": "PUBLIC_DOMAIN_CLASSICAL_TEXT",
+    "note": "Short classical excerpts are included solely as deterministic test fixtures; edition-level provenance remains a separate research layer."
+  },
+  "cases": [
+    {
+      "id": "NVWA",
+      "candidate": "女娃",
+      "left": "有鸟焉，其状如乌，文首、白喙、赤足，名曰精卫。是炎帝之少女，名曰",
+      "right": "。女娃游于东海，溺而不返，故为精卫。",
+      "expected_type": "PERSON_DEITY"
+    },
+    {
+      "id": "NUSHI",
+      "candidate": "女尸",
+      "left": "又东二百里，曰姑媱之山。帝女死焉，其名曰",
+      "right": "，化为䔄草，其叶胥成。",
+      "expected_type": "PERSON_DEITY"
+    },
+    {
+      "id": "NUCHOU",
+      "candidate": "女丑",
+      "left": "有人衣青，以袂蔽面，名曰",
+      "right": "之尸。有女子之国。",
+      "expected_type": "PERSON_DEITY"
+    },
+    {
+      "id": "NUJI",
+      "candidate": "女祭",
+      "left": "有寒荒之国。有二人",
+      "right": "、女薎。女祭操俎而居两水之间。",
+      "expected_type": "RITUAL_PERSON"
+    },
+    {
+      "id": "NUMIE",
+      "candidate": "女薎",
+      "left": "有寒荒之国。有二人女祭、",
+      "right": "。其异文传统又见女戚，附近有祭器与操持之描写。",
+      "expected_type": "RITUAL_PERSON"
+    },
+    {
+      "id": "NUQIAN",
+      "candidate": "女虔",
+      "left": "有寿麻之国。南岳娶州山女，名曰",
+      "right": "。女虔生季格，季格生寿麻。",
+      "expected_type": "PERSON_DEITY"
+    },
+    {
+      "id": "NUCHUANG_MOUNTAIN",
+      "candidate": "女床",
+      "left": "西南三百里，曰",
+      "right": "之山，其阳多赤铜，其阴多石涅。",
+      "expected_type": "TOPONYM"
+    },
+    {
+      "id": "NUZHENG_MOUNTAIN",
+      "candidate": "女烝",
+      "left": "又东南三百里，曰",
+      "right": "之山，其上无草木。石膏水出焉。",
+      "expected_type": "TOPONYM"
+    },
+    {
+      "id": "NUJI_MOUNTAIN",
+      "candidate": "女几",
+      "left": "又东北百二十里，曰",
+      "right": "之山，其上多玉，其下多黄金。",
+      "expected_type": "TOPONYM"
+    }
+  ],
+  "textual_relations": [
+    {
+      "a": "女戚",
+      "b": "女薎",
+      "relation": "TEXTUAL_VARIANT_CANDIDATE",
+      "status": "STRONG_TEXT_CRITICAL_HYPOTHESIS",
+      "guard": "Do not count as two independent deities without independent witnesses."
+    },
+    {
+      "a": "女虔",
+      "b": "女䖍",
+      "relation": "GRAPHIC_SPELLING_VARIANT",
+      "status": "WITNESS_VARIANT"
+    },
+    {
+      "a": "赤水女子献",
+      "b": "女妭/女魃",
+      "relation": "DUPLICATE_VARIANT_HYPOTHESIS",
+      "status": "STRONG_HYPOTHESIS",
+      "guard": "Textual-critical duplicate hypothesis is not raw-source identity fact."
+    }
+  ],
+  "motif_controls": [
+    {
+      "a": "女娃",
+      "b": "女尸",
+      "shared_bundle": ["IMPERIAL_DAUGHTER", "DEATH", "NONHUMAN_TRANSFORMATION", "PERSISTENT_FUNCTION"],
+      "interpretation": "ABLATION_CONTROL_ONLY",
+      "guard": "Shared transformation grammar does not imply same entity."
+    },
+    {
+      "a": "女虔/寿麻",
+      "b": "女妭/女魃",
+      "shared_bundle": ["WESTERN_GREAT_WILDERNESS", "EXTREME_HEAT_OR_DROUGHT"],
+      "interpretation": "COMPETING_MODEL_SEED",
+      "guard": "Do not merge; test whether heat/drought function reflects lineage, office, editorial duplication, or coincidence."
+    }
+  ]
+}
