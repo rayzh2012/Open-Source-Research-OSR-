@@ -16,6 +16,7 @@ import pyarrow.parquet as pq
 from huggingface_hub import hf_hub_download, list_repo_files
 
 from myth_engine.core import KeywordAutomaton, normalize_text
+from myth_engine.female_x import classify_female_x_candidate
 
 
 DATASETS = [
@@ -92,6 +93,18 @@ def anchor_groups_in_context(context: str, anchors: dict[str, list[str]]) -> tup
     return groups, matched
 
 
+def type_hint_for_occurrence(text: str, start: int, end: int, candidate: str) -> tuple[str, list[str]]:
+    # Type routing is based on tight syntactic context, intentionally smaller
+    # than the evidence window used for thematic anchors.
+    left = text[max(0, start - 80):start]
+    right = text[end:min(len(text), end + 80)]
+    base = candidate[:2] if candidate.startswith("女") and len(candidate) >= 2 else candidate
+    if len(base) == 2 and base.startswith("女"):
+        hint = classify_female_x_candidate(base, left, right)
+        return hint.entity_type_hint, list(hint.reasons)
+    return "COMPOSITE_OR_NON_FEMALE_X_SEED", ["exact_seed_not_two_graph_女X"]
+
+
 def emit_hit(
     fh,
     *,
@@ -104,8 +117,14 @@ def emit_hit(
     context: str,
     anchor_groups: list[str],
     anchors: list[str],
+    entity_type_hint: str,
+    type_hint_reasons: list[str],
 ) -> str:
-    context_hash = sha256_text(normalize_text(context))
+    context_norm = normalize_text(context)
+    context_hash = sha256_text(context_norm)
+    # Crucial invariant: two different entities in the same source window are
+    # two different hits. Context hash alone is NOT a hit identity.
+    hit_hash = sha256_text(kind + "|" + term + "|" + context_norm)
     obj = {
         "repo_id": repo_id,
         "shard": shard,
@@ -113,13 +132,16 @@ def emit_hit(
         "kind": kind,
         "term": term,
         "entity_group": group,
+        "entity_type_hint": entity_type_hint,
+        "type_hint_reasons": type_hint_reasons,
         "context": context,
         "anchor_groups": anchor_groups,
         "anchors": sorted(set(anchors)),
         "context_sha256": context_hash,
+        "hit_sha256": hit_hash,
     }
     fh.write((json.dumps(obj, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8"))
-    return context_hash
+    return hit_hash
 
 
 def scan_shard(
@@ -130,9 +152,10 @@ def scan_shard(
     seed_terms: list[str],
     seed_group: dict[str, str],
     out_fh,
-    seen_hashes: set[str],
+    seen_hit_hashes: set[str],
     candidate_counter: collections.Counter[str],
     candidate_anchor_counter: collections.Counter[str],
+    candidate_type_counter: collections.Counter[str],
 ) -> dict[str, int]:
     stats = collections.Counter()
     text_col = choose_text_column(local_path)
@@ -154,15 +177,13 @@ def scan_shard(
             continue
         stats["rows"] += 1
 
-        # Fast reject: if neither seeds, female-X pattern prefix, nor anchors are present,
-        # skip the expensive context work. The automata keep this tokenizer-free.
         seed_matches = seed_automaton.scan(text)
         discovery_possible = "女" in text
         anchor_possible = bool(anchor_automaton.scan(text)) if discovery_possible else False
         if not seed_matches and not (discovery_possible and anchor_possible):
             continue
 
-        # Seed retrieval: identity is NOT asserted; every spelling is just a retrieval key.
+        # Seed retrieval: spelling witnesses stay independent. Identity is not asserted.
         matched_seed_terms = sorted({term for _, term in seed_matches}, key=len, reverse=True)
         for term in matched_seed_terms:
             start = 0
@@ -170,13 +191,15 @@ def scan_shard(
                 pos = text.find(term, start)
                 if pos < 0:
                     break
+                end = pos + len(term)
                 left = max(0, pos - radius)
-                right = min(len(text), pos + len(term) + radius)
+                right = min(len(text), end + radius)
                 context = text[left:right]
                 agroups, amatches = anchor_groups_in_context(context, pack["anchors"])
-                h = sha256_text(context)
-                if h not in seen_hashes:
-                    seen_hashes.add(h)
+                type_hint, type_reasons = type_hint_for_occurrence(text, pos, end, term)
+                hit_hash = sha256_text("seed|" + term + "|" + normalize_text(context))
+                if hit_hash not in seen_hit_hashes:
+                    seen_hit_hashes.add(hit_hash)
                     emit_hit(
                         out_fh,
                         repo_id=repo_id,
@@ -188,18 +211,17 @@ def scan_shard(
                         context=context,
                         anchor_groups=agroups,
                         anchors=amatches,
+                        entity_type_hint=type_hint,
+                        type_hint_reasons=type_reasons,
                     )
                     stats["seed_hits"] += 1
-                start = pos + max(1, len(term))
+                start = end
 
-        # Discovery retrieval: retain only candidates embedded in >= N independent
-        # anchor groups. This prevents modern 女主/女友 noise from flooding outputs.
+        # Generic discovery: conservative 女+one-core-graph shape. Longer names
+        # and constructions remain exact-seed responsibilities.
         for m in female_re.finditer(text):
             candidate = m.group(0)
-            if candidate in stop:
-                continue
-            # If this exact string is already a seed spelling, seed handling above owns it.
-            if candidate in seed_group:
+            if candidate in stop or candidate in seed_group:
                 continue
             left = max(0, m.start() - radius)
             right = min(len(text), m.end() + radius)
@@ -207,13 +229,15 @@ def scan_shard(
             agroups, amatches = anchor_groups_in_context(context, pack["anchors"])
             if len(set(agroups)) < min_groups:
                 continue
+            type_hint, type_reasons = type_hint_for_occurrence(text, m.start(), m.end(), candidate)
             candidate_counter[candidate] += 1
+            candidate_type_counter[f"{candidate}\t{type_hint}"] += 1
             for g in set(agroups):
                 candidate_anchor_counter[f"{candidate}\t{g}"] += 1
-            h = sha256_text(context)
-            if h in seen_hashes:
+            hit_hash = sha256_text("discovery|" + candidate + "|" + normalize_text(context))
+            if hit_hash in seen_hit_hashes:
                 continue
-            seen_hashes.add(h)
+            seen_hit_hashes.add(hit_hash)
             emit_hit(
                 out_fh,
                 repo_id=repo_id,
@@ -225,6 +249,8 @@ def scan_shard(
                 context=context,
                 anchor_groups=agroups,
                 anchors=amatches,
+                entity_type_hint=type_hint,
+                type_hint_reasons=type_reasons,
             )
             stats["discovery_hits"] += 1
 
@@ -254,9 +280,10 @@ def main() -> None:
     summary_path = outdir / f"worker-{args.worker_index:02d}-summary.json"
     candidates_path = outdir / f"worker-{args.worker_index:02d}-candidates.json"
 
-    seen_hashes: set[str] = set()
+    seen_hit_hashes: set[str] = set()
     candidate_counter: collections.Counter[str] = collections.Counter()
     candidate_anchor_counter: collections.Counter[str] = collections.Counter()
+    candidate_type_counter: collections.Counter[str] = collections.Counter()
     aggregate = collections.Counter()
     errors: list[dict[str, str]] = []
 
@@ -280,13 +307,14 @@ def main() -> None:
                     seed_terms,
                     seed_group,
                     out_fh,
-                    seen_hashes,
+                    seen_hit_hashes,
                     candidate_counter,
                     candidate_anchor_counter,
+                    candidate_type_counter,
                 )
                 aggregate.update(stats)
                 aggregate["completed_shards"] += 1
-            except Exception as exc:  # keep the worker moving; reducer will surface errors
+            except Exception as exc:
                 aggregate["failed_shards"] += 1
                 errors.append({"repo_id": repo_id, "shard": shard, "error": repr(exc)})
             finally:
@@ -312,6 +340,7 @@ def main() -> None:
             {
                 "candidate_counts": candidate_counter.most_common(),
                 "candidate_anchor_counts": candidate_anchor_counter.most_common(),
+                "candidate_type_counts": candidate_type_counter.most_common(),
             },
             ensure_ascii=False,
             indent=2,
