@@ -1,0 +1,76 @@
+{
+  "benchmark_id": "female-x-early-texts-gold-v1",
+  "purpose": "Cross-corpus early-text controls for 女X structure. Prevents the model from equating the grammatical form 女+core-name with any one cult, clan, or deity family.",
+  "cases": [
+    {
+      "id": "CHUCI_NUQI_NINE_SONS",
+      "source": "楚辞·天问",
+      "candidate": "女歧",
+      "text": "女歧无合，夫焉取九子？",
+      "early_commentary": "王逸注：女歧，神女，无夫而生九子也。",
+      "node_type": "PERSON_DEITY",
+      "function_bundle": ["MIRACULOUS_REPRODUCTION", "NINE_CHILDREN"],
+      "identity_status": "OCCURRENCE_NODE_ONLY"
+    },
+    {
+      "id": "CHUCI_NUQI_SEWING",
+      "source": "楚辞·天问",
+      "candidate": "女歧",
+      "text": "女歧缝裳，而馆同爰止。",
+      "early_commentary": "王逸注：女歧，浇嫂也。",
+      "node_type": "PERSON_OR_HEROIC_FIGURE",
+      "function_bundle": ["SEW_GARMENT", "SHAOKANG_HANJIAO_NARRATIVE"],
+      "identity_status": "OPEN_SAME_NAME_AS_CHUCI_NUQI_NINE_SONS",
+      "guard": "Same surface name in the same work does not by itself prove one person or two. Preserve two occurrences and test transmission/commentary models."
+    },
+    {
+      "id": "SHUOWEN_NUJIAN",
+      "source": "说文解字·女部（引甘氏星经）",
+      "candidate": "女媊",
+      "text": "甘氏星经曰：太白上公，妻曰女媊。女媊居南斗，食厉，天下祭之，曰明星。",
+      "node_type": "STAR_DEITY_RITUAL_PERSON",
+      "function_bundle": ["STAR_CULT", "VENUS_SYSTEM", "SOUTHERN_DIPPER", "RITUAL_WORSHIP"],
+      "identity_status": "DISTINCT_CONTROL_TRADITION"
+    },
+    {
+      "id": "CHUCI_NUWA",
+      "source": "楚辞·天问",
+      "candidate": "女娲",
+      "text": "女娲有体，孰制匠之？",
+      "node_type": "PERSON_DEITY",
+      "function_bundle": ["COSMOGONIC_DEITY"],
+      "identity_status": "KNOWN_DEITY_OCCURRENCE"
+    },
+    {
+      "id": "CHUCI_GRAMMAR_NUHE",
+      "source": "楚辞·天问",
+      "candidate": "女何",
+      "text": "玄鸟致贻，女何喜？",
+      "node_type": "GRAMMATICAL_PHRASE_NEGATIVE_CONTROL",
+      "identity_status": "NOT_A_NAME",
+      "guard": "A raw 女+one-CJK regex will catch this; it must not enter a deity census."
+    }
+  ],
+  "variant_relations": [
+    {
+      "a": "女歧",
+      "b": "女岐",
+      "relation": "GRAPHIC_VARIANT",
+      "status": "ATTESTED_VARIANT"
+    },
+    {
+      "a": "女歧",
+      "b": "女伎",
+      "relation": "TEXTUAL_VARIANT",
+      "status": "ATTESTED_VARIANT"
+    },
+    {
+      "a": "女媊",
+      "b": "女前",
+      "relation": "SPEECH_TO_TEXT_RESOLUTION_CANDIDATE",
+      "status": "HIGH_CONFIDENCE_USER_SEED_RESOLUTION",
+      "evidence": "Later transmission explicitly glosses 媊音前; historical source spelling remains 女媊."
+    }
+  ],
+  "model_implication": "The construction 女+core graph is cross-tradition. It cannot by itself identify Wa/frog affiliation. Wa classification requires independent geography, ritual, hydrology, iconography, phonology, genealogy, or textual-provenance evidence."
+}
