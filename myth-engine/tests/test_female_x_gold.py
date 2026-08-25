@@ -6,12 +6,15 @@ from myth_engine.female_x import (
     classify_female_x_candidate,
     female_x_hit_hash,
     iter_female_x,
+    seed_group_context_allowed,
 )
 
 
 ROOT = Path(__file__).resolve().parents[1] / "benchmarks"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SHANHAIJING_GOLD = ROOT / "female-x-shanhaijing" / "gold_v1.json"
 EARLY_TEXT_GOLD = ROOT / "female-x-early-texts" / "gold_v2.json"
+QUERY_PACK = PROJECT_ROOT / "query-packs" / "female_x_chishui_kunlun_v1.json"
 
 
 class FemaleXGoldTests(unittest.TestCase):
@@ -19,6 +22,7 @@ class FemaleXGoldTests(unittest.TestCase):
     def setUpClass(cls):
         cls.payload = json.loads(SHANHAIJING_GOLD.read_text(encoding="utf-8"))
         cls.early = json.loads(EARLY_TEXT_GOLD.read_text(encoding="utf-8"))
+        cls.pack = json.loads(QUERY_PACK.read_text(encoding="utf-8"))
 
     def test_gold_type_routing(self):
         failures = []
@@ -81,6 +85,36 @@ class FemaleXGoldTests(unittest.TestCase):
             if x["a"] == "女艾/汝艾"
         )
         self.assertEqual(model["status"], "OPEN")
+
+    def test_high_ambiguity_seed_policy_blocks_modern_nufang(self):
+        group = "historical_philology_high_ambiguity"
+        policy = self.pack["seed_group_anchor_policy"]
+        modern = "在离婚案件中，女方表示希望协商财产分配，男方尚未回应。"
+        allowed, reasons = seed_group_context_allowed(group, modern, [], policy)
+        self.assertFalse(allowed)
+        self.assertIn("missing_required_any_term", reasons)
+
+    def test_high_ambiguity_seed_policy_retains_ancient_nufang(self):
+        group = "historical_philology_high_ambiguity"
+        policy = self.pack["seed_group_anchor_policy"]
+        ancient = "世本氏姓篇称夏有女艾，商有女鸠女方，晋有女宽。"
+        allowed, reasons = seed_group_context_allowed(
+            group,
+            ancient,
+            ["historical_philology", "mythic_context"],
+            policy,
+        )
+        self.assertTrue(allowed)
+        self.assertTrue(any(x.startswith("required_any_term:") for x in reasons))
+
+    def test_historical_philology_cluster_is_explicitly_guarded(self):
+        seeds = self.pack["seed_groups"]["historical_philology_high_ambiguity"]
+        self.assertIn("女方", seeds)
+        self.assertIn("女齐", seeds)
+        self.assertIn("女叔", seeds)
+        self.assertIn("女氏", seeds)
+        self.assertIn("邚", seeds)
+        self.assertIn("historical_philology_high_ambiguity", self.pack["seed_group_anchor_policy"])
 
     def test_generic_discovery_is_conservative_two_graph_shape(self):
         text = "女娃游海；女尸化草；女床之山；赤水女子献；天女曰妭。"
