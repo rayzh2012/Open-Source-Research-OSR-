@@ -9,13 +9,16 @@ from myth_engine.female_x import (
 )
 
 
-GOLD = Path(__file__).resolve().parents[1] / "benchmarks" / "female-x-shanhaijing" / "gold_v1.json"
+ROOT = Path(__file__).resolve().parents[1] / "benchmarks"
+SHANHAIJING_GOLD = ROOT / "female-x-shanhaijing" / "gold_v1.json"
+EARLY_TEXT_GOLD = ROOT / "female-x-early-texts" / "gold_v1.json"
 
 
 class FemaleXGoldTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.payload = json.loads(GOLD.read_text(encoding="utf-8"))
+        cls.payload = json.loads(SHANHAIJING_GOLD.read_text(encoding="utf-8"))
+        cls.early = json.loads(EARLY_TEXT_GOLD.read_text(encoding="utf-8"))
 
     def test_gold_type_routing(self):
         failures = []
@@ -31,13 +34,29 @@ class FemaleXGoldTests(unittest.TestCase):
                 )
         self.assertEqual(failures, [])
 
+    def test_chuci_grammar_negative_control(self):
+        # 天问：玄鸟致贻，女何喜？  A raw 女X regex sees 女何, but it is
+        # syntactic prose, not a deity name.
+        hint = classify_female_x_candidate("女何", "玄鸟致贻，", "喜？")
+        self.assertEqual(hint.entity_type_hint, "GRAMMATICAL_PHRASE")
+        grammar_case = next(x for x in self.early["cases"] if x["id"] == "CHUCI_GRAMMAR_NUHE")
+        self.assertEqual(grammar_case["identity_status"], "NOT_A_NAME")
+
+    def test_early_text_controls_keep_cross_tradition_distinctions(self):
+        ids = {x["id"] for x in self.early["cases"]}
+        self.assertIn("CHUCI_NUQI_NINE_SONS", ids)
+        self.assertIn("CHUCI_NUQI_SEWING", ids)
+        self.assertIn("SHUOWEN_NUJIAN", ids)
+        self.assertIn("CHUCI_NUWA", ids)
+        nujian = next(x for x in self.early["cases"] if x["id"] == "SHUOWEN_NUJIAN")
+        self.assertEqual(nujian["identity_status"], "DISTINCT_CONTROL_TRADITION")
+
     def test_generic_discovery_is_conservative_two_graph_shape(self):
         text = "女娃游海；女尸化草；女床之山；赤水女子献；天女曰妭。"
         found = [m.group(0) for m in iter_female_x(text)]
         self.assertIn("女娃", found)
         self.assertIn("女尸", found)
         self.assertIn("女床", found)
-        # Generic lane must not pretend that a longer phrase is one 女X name.
         self.assertNotIn("女子献", found)
         self.assertNotIn("天女曰妭", found)
 
