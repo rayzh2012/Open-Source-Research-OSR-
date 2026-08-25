@@ -11,7 +11,7 @@ from myth_engine.female_x import (
 
 ROOT = Path(__file__).resolve().parents[1] / "benchmarks"
 SHANHAIJING_GOLD = ROOT / "female-x-shanhaijing" / "gold_v1.json"
-EARLY_TEXT_GOLD = ROOT / "female-x-early-texts" / "gold_v1.json"
+EARLY_TEXT_GOLD = ROOT / "female-x-early-texts" / "gold_v2.json"
 
 
 class FemaleXGoldTests(unittest.TestCase):
@@ -35,8 +35,6 @@ class FemaleXGoldTests(unittest.TestCase):
         self.assertEqual(failures, [])
 
     def test_chuci_grammar_negative_control(self):
-        # 天问：玄鸟致贻，女何喜？  A raw 女X regex sees 女何, but it is
-        # syntactic prose, not a deity name.
         hint = classify_female_x_candidate("女何", "玄鸟致贻，", "喜？")
         self.assertEqual(hint.entity_type_hint, "GRAMMATICAL_PHRASE")
         grammar_case = next(x for x in self.early["cases"] if x["id"] == "CHUCI_GRAMMAR_NUHE")
@@ -44,12 +42,45 @@ class FemaleXGoldTests(unittest.TestCase):
 
     def test_early_text_controls_keep_cross_tradition_distinctions(self):
         ids = {x["id"] for x in self.early["cases"]}
-        self.assertIn("CHUCI_NUQI_NINE_SONS", ids)
-        self.assertIn("CHUCI_NUQI_SEWING", ids)
-        self.assertIn("SHUOWEN_NUJIAN", ids)
-        self.assertIn("CHUCI_NUWA", ids)
+        for expected in (
+            "CHUCI_NUQI_NINE_SONS",
+            "CHUCI_NUQI_SEWING",
+            "SHUOWEN_NUJIAN",
+            "CHUCI_NUWA",
+            "QIN_NUXIU",
+            "QIN_NUHUA",
+            "QIN_NUFANG",
+            "SHAOKANG_NUAI_ZUO",
+            "SHAOKANG_RUAI_JINIAN",
+        ):
+            self.assertIn(expected, ids)
         nujian = next(x for x in self.early["cases"] if x["id"] == "SHUOWEN_NUJIAN")
         self.assertEqual(nujian["identity_status"], "DISTINCT_CONTROL_TRADITION")
+
+    def test_surface_nu_never_forces_sex(self):
+        cases = {x["id"]: x for x in self.early["cases"]}
+        self.assertEqual(cases["QIN_NUFANG"]["sex"], "OPEN")
+        self.assertEqual(cases["SHAOKANG_NUAI_ZUO"]["sex"], "OPEN")
+        self.assertEqual(cases["SHAOKANG_RUAI_JINIAN"]["sex"], "OPEN")
+        self.assertIn("女又音汝", cases["SHAOKANG_NUAI_ZUO"]["reading"])
+
+    def test_maternal_genealogy_is_evidence_not_universal_prefix_rule(self):
+        nuxiu = next(x for x in self.early["cases"] if x["id"] == "QIN_NUXIU")
+        self.assertIn("MATERNAL_LINE_CONTROL", nuxiu["function_bundle"])
+        rules = " ".join(self.early["epistemic_rules"])
+        self.assertIn("not a universal semantic value", rules)
+
+    def test_nuai_ruai_relation_is_not_identity_overreach(self):
+        rel = next(
+            x for x in self.early["variant_relations"]
+            if x["a"] == "女艾" and x["b"] == "汝艾"
+        )
+        self.assertEqual(rel["relation"], "READING_OR_TRANSMISSION_VARIANT")
+        model = next(
+            x for x in self.early["competing_identity_models"]
+            if x["a"] == "女艾/汝艾"
+        )
+        self.assertEqual(model["status"], "OPEN")
 
     def test_generic_discovery_is_conservative_two_graph_shape(self):
         text = "女娃游海；女尸化草；女床之山；赤水女子献；天女曰妭。"
