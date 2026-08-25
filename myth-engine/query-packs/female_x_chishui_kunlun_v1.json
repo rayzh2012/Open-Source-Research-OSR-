@@ -1,6 +1,6 @@
 {
-  "pack_id": "female-x-chishui-kunlun-v1.3",
-  "purpose": "Discover and split 女X entities across the 508GB corpus while separating deity/person, ritual person, genealogy, place, grammar, reading variants, state/people, and unresolved nodes before any cultural-family or sex inference.",
+  "pack_id": "female-x-chishui-kunlun-v1.4",
+  "purpose": "Discover and split 女X entities across the 508GB corpus while separating deity/person, ritual person, genealogy, place, grammar, reading variants, state/clan hypotheses, and unresolved nodes before any cultural-family or sex inference.",
   "epistemic_rule": "Exact strings are retrieval seeds only. 女+core graph is cross-tradition; 女 may participate in sex/class/clan/title or reading/transmission structures, and cannot by itself establish sex, Wa/frog affiliation, or historical identity.",
   "seed_groups": {
     "nuchou": ["女丑", "女醜", "女丑之尸", "女丑之屍"],
@@ -12,10 +12,17 @@
     "chuci_female_x": ["女歧", "女岐", "女伎"],
     "shaokang_event_variants": ["女艾", "汝艾", "女歧", "女岐"],
     "qin_maternal_genealogy_control": ["女修", "女脩", "女华", "女華", "女防"],
+    "historical_philology_high_ambiguity": ["女鸠", "女鳩", "汝鸠", "汝鳩", "女方", "汝方", "女齐", "女齊", "汝齐", "汝齊", "女宽", "女寬", "汝宽", "汝寬", "女叔", "汝叔", "女氏", "汝氏", "女艾国", "女艾國", "邚"],
     "astral_control": ["女媊"],
     "negative_toponym_controls": ["女床", "女烝", "女几"],
     "speech_resolution_candidate": ["女前"],
     "unresolved_user_seed": ["女俊", "女拆"]
+  },
+  "seed_group_anchor_policy": {
+    "historical_philology_high_ambiguity": {
+      "required_any_terms": ["左传", "左傳", "公羊", "世本", "路史", "竹书纪年", "竹書紀年", "史记", "史記", "陆贾", "陸賈", "新语", "新語", "经典释文", "經典釋文", "杜预", "杜預", "司马侯", "司馬侯", "晋大夫", "晉大夫", "陈侯", "陳侯", "国名", "國名", "氏族", "女音汝", "音汝", "女鸠", "女鳩", "女齐", "女齊", "女宽", "女寬", "女叔", "女艾", "汝艾"],
+      "minimum_anchor_groups": 1
+    }
   },
   "textual_relations": [
     {
@@ -50,14 +57,35 @@
       "b": "汝艾",
       "relation": "READING_OR_TRANSMISSION_VARIANT",
       "status": "STRONG_WITNESS_RELATION",
-      "guard": "左传传本 has 女艾 and 经典释文 says 女如字又音汝; 竹书纪年 tradition has 汝艾. This relation does not establish sex."
+      "guard": "左传 has 女艾, 经典释文 says 女如字又音汝, and 竹书纪年 tradition has 汝艾. This relation does not establish sex."
+    },
+    {
+      "a": "女齐/女叔齐/女叔",
+      "b": "汝-reading",
+      "relation": "MULTI_WITNESS_NU_TO_RU_READING_CLUSTER",
+      "status": "STRONG_PHILOLOGICAL_FACT",
+      "guard": "左传注疏/经典释文 and 公羊传注疏 explicitly annotate 女音汝 in multiple Spring-and-Autumn personal-name/title contexts. Do not infer that every 女 graph has this reading."
+    },
+    {
+      "a": "女氏/女艾/女鸠/女方/女宽",
+      "b": "陆贾新语 attribution",
+      "relation": "LOST_QUOTE_ATTRIBUTION",
+      "status": "LATER_RECONSTRUCTED_SOURCE_CHAIN",
+      "guard": "张澍辑世本 attributes this lineage statement to 陆贾新语, but the passage is absent from the received 新语 and from a modern collected 新语佚文 set. Do not cite it as extant Western-Han text."
+    },
+    {
+      "a": "女/汝",
+      "b": "state_or_clan_semantics",
+      "relation": "POLITY_OR_CLAN_REANALYSIS_HYPOTHESIS",
+      "status": "OPEN_LATER_PHILOLOGY",
+      "guard": "宋路史国名纪 and later philologists treat 女/汝 as a polity/clan reading in some names; this is a hypothesis to test against earlier witnesses."
     },
     {
       "a": "女艾/汝艾",
       "b": "女歧_少康寒浇_occurrence",
       "relation": "SAME_EVENT_IDENTITY_HYPOTHESIS",
-      "status": "OPEN",
-      "guard": "A reported scholarly proposal merges them by event role plus phonological argument; Su Xuelin explicitly rejects it. Preserve separate occurrence nodes until witness, phonology, and event details converge."
+      "status": "OPEN_LOW_AFTER_PHONOLOGY_HOLDOUT",
+      "guard": "Same-event overlap remains, but modern Old Chinese reconstructions do not support the traditional claim that 艾 and 歧 are close. Preserve separate occurrence nodes."
     },
     {
       "a": "女歧_九子_occurrence",
@@ -89,6 +117,7 @@
     "transformation": ["死", "溺", "化为", "化為", "尸", "屍", "鸟", "鳥", "草", "神"],
     "genealogy_maternal": ["母族", "祖", "苗裔", "裔女", "生", "取", "妻", "女脩", "女修", "女华", "女華", "女防", "玄鸟", "玄鳥", "陨卵", "隕卵", "吞", "鸟俗", "鳥俗"],
     "shaokang_hanjiao": ["少康", "浇", "澆", "寒浞", "过", "過", "谍", "諜", "伐过", "伐過", "缝裳", "縫裳", "汝艾", "女艾", "女歧", "女岐"],
+    "historical_philology": ["左传", "左傳", "公羊", "世本", "路史", "新语", "新語", "经典释文", "經典釋文", "杜预", "杜預", "音汝", "国名", "國名", "氏族", "大夫", "诸侯", "諸侯", "司马侯", "司馬侯"],
     "astral": ["星", "太白", "南斗", "明星", "日", "月"],
     "mythic_context": ["神", "帝", "山海经", "山海經", "楚辞", "楚辭", "天问", "天問", "说文", "說文", "左传", "左傳", "竹书纪年", "竹書紀年", "史记", "史記", "大荒", "海外", "海内", "海內", "古", "经", "經", "传", "傳", "图赞", "圖讚"]
   },
@@ -101,5 +130,5 @@
     "type_hint_is_routing_only": true,
     "surface_sex_inference_forbidden": true
   },
-  "cultural_family_guard": "Wa/frog membership requires an independent evidence bundle such as western geography + water/rain/Chishui + frog/Wa phonology/iconography/ritual/genealogy. 女X form alone has zero positive weight. 女艾/汝艾 further proves that the surface graph 女 can participate in a reading/transmission variant, while 秦本纪索隐 independently proves maternal-clan genealogy; these facts must be tested separately rather than collapsed into one universal 女-prefix rule."
+  "cultural_family_guard": "Wa/frog membership requires an independent evidence bundle such as western geography + water/rain/Chishui + frog/Wa phonology/iconography/ritual/genealogy. 女X form alone has zero positive weight. Multiple Spring-and-Autumn names explicitly read 女 as 汝, while Qin genealogy independently proves maternal-clan ancestry exists; reading, clan, sex, office, and cultural-family semantics must be modeled as separate fields rather than collapsed into one universal 女-prefix rule."
 }
