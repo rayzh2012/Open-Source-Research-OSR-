@@ -1,0 +1,143 @@
+{
+  "benchmark_id": "female-x-early-texts-gold-v2",
+  "purpose": "Cross-corpus early-text benchmark for 女X structure, occurrence splitting, role extraction, reading variants, genealogy, and sex uncertainty. Prevents the model from equating 女+core-name with any one sex, cult, clan, or deity family.",
+  "epistemic_rules": [
+    "Surface 女 never directly determines sex.",
+    "A reading/transmission variant does not by itself establish historical identity beyond the textual witness relation.",
+    "Same-name occurrences remain distinct nodes until independent evidence supports a merge.",
+    "Maternal-line genealogy is an attested structure, not a universal semantic value of 女."
+  ],
+  "cases": [
+    {
+      "id": "CHUCI_NUQI_NINE_SONS",
+      "source": "楚辞·天问",
+      "candidate": "女歧",
+      "text": "女歧无合，夫焉取九子？",
+      "early_commentary": "王逸注：女歧，神女，无夫而生九子也。",
+      "node_type": "PERSON_DEITY",
+      "sex": "FEMALE_SUPPORTED_BY_COMMENTARIAL_TRADITION",
+      "function_bundle": ["MIRACULOUS_REPRODUCTION", "NINE_CHILDREN"],
+      "occurrence_key": "女歧_九子_occurrence",
+      "identity_status": "OCCURRENCE_NODE_ONLY"
+    },
+    {
+      "id": "CHUCI_NUQI_SEWING",
+      "source": "楚辞·天问",
+      "candidate": "女歧",
+      "text": "女歧缝裳，而馆同爰止。",
+      "early_commentary": "王逸注：女歧，浇嫂也。",
+      "node_type": "PERSON_OR_HEROIC_FIGURE",
+      "sex": "FEMALE_IN_COMMENTARIAL_MODEL",
+      "function_bundle": ["SEW_GARMENT", "SHAOKANG_HANJIAO_NARRATIVE"],
+      "occurrence_key": "女歧_少康寒浇_occurrence",
+      "identity_status": "OPEN_SAME_NAME_AS_CHUCI_NUQI_NINE_SONS",
+      "guard": "Same surface name does not prove one person or two. Preserve occurrences and test transmission/commentary models."
+    },
+    {
+      "id": "SHUOWEN_NUJIAN",
+      "source": "说文解字·女部（引甘氏星经）",
+      "candidate": "女媊",
+      "text": "甘氏星经曰：太白上公，妻曰女媊。女媊居南斗，食厉，天下祭之，曰明星。",
+      "node_type": "STAR_DEITY_RITUAL_PERSON",
+      "sex": "FEMALE_SUPPORTED_BY_SPOUSE_TERM",
+      "function_bundle": ["STAR_CULT", "VENUS_SYSTEM", "SOUTHERN_DIPPER", "RITUAL_WORSHIP"],
+      "identity_status": "DISTINCT_CONTROL_TRADITION"
+    },
+    {
+      "id": "CHUCI_NUWA",
+      "source": "楚辞·天问",
+      "candidate": "女娲",
+      "text": "女娲有体，孰制匠之？",
+      "node_type": "PERSON_DEITY",
+      "sex": "DO_NOT_INFER_FROM_SURFACE_ONLY",
+      "function_bundle": ["COSMOGONIC_DEITY"],
+      "identity_status": "KNOWN_DEITY_OCCURRENCE"
+    },
+    {
+      "id": "CHUCI_GRAMMAR_NUHE",
+      "source": "楚辞·天问",
+      "candidate": "女何",
+      "text": "玄鸟致贻，女何喜？",
+      "node_type": "GRAMMATICAL_PHRASE_NEGATIVE_CONTROL",
+      "identity_status": "NOT_A_NAME",
+      "guard": "A raw 女+one-CJK regex catches this; it must not enter an entity census."
+    },
+    {
+      "id": "QIN_NUXIU",
+      "source": "史记·秦本纪 / 史记索隐",
+      "candidate": "女脩",
+      "aliases": ["女修"],
+      "text": "女脩织，玄鸟陨卵，女脩吞之，生子大业。",
+      "node_type": "GENEALOGICAL_ANCESTOR",
+      "sex": "FEMALE_SUPPORTED",
+      "function_bundle": ["MATERNAL_LINE_CONTROL", "BIRD_EGG_ORIGIN_MOTIF"],
+      "evidence": ["索隐：女脩，颛顼之裔女", "索隐：其父不著，而秦赵以母族而祖颛顼"],
+      "identity_status": "DISTINCT_CONTROL_TRADITION"
+    },
+    {
+      "id": "QIN_NUHUA",
+      "source": "史记·秦本纪",
+      "candidate": "女华",
+      "aliases": ["女華"],
+      "text": "大业取少典之子，曰女华。女华生大费。",
+      "node_type": "GENEALOGICAL_PERSON",
+      "sex": "FEMALE_SUPPORTED_BY_ROLE",
+      "function_bundle": ["SPOUSE", "MOTHER"],
+      "guard": "子 in 少典之子 is not male-only."
+    },
+    {
+      "id": "QIN_NUFANG",
+      "source": "史记·秦本纪",
+      "candidate": "女防",
+      "text": "恶来革有子曰女防，女防生旁皋。",
+      "node_type": "GENEALOGICAL_PERSON",
+      "sex": "OPEN",
+      "function_bundle": ["PARENT_OF_PANGGAO"],
+      "guard": "有子曰 is insufficient for sex inference; compare 女华 in the same chapter."
+    },
+    {
+      "id": "SHAOKANG_NUAI_ZUO",
+      "source": "左传·哀公元年 / 经典释文",
+      "candidate": "女艾",
+      "text": "使女艾谍浇。",
+      "node_type": "HISTORICAL_MYTHIC_AGENT",
+      "sex": "OPEN",
+      "function_bundle": ["SHAOKANG_SUBORDINATE", "INTELLIGENCE_RECONNAISSANCE"],
+      "reading": ["女如字", "女又音汝"],
+      "guard": "Do not set sex=female from 女."
+    },
+    {
+      "id": "SHAOKANG_RUAI_JINIAN",
+      "source": "竹书纪年 tradition",
+      "candidate": "汝艾",
+      "text": "世子少康使汝艾伐过杀浇。",
+      "node_type": "HISTORICAL_MYTHIC_AGENT",
+      "sex": "OPEN",
+      "function_bundle": ["SHAOKANG_SUBORDINATE", "ATTACK_OR_INTELLIGENCE_ROLE"],
+      "identity_status": "STRONG_READING_OR_TRANSMISSION_RELATION_TO_NUAI"
+    }
+  ],
+  "variant_relations": [
+    {"a": "女歧", "b": "女岐", "relation": "GRAPHIC_VARIANT", "status": "ATTESTED_VARIANT"},
+    {"a": "女歧", "b": "女伎", "relation": "TEXTUAL_VARIANT", "status": "ATTESTED_VARIANT"},
+    {"a": "女媊", "b": "女前", "relation": "SPEECH_TO_TEXT_RESOLUTION_CANDIDATE", "status": "HIGH_CONFIDENCE_USER_SEED_RESOLUTION", "evidence": "Later transmission explicitly glosses 媊音前; historical source spelling remains 女媊."},
+    {"a": "女艾", "b": "汝艾", "relation": "READING_OR_TRANSMISSION_VARIANT", "status": "STRONG_WITNESS_RELATION", "evidence": "经典释文: 女如字又音汝; 竹书纪年 tradition: 汝艾."}
+  ],
+  "competing_identity_models": [
+    {
+      "a": "女艾/汝艾",
+      "b": "女歧_少康寒浇_occurrence",
+      "relation": "SAME_EVENT_IDENTITY_HYPOTHESIS",
+      "status": "OPEN",
+      "pro": ["same Shaokang-Hanjiao event cluster", "reported phonological argument linking 艾 and 岐"],
+      "contra": ["Su Xuelin explicitly rejects the identification", "Jinian narrative as transmitted distinguishes 汝艾 and 女歧 as separate actors"]
+    },
+    {
+      "a": "女歧_九子_occurrence",
+      "b": "女歧_少康寒浇_occurrence",
+      "relation": "SAME_SURFACE_NAME_DIFFERENT_OCCURRENCE",
+      "status": "IDENTITY_OPEN"
+    }
+  ],
+  "model_implication": "女+core graph is cross-tradition and semantically heterogeneous. Wa classification requires independent geography, ritual, hydrology, iconography, phonology, genealogy, or textual-provenance evidence; sex and maternal-line semantics must also be independently evidenced."
+}
