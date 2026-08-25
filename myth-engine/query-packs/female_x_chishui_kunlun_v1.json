@@ -1,7 +1,7 @@
 {
-  "pack_id": "female-x-chishui-kunlun-v1.2",
-  "purpose": "Discover and split 女X entities across the 508GB corpus while separating deity/person, ritual person, place, grammar, state/people, and unresolved nodes before any cultural-family inference.",
-  "epistemic_rule": "Exact strings are retrieval seeds only. The grammatical construction 女+core graph is cross-tradition and cannot by itself establish Wa/frog affiliation or entity identity.",
+  "pack_id": "female-x-chishui-kunlun-v1.3",
+  "purpose": "Discover and split 女X entities across the 508GB corpus while separating deity/person, ritual person, genealogy, place, grammar, reading variants, state/people, and unresolved nodes before any cultural-family or sex inference.",
+  "epistemic_rule": "Exact strings are retrieval seeds only. 女+core graph is cross-tradition; 女 may participate in sex/class/clan/title or reading/transmission structures, and cannot by itself establish sex, Wa/frog affiliation, or historical identity.",
   "seed_groups": {
     "nuchou": ["女丑", "女醜", "女丑之尸", "女丑之屍"],
     "nuwa": ["女娲", "女媧", "娲", "媧", "女娲之肠", "女媧之腸"],
@@ -10,6 +10,8 @@
     "imperial_daughter_transformation": ["女娃", "女尸", "女屍"],
     "shanhaijing_female_x": ["女祭", "女薎", "女戚", "女蔑", "女虔", "女䖍"],
     "chuci_female_x": ["女歧", "女岐", "女伎"],
+    "shaokang_event_variants": ["女艾", "汝艾", "女歧", "女岐"],
+    "qin_maternal_genealogy_control": ["女修", "女脩", "女华", "女華", "女防"],
     "astral_control": ["女媊"],
     "negative_toponym_controls": ["女床", "女烝", "女几"],
     "speech_resolution_candidate": ["女前"],
@@ -44,6 +46,27 @@
       "guard": "Two distinct 女歧 occurrences in 天问 remain separate occurrence nodes until identity is tested."
     },
     {
+      "a": "女艾",
+      "b": "汝艾",
+      "relation": "READING_OR_TRANSMISSION_VARIANT",
+      "status": "STRONG_WITNESS_RELATION",
+      "guard": "左传传本 has 女艾 and 经典释文 says 女如字又音汝; 竹书纪年 tradition has 汝艾. This relation does not establish sex."
+    },
+    {
+      "a": "女艾/汝艾",
+      "b": "女歧_少康寒浇_occurrence",
+      "relation": "SAME_EVENT_IDENTITY_HYPOTHESIS",
+      "status": "OPEN",
+      "guard": "A reported scholarly proposal merges them by event role plus phonological argument; Su Xuelin explicitly rejects it. Preserve separate occurrence nodes until witness, phonology, and event details converge."
+    },
+    {
+      "a": "女歧_九子_occurrence",
+      "b": "女歧_少康寒浇_occurrence",
+      "relation": "SAME_NAME_OCCURRENCE_SPLIT",
+      "status": "IDENTITY_OPEN",
+      "guard": "Same surface name in 天问 is not enough to merge a nine-child divine occurrence with the Shaokang-Hanjiao occurrence."
+    },
+    {
       "a": "女媊",
       "b": "女前",
       "relation": "SPEECH_TO_TEXT_RESOLUTION_CANDIDATE",
@@ -64,8 +87,10 @@
     "frog_wa": ["蛙", "鼃", "黾", "黽", "蛙纹", "蛙紋", "女娲", "女媧"],
     "ritual": ["巫", "祭", "祀", "禱", "祷", "祝", "尸", "屍", "俎", "觛", "神女", "天女", "玉女", "天下祭之"],
     "transformation": ["死", "溺", "化为", "化為", "尸", "屍", "鸟", "鳥", "草", "神"],
+    "genealogy_maternal": ["母族", "祖", "苗裔", "裔女", "生", "取", "妻", "女脩", "女修", "女华", "女華", "女防", "玄鸟", "玄鳥", "陨卵", "隕卵", "吞", "鸟俗", "鳥俗"],
+    "shaokang_hanjiao": ["少康", "浇", "澆", "寒浞", "过", "過", "谍", "諜", "伐过", "伐過", "缝裳", "縫裳", "汝艾", "女艾", "女歧", "女岐"],
     "astral": ["星", "太白", "南斗", "明星", "日", "月"],
-    "mythic_context": ["神", "帝", "山海经", "山海經", "楚辞", "楚辭", "天问", "天問", "说文", "說文", "大荒", "海外", "海内", "海內", "古", "经", "經", "传", "傳", "图赞", "圖讚"]
+    "mythic_context": ["神", "帝", "山海经", "山海經", "楚辞", "楚辭", "天问", "天問", "说文", "說文", "左传", "左傳", "竹书纪年", "竹書紀年", "史记", "史記", "大荒", "海外", "海内", "海內", "古", "经", "經", "传", "傳", "图赞", "圖讚"]
   },
   "female_x_stoplist": ["女子", "女人", "女儿", "女兒", "女主", "女友", "女方", "女孩", "女童", "女装", "女裝", "女星", "女王", "女士", "女工", "女官", "女兵", "女校", "女篮", "女籃", "女足", "女排", "女队", "女隊", "女婿", "女仆", "女僕", "女佣", "女傭"],
   "discovery": {
@@ -73,7 +98,8 @@
     "context_radius": 180,
     "minimum_anchor_groups": 2,
     "retain_seed_hits_regardless_of_anchor_score": true,
-    "type_hint_is_routing_only": true
+    "type_hint_is_routing_only": true,
+    "surface_sex_inference_forbidden": true
   },
-  "cultural_family_guard": "Wa/frog membership requires an independent evidence bundle such as western geography + water/rain/Chishui + frog/Wa phonology/iconography/ritual/genealogy. 女X form alone has zero positive weight after the 女媊 and 女歧 controls."
+  "cultural_family_guard": "Wa/frog membership requires an independent evidence bundle such as western geography + water/rain/Chishui + frog/Wa phonology/iconography/ritual/genealogy. 女X form alone has zero positive weight. 女艾/汝艾 further proves that the surface graph 女 can participate in a reading/transmission variant, while 秦本纪索隐 independently proves maternal-clan genealogy; these facts must be tested separately rather than collapsed into one universal 女-prefix rule."
 }
