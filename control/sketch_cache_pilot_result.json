@@ -1,5 +1,5 @@
 {
-  "format": "osr-sketch-cache-pilot/v1",
+  "format": "osr-sketch-cache-pilot/v2",
   "shards": [
     {
       "file": "literature_zh-00142-of-00233.parquet",
@@ -18,6 +18,152 @@
           "bloom_combined_bytes": 2154913
         }
       },
+      "query_probe": [
+        {
+          "query": "女娲",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "共工",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "炎帝",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "神农",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "黄帝",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "后土",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "句龙",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "不周山",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "补天",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "天柱",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "洪水",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "治水",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "罔物",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "网雾",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "天降",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "绝地天通",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "龙伯国",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "鳌",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "高诱",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "论衡",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "淮南子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "三皇本纪",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "方志",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "祀典",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        }
+      ],
       "fingerprint_sha256": "239c56d2c4b0b32bbfea17f3c4d40c26dea1ce78f286ce47b8aa9b0c0daa93e9"
     },
     {
@@ -37,6 +183,152 @@
           "bloom_combined_bytes": 2029390
         }
       },
+      "query_probe": [
+        {
+          "query": "女娲",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "共工",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "炎帝",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "神农",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "黄帝",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "后土",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "句龙",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "不周山",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "补天",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "天柱",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "洪水",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "治水",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "罔物",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "网雾",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "天降",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "绝地天通",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "龙伯国",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "鳌",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "高诱",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "论衡",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "淮南子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "三皇本纪",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "方志",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "祀典",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        }
+      ],
       "fingerprint_sha256": "d53c536cf4ba761bfb15842afa7968a0bca13cd01bbee3cae92c5a4f9ab7f381"
     },
     {
@@ -56,6 +348,152 @@
           "bloom_combined_bytes": 2083150
         }
       },
+      "query_probe": [
+        {
+          "query": "女娲",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "共工",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "炎帝",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "神农",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "黄帝",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "后土",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "句龙",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "不周山",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": false
+        },
+        {
+          "query": "补天",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "天柱",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "洪水",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "治水",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "罔物",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "网雾",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "天降",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "绝地天通",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": false
+        },
+        {
+          "query": "龙伯国",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "鳌",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "高诱",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "论衡",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "淮南子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "三皇本纪",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "方志",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "祀典",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        }
+      ],
       "fingerprint_sha256": "d41e27eeab326e2a42141c33339fdbdb0f7e14efe3c0cdbad147aa4e8c5ace5e"
     },
     {
@@ -75,10 +513,182 @@
           "bloom_combined_bytes": 1441810
         }
       },
+      "query_probe": [
+        {
+          "query": "女娲",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "共工",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "炎帝",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "神农",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "黄帝",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "后土",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "句龙",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "不周山",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "补天",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "天柱",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "洪水",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "治水",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "罔物",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "网雾",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "天降",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "绝地天通",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "龙伯国",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "鳌",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "高诱",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "论衡",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "淮南子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "三皇本纪",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "方志",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "祀典",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        }
+      ],
       "fingerprint_sha256": "88994ab0b319f02819bb78f2c44a411a36e2fe241d8eac8bd3d71276defcf35c"
     }
   ],
-  "created_unix": 1787627861.2297297,
+  "created_unix": 1787630648.2438319,
+  "held_out_queries": [
+    "女娲",
+    "共工",
+    "炎帝",
+    "神农",
+    "黄帝",
+    "后土",
+    "句龙",
+    "不周山",
+    "补天",
+    "天柱",
+    "洪水",
+    "治水",
+    "罔物",
+    "网雾",
+    "天降",
+    "绝地天通",
+    "龙伯国",
+    "鳌",
+    "高诱",
+    "论衡",
+    "淮南子",
+    "三皇本纪",
+    "方志",
+    "祀典"
+  ],
   "summary": {
     "shard_count": 4,
     "sample_chars": 7688559,
@@ -88,6 +698,10 @@
     "mean_bloom_bytes_fpr_0_1pct": 1927315.75,
     "projected_1788_shards_mib_fpr_1pct": 2190.9341526031494,
     "projected_1788_shards_mib_fpr_0_1pct": 3286.4003763198853,
-    "note": "Pilot uses bounded shard text samples. Full-shard gram cardinality may be higher; do not scale without held-out rejection-rate validation."
+    "exact_2gram_rejection_rate_on_probe": 0.8043478260869565,
+    "exact_3gram_rejection_rate_on_probe": 1.0,
+    "probe_checks_2gram": 92,
+    "probe_checks_3gram": 20,
+    "note": "Bounded shard samples only. Rejection metrics are exact-set upper-bound routing tests before Bloom/XOR false positives. Full-shard cardinality may be higher."
   }
 }
