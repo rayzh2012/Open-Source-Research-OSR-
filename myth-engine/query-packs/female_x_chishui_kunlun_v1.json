@@ -1,0 +1,27 @@
+{
+  "pack_id": "female-x-chishui-kunlun-v1",
+  "purpose": "Discover and split 女X / 天女X mythic entities across the full 508GB corpus; test Chishui-Kunlun-Nuwa-Nuba network without pre-merging entities.",
+  "epistemic_rule": "Exact strings are retrieval seeds only. No alias implies identity. unresolved_user_seed items must remain unresolved until independently attested.",
+  "seed_groups": {
+    "nuchou": ["女丑", "女醜", "女丑之尸"],
+    "nuwa": ["女娲", "女媧", "娲", "媧", "女娲之肠", "女媧之腸"],
+    "nuba": ["女妭", "女魃", "妭", "魃", "黄帝女魃", "黃帝女魃", "天女曰妭"],
+    "chishui_woman": ["赤水女子献", "赤水女子獻", "赤水女子魃", "赤水女子妭"],
+    "female_x_known": ["女祭", "女戚", "女虔", "女蔑", "女媊"],
+    "unresolved_user_seed": ["女俊", "女前", "女拆"]
+  },
+  "anchors": {
+    "west_geography": ["西", "西方", "西北", "西海", "大荒西", "流沙", "不周", "昆仑", "昆侖", "西王母", "玄圃"],
+    "chishui_water": ["赤水", "黑水", "弱水", "青水", "水", "河", "海", "渊", "淵", "泉", "雨", "旱", "雨师", "雨師"],
+    "frog_wa": ["蛙", "鼃", "黾", "黽", "蛙纹", "蛙紋", "女娲", "女媧"],
+    "ritual": ["巫", "祭", "祀", "禱", "祷", "祝", "尸", "神女", "天女", "玉女"],
+    "mythic_context": ["神", "帝", "山海经", "山海經", "大荒", "海外", "海内", "海內", "古", "经", "經", "传", "傳", "图赞", "圖讚"]
+  },
+  "female_x_stoplist": ["女子", "女人", "女儿", "女兒", "女主", "女友", "女方", "女孩", "女童", "女装", "女裝", "女星", "女王", "女士", "女工", "女官", "女兵", "女校", "女篮", "女籃", "女足", "女排", "女队", "女隊", "女婿", "女仆", "女僕", "女佣", "女傭"],
+  "discovery": {
+    "regex": "(?:天女|神女|女)[\\u3400-\\u9fff]{1,3}",
+    "context_radius": 180,
+    "minimum_anchor_groups": 2,
+    "retain_seed_hits_regardless_of_anchor_score": true
+  }
+}
