@@ -11,6 +11,12 @@ on:
       - '.github/workflows/myth-engine-ci.yml'
   workflow_dispatch:
 
+# Research code changes often arrive as a burst of small commits. Keep only the
+# newest CI for a branch/PR so stale runs do not block the evidence pipeline.
+concurrency:
+  group: myth-engine-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
