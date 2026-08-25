@@ -16,7 +16,7 @@ import pyarrow.parquet as pq
 from huggingface_hub import hf_hub_download, list_repo_files
 
 from myth_engine.core import KeywordAutomaton, normalize_text
-from myth_engine.female_x import classify_female_x_candidate
+from myth_engine.female_x import classify_female_x_candidate, seed_group_context_allowed
 
 
 DATASETS = [
@@ -94,8 +94,6 @@ def anchor_groups_in_context(context: str, anchors: dict[str, list[str]]) -> tup
 
 
 def type_hint_for_occurrence(text: str, start: int, end: int, candidate: str) -> tuple[str, list[str]]:
-    # Type routing is based on tight syntactic context, intentionally smaller
-    # than the evidence window used for thematic anchors.
     left = text[max(0, start - 80):start]
     right = text[end:min(len(text), end + 80)]
     base = candidate[:2] if candidate.startswith("女") and len(candidate) >= 2 else candidate
@@ -119,11 +117,10 @@ def emit_hit(
     anchors: list[str],
     entity_type_hint: str,
     type_hint_reasons: list[str],
+    retrieval_policy_reasons: list[str],
 ) -> str:
     context_norm = normalize_text(context)
     context_hash = sha256_text(context_norm)
-    # Crucial invariant: two different entities in the same source window are
-    # two different hits. Context hash alone is NOT a hit identity.
     hit_hash = sha256_text(kind + "|" + term + "|" + context_norm)
     obj = {
         "repo_id": repo_id,
@@ -134,6 +131,7 @@ def emit_hit(
         "entity_group": group,
         "entity_type_hint": entity_type_hint,
         "type_hint_reasons": type_hint_reasons,
+        "retrieval_policy_reasons": retrieval_policy_reasons,
         "context": context,
         "anchor_groups": anchor_groups,
         "anchors": sorted(set(anchors)),
@@ -170,6 +168,7 @@ def scan_shard(
     stop = set(pack.get("female_x_stoplist", []))
     radius = int(pack["discovery"].get("context_radius", 180))
     min_groups = int(pack["discovery"].get("minimum_anchor_groups", 2))
+    seed_policy = pack.get("seed_group_anchor_policy", {})
 
     for row_no, raw in iter_texts(local_path, text_col):
         text = normalize_text(raw)
@@ -184,6 +183,8 @@ def scan_shard(
             continue
 
         # Seed retrieval: spelling witnesses stay independent. Identity is not asserted.
+        # High-frequency ambiguous seed groups may additionally require ancient-source
+        # context so ordinary modern phrases such as 女方 do not swamp the evidence set.
         matched_seed_terms = sorted({term for _, term in seed_matches}, key=len, reverse=True)
         for term in matched_seed_terms:
             start = 0
@@ -196,6 +197,18 @@ def scan_shard(
                 right = min(len(text), end + radius)
                 context = text[left:right]
                 agroups, amatches = anchor_groups_in_context(context, pack["anchors"])
+                group = seed_group[term]
+                allowed, policy_reasons = seed_group_context_allowed(
+                    group,
+                    context,
+                    agroups,
+                    seed_policy,
+                )
+                if not allowed:
+                    stats["seed_hits_filtered_by_policy"] += 1
+                    start = end
+                    continue
+
                 type_hint, type_reasons = type_hint_for_occurrence(text, pos, end, term)
                 hit_hash = sha256_text("seed|" + term + "|" + normalize_text(context))
                 if hit_hash not in seen_hit_hashes:
@@ -207,12 +220,13 @@ def scan_shard(
                         row_no=row_no,
                         kind="seed",
                         term=term,
-                        group=seed_group[term],
+                        group=group,
                         context=context,
                         anchor_groups=agroups,
                         anchors=amatches,
                         entity_type_hint=type_hint,
                         type_hint_reasons=type_reasons,
+                        retrieval_policy_reasons=list(policy_reasons),
                     )
                     stats["seed_hits"] += 1
                 start = end
@@ -251,6 +265,7 @@ def scan_shard(
                 anchors=amatches,
                 entity_type_hint=type_hint,
                 type_hint_reasons=type_reasons,
+                retrieval_policy_reasons=["generic_discovery_anchor_gate"],
             )
             stats["discovery_hits"] += 1
 
