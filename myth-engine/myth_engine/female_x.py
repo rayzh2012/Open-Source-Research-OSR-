@@ -22,9 +22,13 @@ _RITUAL_CUES = (
 )
 _PERSON_CUES = (
     "名曰", "其名曰", "有二人", "有人名曰", "有女子名曰", "少女",
-    "帝女死焉", "生季", "生寿", "生壽", "之尸", "之屍",
+    "帝女死焉", "生季", "生寿", "生壽", "之尸", "之屍", "神女",
 )
 _STATE_CUES = ("之国", "之國", "国名", "國名")
+# High-frequency Classical Chinese continuations where a raw 女+graph match is
+# normally syntactic prose rather than a proper name. These are routing hints,
+# never destructive filters: the hit is retained for audit.
+_GRAMMATICAL_SECOND_GRAPHS = frozenset("何曰为為有无無之而其不亦乃可所焉")
 
 
 def female_x_hit_hash(kind: str, term: str, context: str) -> str:
@@ -42,9 +46,9 @@ def female_x_hit_hash(kind: str, term: str, context: str) -> str:
 def iter_female_x(text: str):
     """Yield conservative 女+one-CJK candidates.
 
-    The generic discovery lane deliberately extracts only the stable two-graph
-    shape 女X. Longer strings such as 女娲之肠 or 赤水女子献 belong in the
-    exact-seed lane. This keeps toponyms and prose continuations inspectable.
+    Longer strings such as 女娲之肠 or 赤水女子献 belong in the exact-seed
+    lane. Generic matches are retained even when later routed as place/grammar
+    controls so false-positive behavior remains measurable.
     """
     yield from FEMALE_X_RE.finditer(text)
 
@@ -54,25 +58,21 @@ def classify_female_x_candidate(
     left_context: str = "",
     right_context: str = "",
 ) -> FemaleXTypeHint:
-    """Return a cautious type hint, never an identity assertion.
-
-    Classification is intentionally surface/provenance-oriented. The result is
-    a routing hint for review queues; it must not be promoted directly to FACT.
-    """
+    """Return a cautious type hint, never an identity assertion."""
     left = left_context[-80:]
     right = right_context[:80]
     local = left + candidate + right
     reasons: list[str] = []
 
-    # Structural place-name tests take precedence. A naive 女X regex otherwise
-    # promotes 女床/女烝/女几 into a bogus goddess list.
+    if len(candidate) == 2 and candidate.startswith("女") and candidate[1] in _GRAMMATICAL_SECOND_GRAPHS:
+        return FemaleXTypeHint("GRAMMATICAL_PHRASE", ("function_graph_after_女",))
+
+    # Structural place-name tests take precedence over mythic thematic anchors.
     if right.startswith("之山") or re.search(rf"曰{re.escape(candidate)}之山", local):
         return FemaleXTypeHint("TOPONYM", ("candidate_followed_by_之山",))
     if right.startswith("之水") or re.search(rf"{re.escape(candidate)}之水", local):
         return FemaleXTypeHint("HYDRONYM", ("candidate_followed_by_之水",))
 
-    # Country/people labels are a separate node class unless a stronger naming
-    # construction identifies an individual.
     has_person_naming = any(cue in local for cue in _PERSON_CUES)
     if not has_person_naming and any(cue in right[:12] for cue in _STATE_CUES):
         return FemaleXTypeHint("STATE_OR_PEOPLE", ("near_之国_or_country_cue",))
