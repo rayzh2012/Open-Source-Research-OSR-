@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import re
+from typing import Any
 
 from .core import normalize_text
 
@@ -41,6 +42,51 @@ def female_x_hit_hash(kind: str, term: str, context: str) -> str:
     """
     payload = f"{kind}|{term}|{normalize_text(context)}"
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def seed_group_context_allowed(
+    group: str,
+    context: str,
+    anchor_groups: list[str] | tuple[str, ...] | set[str],
+    policy_map: dict[str, Any] | None,
+) -> tuple[bool, tuple[str, ...]]:
+    """Apply optional provenance gates to ambiguous exact-seed groups.
+
+    Rare names such as 赤水女子献 may be retained unconditionally, but a term
+    such as 女方 is overwhelmingly ordinary modern prose. Query packs can put
+    such strings in a guarded seed group and require ancient-source/context
+    terms before the hit is emitted. This guard affects retrieval only; it does
+    not assert entity identity, sex, chronology, or cultural affiliation.
+    """
+    policy = (policy_map or {}).get(group)
+    if not policy:
+        return True, ("no_seed_group_policy",)
+
+    reasons: list[str] = []
+    normalized = normalize_text(context)
+    required_any_terms = tuple(policy.get("required_any_terms", ()))
+    if required_any_terms:
+        matched_terms = tuple(t for t in required_any_terms if normalize_text(t) in normalized)
+        if not matched_terms:
+            return False, ("missing_required_any_term",)
+        reasons.append("required_any_term:" + ",".join(matched_terms[:8]))
+
+    required_anchor_groups = set(policy.get("required_anchor_groups", ()))
+    observed_groups = set(anchor_groups)
+    if required_anchor_groups and not (required_anchor_groups & observed_groups):
+        return False, ("missing_required_anchor_group",)
+    if required_anchor_groups:
+        reasons.append(
+            "required_anchor_group:" + ",".join(sorted(required_anchor_groups & observed_groups))
+        )
+
+    minimum = int(policy.get("minimum_anchor_groups", 0))
+    if len(observed_groups) < minimum:
+        return False, (f"anchor_group_count<{minimum}",)
+    if minimum:
+        reasons.append(f"anchor_group_count>={minimum}")
+
+    return True, tuple(reasons or ["seed_group_policy_pass"])
 
 
 def iter_female_x(text: str):
