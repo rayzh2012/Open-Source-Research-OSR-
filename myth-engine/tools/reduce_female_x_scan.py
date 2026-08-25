@@ -4,11 +4,30 @@ import argparse
 import collections
 import csv
 import gzip
+import hashlib
 import json
 import sqlite3
 from pathlib import Path
 
 EXPECTED_FULL_SHARDS = 1788
+TYPE_HINTS = (
+    "PERSON_DEITY",
+    "RITUAL_PERSON",
+    "TOPONYM",
+    "HYDRONYM",
+    "STATE_OR_PEOPLE",
+    "UNKNOWN",
+    "COMPOSITE_OR_NON_FEMALE_X_SEED",
+)
+
+
+def fallback_hit_hash(obj: dict) -> str:
+    payload = "|".join([
+        str(obj.get("kind", "")),
+        str(obj.get("term", "")),
+        str(obj.get("context_sha256", "")),
+    ])
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def main() -> None:
@@ -29,11 +48,15 @@ def main() -> None:
     merged_hits = outdir / "female-x-merged-hits.jsonl.gz"
     candidate_counts: collections.Counter[str] = collections.Counter()
     candidate_anchor_counts: collections.Counter[str] = collections.Counter()
+    candidate_type_counts: collections.Counter[str] = collections.Counter()
     total_stats: collections.Counter[str] = collections.Counter()
     worker_summaries = []
     errors = []
     unique_hits = 0
 
+    # Hit identity is term-aware. Same-context 女祭 and 女薎 MUST survive as
+    # separate evidence records; context_sha256 is retained only for textual
+    # reuse/duplication analysis.
     with gzip.open(merged_hits, "wt", encoding="utf-8", compresslevel=6) as out:
         for path in sorted(indir.rglob("worker-*-hits.jsonl.gz")):
             with gzip.open(path, "rt", encoding="utf-8") as fh:
@@ -41,9 +64,7 @@ def main() -> None:
                     if not line.strip():
                         continue
                     obj = json.loads(line)
-                    h = obj.get("context_sha256")
-                    if not h:
-                        continue
+                    h = obj.get("hit_sha256") or fallback_hit_hash(obj)
                     cur = db.execute("INSERT OR IGNORE INTO seen(h) VALUES (?)", (h,))
                     if cur.rowcount:
                         out.write(json.dumps(obj, ensure_ascii=False, sort_keys=True) + "\n")
@@ -54,6 +75,7 @@ def main() -> None:
         obj = json.loads(path.read_text(encoding="utf-8"))
         candidate_counts.update(dict(obj.get("candidate_counts", [])))
         candidate_anchor_counts.update(dict(obj.get("candidate_anchor_counts", [])))
+        candidate_type_counts.update(dict(obj.get("candidate_type_counts", [])))
 
     modes = set()
     requested_worker_counts = set()
@@ -78,17 +100,25 @@ def main() -> None:
     with ranked_csv.open("w", encoding="utf-8-sig", newline="") as fh:
         w = csv.writer(fh)
         w.writerow([
-            "candidate", "count", "west_geography", "chishui_water",
-            "frog_wa", "ritual", "mythic_context"
+            "candidate", "count",
+            "person_deity", "ritual_person", "toponym", "hydronym", "state_or_people", "unknown",
+            "west_geography", "chishui_water", "frog_wa", "ritual", "transformation", "mythic_context",
         ])
         for candidate, count in candidate_counts.most_common():
             w.writerow([
                 candidate,
                 count,
+                candidate_type_counts.get(f"{candidate}\tPERSON_DEITY", 0),
+                candidate_type_counts.get(f"{candidate}\tRITUAL_PERSON", 0),
+                candidate_type_counts.get(f"{candidate}\tTOPONYM", 0),
+                candidate_type_counts.get(f"{candidate}\tHYDRONYM", 0),
+                candidate_type_counts.get(f"{candidate}\tSTATE_OR_PEOPLE", 0),
+                candidate_type_counts.get(f"{candidate}\tUNKNOWN", 0),
                 candidate_anchor_counts.get(f"{candidate}\twest_geography", 0),
                 candidate_anchor_counts.get(f"{candidate}\tchishui_water", 0),
                 candidate_anchor_counts.get(f"{candidate}\tfrog_wa", 0),
                 candidate_anchor_counts.get(f"{candidate}\tritual", 0),
+                candidate_anchor_counts.get(f"{candidate}\ttransformation", 0),
                 candidate_anchor_counts.get(f"{candidate}\tmythic_context", 0),
             ])
 
@@ -98,17 +128,12 @@ def main() -> None:
         for x in worker_summaries
         if not x.get("skipped") and x.get("corpus_parquet_files_seen") is not None
     }
-    corpus_files_seen = (
-        next(iter(corpus_files_seen_values))
-        if len(corpus_files_seen_values) == 1 else None
-    )
+    corpus_files_seen = next(iter(corpus_files_seen_values)) if len(corpus_files_seen_values) == 1 else None
 
     assigned = int(total_stats.get("assigned_shards", 0))
     completed = int(total_stats.get("completed_shards", 0))
     failed = int(total_stats.get("failed_shards", 0))
 
-    # FULL PASS is deliberately strict. No candidate count, partial artifact, or
-    # successful reducer is allowed to masquerade as complete corpus coverage.
     if mode == "full":
         full_verified = (
             corpus_files_seen == EXPECTED_FULL_SHARDS
@@ -127,7 +152,7 @@ def main() -> None:
         status_value = "UNVERIFIED"
 
     status = {
-        "stage": "FEMALE_X_CORPUS_ENTITY_COMPILATION_V1",
+        "stage": "FEMALE_X_CORPUS_ENTITY_COMPILATION_V1_1",
         "mode": mode,
         "status": status_value,
         "full_corpus_verified": full_verified,
@@ -140,26 +165,27 @@ def main() -> None:
         "active_worker_summaries": active_worker_summaries,
         "skipped_worker_summaries": skipped_worker_summaries,
         "requested_worker_counts": sorted(requested_worker_counts),
+        "type_hint_contract": "Routing only; never promote PERSON_DEITY/TOPONYM/etc. directly to historical FACT.",
+        "dedupe_contract": "hit identity = kind+term+context; shared source context does not merge distinct entities.",
         "evidence_rule": "Candidate discovery is retrieval evidence only; no candidate name implies entity identity or merge.",
     }
     (outdir / "female-x-scan-status.json").write_text(
-        json.dumps(status, ensure_ascii=False, indent=2, sort_keys=True),
-        encoding="utf-8",
+        json.dumps(status, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8"
     )
 
     report = {
-        "unique_context_hits": unique_hits,
+        "unique_hits": unique_hits,
         "candidate_count": len(candidate_counts),
         "stats": dict(total_stats),
         "failed_shards": failed,
         "errors": errors,
         "top_200_candidates": candidate_counts.most_common(200),
+        "top_candidate_types": candidate_type_counts.most_common(500),
         "status": status,
         "worker_summaries": worker_summaries,
     }
     (outdir / "female-x-scan-report.json").write_text(
-        json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True),
-        encoding="utf-8",
+        json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8"
     )
 
     db.close()
