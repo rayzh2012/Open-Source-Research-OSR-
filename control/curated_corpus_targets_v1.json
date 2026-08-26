@@ -1,0 +1,80 @@
+{
+  "schema_version": "osr-curated-corpus-targets-v1",
+  "destination_root": "龍族古籍源庫｜Dragon Source Corpus/OPEN_CURATED_CORPORA",
+  "targets": [
+    {
+      "id": "kr5-daoist-corpus",
+      "repo": "tokushige-koyasan/kr5-corpus",
+      "ref": "main",
+      "enabled": true,
+      "domain": "daoism",
+      "format": "plain-text+catalog",
+      "license": "CC-BY-SA-4.0",
+      "approx_text_mb": 102,
+      "priority": "P0",
+      "notes": "1,650 Daoist texts derived from Kanripo KR5; keep catalog and NOTICE for provenance."
+    },
+    {
+      "id": "cbeta-esoteric-corpus",
+      "repo": "tokushige-koyasan/kanseki-corpus",
+      "ref": "main",
+      "enabled": true,
+      "domain": "chinese-buddhist-esoteric",
+      "format": "plain-text+catalog",
+      "license": "CC-BY-NC-SA-4.0",
+      "approx_text_mb": 26,
+      "priority": "P0",
+      "notes": "681 Chinese Buddhist esoteric texts derived from CBETA TEI P5; non-commercial use only; preserve NOTICE_CBETA."
+    },
+    {
+      "id": "cbeta-xml-p5",
+      "repo": "cbeta-org/xml-p5",
+      "ref": "master",
+      "enabled": false,
+      "domain": "chinese-buddhist-canonical-source",
+      "format": "TEI-P5-XML",
+      "license": "per-file CBETA availability; generally non-commercial; preserve TEI headers",
+      "priority": "P1"
+    },
+    {
+      "id": "perseus-greek",
+      "repo": "PerseusDL/canonical-greekLit",
+      "ref": "master",
+      "enabled": false,
+      "domain": "ancient-greek",
+      "format": "TEI/XML",
+      "license": "CC-BY-SA-4.0 unless otherwise indicated",
+      "priority": "P1"
+    },
+    {
+      "id": "perseus-latin",
+      "repo": "PerseusDL/canonical-latinLit",
+      "ref": "master",
+      "enabled": false,
+      "domain": "latin",
+      "format": "TEI/XML",
+      "license": "CC-BY-SA-4.0 unless otherwise indicated",
+      "priority": "P1"
+    },
+    {
+      "id": "suttacentral-bilara",
+      "repo": "suttacentral/bilara-data",
+      "ref": "published",
+      "enabled": false,
+      "domain": "pali-buddhist-multilingual",
+      "format": "segmented JSON",
+      "license": "CC0 for supported Bilara translations; preserve repository licensing metadata",
+      "priority": "P1"
+    },
+    {
+      "id": "sarit-indic",
+      "repo": "sarit/SARIT-corpus",
+      "ref": "master",
+      "enabled": false,
+      "domain": "sanskrit-indic",
+      "format": "TEI-P5-XML",
+      "license": "per-file CC-BY-SA / compatible notices",
+      "priority": "P1"
+    }
+  ]
+}
