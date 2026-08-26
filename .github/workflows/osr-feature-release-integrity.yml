@@ -1,0 +1,176 @@
+name: OSR Feature Release Integrity
+
+on:
+  workflow_run:
+    workflows: ["OSR 508GB Feature Extraction"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: osr-feature-release-integrity
+  cancel-in-progress: true
+
+jobs:
+  validate-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Feature Store branch
+        uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+
+      - name: Resolve run identity and download completion markers
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          RUN_ID=$(python - <<'PY'
+          import json
+          req=json.load(open('control/feature_extraction_request.json',encoding='utf-8'))
+          print(req['run_id'])
+          PY
+          )
+          printf '%s\n' "$RUN_ID" > /tmp/run_id.txt
+          gh release view "$RUN_ID" --json assets > /tmp/release.json
+          mkdir -p /tmp/summaries
+          gh release download "$RUN_ID" -p 'partition-*-summary.json' -D /tmp/summaries
+
+      - name: Validate marker/data pairing and identities
+        id: audit
+        shell: python
+        env:
+          TRIGGER_RUN_ID: ${{ github.event.workflow_run.id }}
+          TRIGGER_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+        run: |
+          import gzip, hashlib, json, os, pathlib, re
+
+          req=json.load(open('control/feature_extraction_request.json',encoding='utf-8'))
+          partition_count=int(req.get('partition_count',128))
+          run_id=req['run_id']
+
+          schema_bytes=pathlib.Path('control/feature_schema_v1.json').read_bytes()
+          schema_sha=hashlib.sha256(schema_bytes).hexdigest()
+          with gzip.open('control/stage2_query_index.json.gz','rt',encoding='utf-8') as f:
+              m2=json.load(f)
+          inventory=sorted([
+              {'corpus':x['source'],'repo':x['repo'],'shard':x['file'],'sha256':x.get('sha256')}
+              for x in m2['inventory']
+          ],key=lambda x:(x['corpus'],x['repo'],x['shard']))
+          names_payload=json.dumps(
+              [{'corpus':x['corpus'],'repo':x['repo'],'shard':x['shard']} for x in inventory],
+              ensure_ascii=False,separators=(',',':'),sort_keys=True
+          ).encode('utf-8')
+          inv_sha=hashlib.sha256(names_payload).hexdigest()
+
+          rel=json.load(open('/tmp/release.json',encoding='utf-8'))
+          assets={a['name']:a for a in rel.get('assets',[])}
+          summaries={}
+          errors=[]
+          all_shards={}
+
+          for p in pathlib.Path('/tmp/summaries').glob('partition-*-summary.json'):
+              try:
+                  s=json.loads(p.read_text('utf-8'))
+                  idx=int(s['partition_index'])
+                  if idx in summaries:
+                      errors.append(f'duplicate_summary_partition:{idx}')
+                  summaries[idx]=s
+              except Exception as exc:
+                  errors.append(f'bad_summary:{p.name}:{exc!r}')
+
+          def check_data_assets(idx:int):
+              prefix=f'partition-{idx:04d}-data.tar'
+              single=assets.get(prefix)
+              parts=[]
+              rx=re.compile(re.escape(prefix)+r'\.part-(\d+)$')
+              for name,a in assets.items():
+                  m=rx.match(name)
+                  if m: parts.append((int(m.group(1)),name,a))
+              if single and parts:
+                  errors.append(f'partition_{idx}:both_single_and_split_data_assets')
+              if single:
+                  if int(single.get('size') or 0) <= 0:
+                      errors.append(f'partition_{idx}:zero_size_data_asset')
+                  return
+              if not parts:
+                  errors.append(f'partition_{idx}:missing_data_asset')
+                  return
+              parts.sort()
+              nums=[x[0] for x in parts]
+              if nums != list(range(len(nums))):
+                  errors.append(f'partition_{idx}:noncontiguous_data_parts:{nums}')
+              for _,name,a in parts:
+                  if int(a.get('size') or 0) <= 0:
+                      errors.append(f'partition_{idx}:zero_size_part:{name}')
+
+          for idx in range(partition_count):
+              s=summaries.get(idx)
+              if s is None:
+                  errors.append(f'partition_{idx}:missing_summary')
+                  continue
+              if s.get('status') != 'COMPLETE': errors.append(f'partition_{idx}:status={s.get("status")}')
+              if int(s.get('partition_count',-1)) != partition_count: errors.append(f'partition_{idx}:partition_count_mismatch')
+              if s.get('feature_schema_sha256') != schema_sha: errors.append(f'partition_{idx}:schema_identity_mismatch')
+              if s.get('source_inventory_sha256') != inv_sha: errors.append(f'partition_{idx}:source_inventory_identity_mismatch')
+              if int(s.get('assigned_shards',-1)) != int(s.get('completed_shards',-2)): errors.append(f'partition_{idx}:assigned_completed_mismatch')
+              if int(s.get('failed_shards',1)) != 0: errors.append(f'partition_{idx}:failed_shards_nonzero')
+              check_data_assets(idx)
+              for sh in s.get('shards',[]):
+                  key=(sh.get('corpus'),sh.get('repo'),sh.get('shard'))
+                  sha=sh.get('shard_sha256')
+                  if key in all_shards: errors.append(f'duplicate_shard:{key}')
+                  all_shards[key]=sha
+
+          expected={(x['corpus'],x['repo'],x['shard']):x.get('sha256') for x in inventory}
+          missing=sorted(set(expected)-set(all_shards))
+          extra=sorted(set(all_shards)-set(expected))
+          sha_mismatch=[k for k in expected.keys() & all_shards.keys() if expected[k] and all_shards[k] != expected[k]]
+          if missing: errors.append(f'missing_shards:{len(missing)}')
+          if extra: errors.append(f'extra_shards:{len(extra)}')
+          if sha_mismatch: errors.append(f'shard_sha_mismatch:{len(sha_mismatch)}')
+
+          result={
+              'format':'osr-feature-release-integrity/v1',
+              'status':'PASS' if not errors and len(summaries)==partition_count and len(all_shards)==len(expected) else 'FAIL',
+              'run_id':run_id,
+              'trigger_workflow_run_id':os.environ.get('TRIGGER_RUN_ID'),
+              'trigger_workflow_conclusion':os.environ.get('TRIGGER_CONCLUSION'),
+              'partition_count_expected':partition_count,
+              'partition_summaries_found':len(summaries),
+              'source_shards_expected':len(expected),
+              'source_shards_found':len(all_shards),
+              'feature_schema_sha256':schema_sha,
+              'source_inventory_sha256':inv_sha,
+              'release_asset_count':len(assets),
+              'errors':errors[:500],
+              'missing_shard_examples':[list(x) for x in missing[:20]],
+              'extra_shard_examples':[list(x) for x in extra[:20]],
+              'sha_mismatch_examples':[list(x) for x in sha_mismatch[:20]],
+              'acceptance_rule':'128 valid COMPLETE markers + corresponding nonzero data asset(s) + contiguous split numbering + exact 1788-shard identity/SHA coverage',
+          }
+          pathlib.Path('control/feature_release_integrity.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n','utf-8')
+          print(json.dumps(result,ensure_ascii=False,indent=2))
+
+      - name: Commit integrity result to Feature Store branch
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/feature_release_integrity.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "feature-store: durable release integrity audit"
+          git pull --rebase origin stage2-direct-miner-v3-1
+          git push origin HEAD:stage2-direct-miner-v3-1
+
+      - name: Fail workflow if durable checkpoint audit fails
+        shell: python
+        run: |
+          import json
+          r=json.load(open('control/feature_release_integrity.json',encoding='utf-8'))
+          assert r['status']=='PASS', r
