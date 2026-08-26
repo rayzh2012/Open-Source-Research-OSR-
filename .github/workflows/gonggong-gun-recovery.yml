@@ -1,0 +1,140 @@
+name: Gonggong-Gun Recovery
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'control/gonggong_recovery_request.json'
+
+permissions:
+  actions: read
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: '1'
+  HF_HUB_DISABLE_TELEMETRY: '1'
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      old_run_id: ${{ steps.plan.outputs.old_run_id }}
+      worker_count: ${{ steps.plan.outputs.worker_count }}
+      missing: ${{ steps.plan.outputs.missing }}
+      missing_count: ${{ steps.plan.outputs.missing_count }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: python
+        run: |
+          import json, os, subprocess
+          req=json.load(open('control/gonggong_recovery_request.json',encoding='utf-8'))
+          assert req.get('action') == 'RECOVER_GONGGONG_RUN', req
+          old=int(req['old_run_id'])
+          n=int(req.get('worker_count',20))
+          assert 1 <= n <= 20
+          raw=subprocess.check_output([
+              'gh','api',f'repos/{os.environ["GH_REPO"]}/actions/runs/{old}/artifacts?per_page=100'
+          ],text=True)
+          payload=json.loads(raw)
+          names={a['name'] for a in payload.get('artifacts',[]) if not a.get('expired')}
+          missing=[i for i in range(n) if f'gonggong-gun-worker-{i}' not in names]
+          out=os.environ['GITHUB_OUTPUT']
+          with open(out,'a') as f:
+              f.write(f'old_run_id={old}\n')
+              f.write(f'worker_count={n}\n')
+              f.write('missing='+json.dumps(missing,separators=(',',':'))+'\n')
+              f.write(f'missing_count={len(missing)}\n')
+          print(json.dumps({'old_run_id':old,'existing_worker_artifacts':sorted(names),'missing_workers':missing},indent=2))
+
+  recover:
+    needs: plan
+    if: needs.plan.outputs.missing_count != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        worker: ${{ fromJson(needs.plan.outputs.missing) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install streaming corpus dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install 'huggingface_hub>=0.24' 'pyarrow>=16'
+      - name: Recompute only missing original worker assignment
+        run: |
+          PYTHONPATH="$GITHUB_WORKSPACE/myth-engine" \
+          python myth-engine/tools/scan_lineage_corpus.py \
+            --query-pack myth-engine/query-packs/gonggong_gun_lineage_v1.json \
+            --output-dir "out/worker-${{ matrix.worker }}" \
+            --worker-index '${{ matrix.worker }}' \
+            --worker-count '${{ needs.plan.outputs.worker_count }}' \
+            --mode full
+      - name: Upload recovered worker evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gonggong-gun-recovery-worker-${{ matrix.worker }}
+          path: out/worker-${{ matrix.worker }}/
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 14
+
+  reduce:
+    needs: [plan, recover]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download surviving artifacts from original cancelled run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          OLD_RUN: ${{ needs.plan.outputs.old_run_id }}
+        run: |
+          mkdir -p worker-artifacts/original
+          gh run download "$OLD_RUN" --repo "$GH_REPO" -p 'gonggong-gun-worker-*' -D worker-artifacts/original
+      - name: Download newly recovered workers
+        if: needs.plan.outputs.missing_count != '0'
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gonggong-gun-recovery-worker-*
+          path: worker-artifacts/recovered
+      - name: Merge original + recovery evidence
+        run: |
+          python myth-engine/tools/reduce_lineage_scan.py \
+            --input-dir worker-artifacts \
+            --output-dir final
+      - name: Strictly require full 1,788-shard verification
+        shell: python
+        run: |
+          import json
+          s=json.load(open('final/gonggong-gun-scan-status.json',encoding='utf-8'))
+          assert s.get('status') == 'PASS', s
+          assert s.get('full_corpus_verified') is True, s
+          assert int(s.get('assigned_shards',0)) == 1788, s
+          assert int(s.get('completed_shards',0)) == 1788, s
+          assert int(s.get('failed_shards',1)) == 0, s
+          print(json.dumps(s,ensure_ascii=False,indent=2))
+      - name: Upload recovered final evidence bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gonggong-gun-corpus-recovered-final
+          path: final/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 90
