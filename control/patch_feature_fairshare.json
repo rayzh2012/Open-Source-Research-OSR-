@@ -1,6 +1,7 @@
 {
+  "id": 2,
   "action": "PATCH_FEATURE_FAIRSHARE",
   "target_branch": "stage2-direct-miner-v3-1",
   "expected_request_max_parallel": 12,
-  "reason": "Wire the resilient Feature Store workflow so extract and recovery matrices honor the request max_parallel instead of hard-coded 20."
+  "reason": "Retry after escaping GitHub expression syntax inside the one-shot patcher. Wire extract and recovery matrices to request max_parallel instead of hard-coded 20."
 }
