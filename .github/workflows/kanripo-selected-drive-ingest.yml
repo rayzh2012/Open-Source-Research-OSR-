@@ -1,0 +1,151 @@
+name: Kanripo Selected to Drive
+
+on:
+  push:
+    branches:
+      - stage2-direct-miner-v3-1
+    paths:
+      - '.github/workflows/kanripo-selected-drive-ingest.yml'
+      - 'control/kanripo_selected_config.json'
+      - 'control/kanripo_bundle_worker.py'
+      - 'control/plain_text_repo_to_parquet.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kanripo-selected-drive-ingest
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      destination_root: ${{ steps.plan.outputs.destination_root }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          cfg=json.load(open('control/kanripo_selected_config.json',encoding='utf-8'))
+          include=[]
+          for cat in cfg['categories']:
+              if not cat.get('enabled'):
+                  continue
+              for p in range(int(cat['partitions'])):
+                  include.append({'category':cat['id'],'label':cat['label'],'partition':p,'partition_count':int(cat['partitions'])})
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write('matrix='+json.dumps({'include':include},ensure_ascii=False,separators=(',',':'))+'\n')
+              f.write('destination_root='+cfg['destination_root']+'\n')
+          print(json.dumps(include,ensure_ascii=False,indent=2))
+          PY
+
+  auth:
+    runs-on: ubuntu-latest
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - shell: bash
+        run: |
+          test -n "${RCLONE_CONFIG_B64:-}" || { echo '::error::Missing RCLONE_CONFIG_B64'; exit 42; }
+
+  ingest:
+    needs: [plan, auth]
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+      DEST_ROOT: ${{ needs.plan.outputs.destination_root }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies and Drive auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pyarrow
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Build commit-locked Kanripo bundle
+        id: bundle
+        shell: bash
+        run: |
+          set +e
+          mkdir -p work out
+          python control/kanripo_bundle_worker.py \
+            --category '${{ matrix.category }}' \
+            --partition '${{ matrix.partition }}' \
+            --work-dir work \
+            --out-dir out
+          rc=$?
+          echo "worker_rc=$rc" >> "$GITHUB_OUTPUT"
+          test -f out/RESULT.json || exit "$rc"
+          exit 0
+      - name: Build feature-ready Parquet
+        shell: bash
+        run: |
+          set -euo pipefail
+          SNAPSHOT_ID="$(python -c "import json;print(json.load(open('out/RESULT.json'))['snapshot_id'])")"
+          python control/plain_text_repo_to_parquet.py \
+            --root work/corpus \
+            --output "out/${{ matrix.category }}-part-${{ matrix.partition }}.parquet" \
+            --source-id "kanripo-${{ matrix.category }}-part-${{ matrix.partition }}" \
+            --source-repo 'kanripo/multi-repository-bundle' \
+            --source-commit "$SNAPSHOT_ID" \
+            --license 'Kanripo-created content CC-BY-SA; underlying classical texts/source-edition notices preserved' \
+            > out/PARQUET.summary.json
+      - name: Upload bundle, Parquet, provenance and completion marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          SNAPSHOT_ID="$(python -c "import json;print(json.load(open('out/RESULT.json'))['snapshot_id'])")"
+          BUNDLE="$(python -c "import json;print(json.load(open('out/RESULT.json'))['bundle'])")"
+          PARQUET="${{ matrix.category }}-part-${{ matrix.partition }}.parquet"
+          REMOTE="gdrive:${DEST_ROOT}/${{ matrix.category }}/part-${{ matrix.partition }}/${SNAPSHOT_ID}"
+          if rclone cat "${REMOTE}/meta/COMPLETE.sha256" >/dev/null 2>&1; then
+            echo 'already complete'; exit 0
+          fi
+          sha256sum "out/$BUNDLE" > out/BUNDLE.sha256
+          sha256sum "out/$PARQUET" > out/PARQUET.sha256
+          rclone copyto "out/$BUNDLE" "${REMOTE}/raw/$BUNDLE" --drive-chunk-size 64M --retries 6 --low-level-retries 12 --stats 30s
+          rclone copyto "out/$PARQUET" "${REMOTE}/parquet/$PARQUET" --drive-chunk-size 64M --retries 6 --low-level-retries 12 --stats 30s
+          rclone copyto out/MANIFEST.json "${REMOTE}/meta/MANIFEST.json"
+          rclone copyto out/RESULT.json "${REMOTE}/meta/RESULT.json"
+          rclone copyto out/PARQUET.summary.json "${REMOTE}/meta/PARQUET.summary.json"
+          rclone copyto out/BUNDLE.sha256 "${REMOTE}/meta/BUNDLE.sha256"
+          rclone copyto out/PARQUET.sha256 "${REMOTE}/meta/PARQUET.sha256"
+          cat out/BUNDLE.sha256 out/PARQUET.sha256 > out/COMPLETE.sha256
+          rclone copyto out/COMPLETE.sha256 "${REMOTE}/meta/COMPLETE.sha256"
+      - name: Preserve recovery metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kanripo-${{ matrix.category }}-${{ matrix.partition }}-${{ github.run_id }}
+          path: |
+            out/*.json
+            out/*.sha256
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 6
+      - name: Fail visibly if any source repo was missing
+        if: always()
+        shell: bash
+        run: |
+          rc='${{ steps.bundle.outputs.worker_rc }}'
+          if [[ -n "$rc" && "$rc" != '0' ]]; then
+            echo '::warning::Bundle archived with partial source failures; inspect MANIFEST.json and rerun later.'
+            exit "$rc"
+          fi
