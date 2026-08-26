@@ -1,0 +1,43 @@
+name: OSR Cancel Stray Run
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'control/cancel_stray_run.json'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cancel explicitly requested stray workflow run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUN_ID=$(python - <<'PY'
+          import json
+          r=json.load(open('control/cancel_stray_run.json',encoding='utf-8'))
+          assert r.get('action') == 'CANCEL_STRAY_RUN', r
+          print(int(r['run_id']))
+          PY
+          )
+          echo "Cancelling stray run $RUN_ID"
+          gh run cancel "$RUN_ID" --repo "$GH_REPO"
+          for i in 1 2 3 4 5 6; do
+            STATUS=$(gh run view "$RUN_ID" --repo "$GH_REPO" --json status,conclusion --jq '.status+":"+(.conclusion // "")')
+            echo "$STATUS"
+            case "$STATUS" in
+              completed:cancelled|completed:failure|completed:success) exit 0 ;;
+            esac
+            sleep 5
+          done
+          gh run view "$RUN_ID" --repo "$GH_REPO" --json status,conclusion
