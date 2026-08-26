@@ -1,0 +1,11 @@
+{
+  "request_id": "wikisource-drive-pilot-v1-001",
+  "action": "INGEST",
+  "dataset": "mediawiki_content_current",
+  "latest_complete_export": true,
+  "build_parquet": true,
+  "drive_remote": "gdrive",
+  "destination_root": "龍族古籍源庫｜Dragon Source Corpus/OPEN_WIKISOURCE_CORPUS",
+  "max_parallel_wikis": 2,
+  "notes": "Pilot Chinese + English Wikisource. Raw XML.bz2 remains immutable; analysis Parquet is derived with provenance and SHA256 sidecars. Re-runs skip completed shards."
+}
