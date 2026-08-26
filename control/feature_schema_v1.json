@@ -1,6 +1,6 @@
 {
   "format": "osr-feature-schema/v1",
-  "version": "v1.0",
+  "version": "v1.0.1",
   "granularity": "sparse_row_signals_plus_shard_aggregates",
   "evidence_contract": "Every row-level feature keeps corpus/repo/shard/row/row_sha256. Derived features are candidates until exact source-row recheck.",
   "design": {
@@ -40,7 +40,7 @@
     {"id":"ENTITY_ZHULONG","family":"mythic_entity","terms":["烛龙","燭龍"]},
 
     {"id":"CREATURE_DRAGON","family":"creature","terms":["龙王","龍王","龙神","龍神","龙女","龍女","龙母","龍母","应龙","應龍","烛龙","燭龍"]},
-    {"id":"CREATURE_TIGER","family":"creature","terms":["虎祖","虎神","白虎","虎神"]},
+    {"id":"CREATURE_TIGER","family":"creature","terms":["虎祖","虎神","白虎"]},
     {"id":"CREATURE_SNAKE","family":"creature","terms":["蛇神","蛇祖","蛇身"]},
     {"id":"CREATURE_TURTLE","family":"creature","terms":["龟神","龜神","玄武","神龟","神龜"]},
     {"id":"CREATURE_FOX","family":"creature","terms":["九尾狐","狐仙","狐神"]},
@@ -94,7 +94,7 @@
     {"id":"TIME_QING","family":"dynasty","terms":["清朝","清代"]}
   ],
   "regex_features": [
-    {"id":"TEMPORAL_EXPLICIT_YEAR","family":"temporal_hint","pattern":"(?:(?:公元|西元)?(?:前|前\s*)?)?[12][0-9]{3}年|(?:公元前|西元前)[0-9]{1,4}年"},
+    {"id":"TEMPORAL_EXPLICIT_YEAR","family":"temporal_hint","pattern":"(?:(?:公元|西元)(?:前)?|前)?[12][0-9]{3}年|(?:公元前|西元前)[0-9]{1,4}年"},
     {"id":"TEMPORAL_CENTURY","family":"temporal_hint","pattern":"(?:公元前)?(?:第)?[一二三四五六七八九十百0-9]{1,4}世纪"}
   ]
 }
