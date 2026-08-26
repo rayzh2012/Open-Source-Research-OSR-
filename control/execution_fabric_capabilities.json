@@ -1,7 +1,7 @@
 {
-  "version": "v1.1",
-  "updated_at": "2026-08-22T03:58:00-04:00",
-  "goal": "Turn large public corpora into compact reusable structured features while minimizing user interaction, machine-local work, and paid compute.",
+  "version": "v1.2",
+  "updated_at": "2026-08-26T04:16:00-04:00",
+  "goal": "Turn large public corpora into compact reusable structured features while minimizing user interaction, machine-local work, paid compute, and unrecoverable batch loss.",
   "execution_planes": {
     "default_public_compute": "GitHub Actions standard hosted runners",
     "private_local_state": "OSR Watcher on Mac only when genuinely required",
@@ -13,6 +13,35 @@
       "Replit agent compute"
     ]
   },
+  "scheduler_policy": {
+    "hosted_runner_budget_assumption": 20,
+    "default_large_batch_max_parallel": 12,
+    "reserved_capacity": 8,
+    "reserved_for": [
+      "control-plane jobs",
+      "short evidence retrieval",
+      "reducers and validators",
+      "interactive research scans",
+      "other concurrent OSR workflows"
+    ],
+    "override_rule": "A large batch may use more than 12 hosted runners only when the user explicitly prioritizes that batch over concurrent OSR work.",
+    "reason": "A 20-way Gonggong-Gun matrix was observed occupying all 20 hosted-runner slots and queueing Feature Store plus other OSR workflows."
+  },
+  "recovery_policy": {
+    "fault_domain": "partition, not whole worker run",
+    "default_partition_count_for_508gb": 128,
+    "typical_shards_per_partition": "~14",
+    "shard_download_retry": "6 attempts with bounded exponential backoff",
+    "single_shard_failure": "record failure and continue partition",
+    "write_semantics": "Parquet and JSON checkpoints are written atomically before completion is advertised",
+    "durable_checkpoint_store": "GitHub Release assets for compact Feature Store partitions",
+    "completion_marker": "partition-XXXX-summary.json uploaded last",
+    "resume_rule": "On every run, read durable completion markers and execute only missing or invalid partitions",
+    "automatic_recovery": "One recovery wave recomputes only incomplete partitions",
+    "final_acceptance": "PASS requires exact partition count, exact 1788-shard inventory coverage, schema identity match, source-inventory identity match, zero failed shards, and no duplicate/missing shard identities",
+    "partial_rule": "Any incomplete coverage is PARTIAL/FAILED; never promote partial output to PASS",
+    "asset_integrity_next": "Completion validation should also bind summary to durable data asset name/size/hash so a marker cannot survive without its data payload."
+  },
   "primary_product": {
     "mode": "feature_extraction",
     "output": "versioned sparse Feature Store in Parquet + compact feature catalog",
@@ -22,14 +51,14 @@
       "F1 co-occurrence and temporal hints",
       "F2 selective deep entity/event extraction over high-signal rows only"
     ],
-    "status": "IMPLEMENTATION_STARTED"
+    "status": "RESILIENT_FULL_BACKFILL_QUEUED"
   },
   "supported_now": [
     {
       "mode": "feature_extraction",
       "examples": ["length/structure", "script mix on signal rows", "feature-family counts", "temporal hints", "sparse row feature vectors", "co-occurrence"],
       "output": "Parquet feature-store partitions + compact JSON feature catalog",
-      "status": "ACTIVE_SMOKE"
+      "status": "ACTIVE_RESILIENT_BACKFILL"
     },
     {
       "mode": "direct_query_scan",
@@ -47,7 +76,7 @@
       "mode": "validation",
       "examples": ["schema checks", "row counts", "null rates", "duplicate indicators", "encoding checks", "range checks", "cross-shard invariants"],
       "output": "validation ledger + failure locators",
-      "status": "PARTIAL_IN_FEATURE_STORE_V1"
+      "status": "STRICT_FINAL_VALIDATOR_IN_RESILIENT_PIPELINE"
     },
     {
       "mode": "transform",
@@ -77,11 +106,11 @@
   "not_default": [
     {
       "mode": "universal_full_text_index",
-      "reason": "Quickwit/Tantivy pilot expanded sampled text by 6.1566x; 508GB is not large enough, and the research workload is not search-heavy enough, to justify Elasticsearch/Quickwit deployment overhead"
+      "reason": "Quickwit/Tantivy pilot expanded sampled text by 6.1566x; 508GB and the research workload do not justify Elasticsearch/Quickwit deployment overhead"
     },
     {
       "mode": "elasticsearch_cluster",
-      "reason": "Operational complexity and persistent storage are unnecessary at this corpus scale and workload shape; search is an auxiliary locator problem, not the primary product"
+      "reason": "Operational complexity and persistent storage are unnecessary at this corpus scale and workload shape; search is auxiliary, not the primary product"
     },
     {
       "mode": "universal_qgram_index",
@@ -89,7 +118,7 @@
     },
     {
       "mode": "full_508GB_deep_transformer_pass",
-      "reason": "Deep NER/LLM inference over every byte is economically wasteful. Full-corpus extraction is shallow/deterministic; deep extraction is routed only to high-signal rows."
+      "reason": "Deep NER/LLM inference over every byte is economically wasteful; deep extraction is routed only to high-signal rows"
     },
     {
       "mode": "full_508GB_mac_scan",
@@ -97,23 +126,32 @@
     },
     {
       "mode": "persist_raw_corpus_in_github_artifacts",
-      "reason": "raw data remains upstream; runners use ephemeral shard hydration and persist only compact derivatives"
+      "reason": "Raw data remains upstream; runners hydrate ephemeral shards and persist only compact derivatives"
+    },
+    {
+      "mode": "single_20_way_background_monopoly",
+      "reason": "Observed to starve all queued OSR workflows; large jobs default to 12-way fair-share"
     }
   ],
   "current_priority": [
-    "validate feature-store-v1-smoke-001 on two real shards",
-    "scale Feature Store v1 to all 1788 shards with 20 workers after smoke passes",
-    "persist worker feature partitions and compact catalog",
-    "build selective F2 entity/event extractor over F1 high-signal rows",
-    "derive graph and aggregation layers from Feature Store rather than repeatedly scanning raw corpus"
+    "allow the currently running 20-way Gonggong scan to finish without destroying already-computed work",
+    "start feature-store-v1-resilient-001 when hosted-runner slots free",
+    "persist 128 durable partition checkpoints and automatically recover missing partitions",
+    "verify exact 1788-shard coverage before PASS",
+    "measure signal-row density and durable Feature Store size",
+    "build selective F2 entity/event extraction over F1 high-signal rows"
   ],
   "job_lifecycle": [
     "CLASSIFY",
     "SMOKE_1_SHARD",
     "VERIFY_OUTPUT",
-    "SCALE_1_TO_20_WORKERS",
-    "CHECKPOINT",
-    "REDUCE",
+    "PLAN_FAULT_DOMAINS",
+    "RUN_WITH_FAIR_SHARE",
+    "CHECKPOINT_EACH_PARTITION",
+    "RECOVER_MISSING_ONLY",
+    "STRICT_REDUCE",
+    "VERIFY_DURABLE_ASSETS",
+    "VERIFY_EXACT_SOURCE_COVERAGE",
     "PERSIST_COMPACT_DERIVATIVE",
     "VERIFY_READBACK",
     "WRITEBACK_NOTION"
