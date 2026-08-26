@@ -15,6 +15,9 @@ concurrency:
   group: openiti-drive-ingest
   cancel-in-progress: false
 
+env:
+  OPENITI_DEST: "gdrive:龍族古籍源庫｜Dragon Source Corpus/OPEN_CURATED_CORPORA/openiti/2025.1.9"
+
 jobs:
   auth:
     runs-on: ubuntu-latest
@@ -30,7 +33,6 @@ jobs:
     timeout-minutes: 180
     env:
       RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
-      DEST: "gdrive:龍族古籍源庫｜Dragon Source Corpus/OPEN_CURATED_CORPORA/openiti/2025.1.9"
     steps:
       - name: Install rclone and configure Drive
         shell: bash
@@ -53,7 +55,7 @@ jobs:
           META_MD5='cb2226f64264efa964df9ef659d40199'
           NOTES_MD5='e127a3fccd2df033a6462542820f55a0'
 
-          if rclone cat "$DEST/meta/COMPLETE.md5" >/tmp/complete 2>/dev/null && grep -q "$DATA_MD5" /tmp/complete; then
+          if rclone cat "$OPENITI_DEST/meta/COMPLETE.md5" >/tmp/complete 2>/dev/null && grep -q "$DATA_MD5" /tmp/complete; then
             echo 'OpenITI 2025.1.9 already archived; skipping.'
             exit 0
           fi
@@ -89,15 +91,81 @@ jobs:
             "metadata_sha256": "$META_SHA",
             "release_notes_md5": "$NOTES_MD5",
             "release_notes_sha256": "$NOTES_SHA",
-            "archive_policy": "raw immutable release; normalize in a separate feature-ready stage"
+            "archive_policy": "raw immutable release; deterministic partitioned Parquet sidecar"
           }
           JSON
 
-          rclone copyto out/OpenITI_data_2025-1-9.zip "$DEST/raw/OpenITI_data_2025-1-9.zip" --drive-chunk-size 64M --retries 8 --low-level-retries 16 --stats 30s
-          rclone copyto out/OpenITI_metadata_2025-1-9.tsv "$DEST/meta/OpenITI_metadata_2025-1-9.tsv"
-          rclone copyto out/OpenITI_release-notes_2025-1-9.zip "$DEST/meta/OpenITI_release-notes_2025-1-9.zip"
-          rclone copyto out/SOURCE.json "$DEST/meta/SOURCE.json"
+          rclone copyto out/OpenITI_data_2025-1-9.zip "$OPENITI_DEST/raw/OpenITI_data_2025-1-9.zip" --drive-chunk-size 64M --retries 8 --low-level-retries 16 --stats 30s
+          rclone copyto out/OpenITI_metadata_2025-1-9.tsv "$OPENITI_DEST/meta/OpenITI_metadata_2025-1-9.tsv"
+          rclone copyto out/OpenITI_release-notes_2025-1-9.zip "$OPENITI_DEST/meta/OpenITI_release-notes_2025-1-9.zip"
+          rclone copyto out/SOURCE.json "$OPENITI_DEST/meta/SOURCE.json"
           printf '%s  OpenITI_data_2025-1-9.zip\n%s  OpenITI_metadata_2025-1-9.tsv\n%s  OpenITI_release-notes_2025-1-9.zip\n' \
             "$DATA_MD5" "$META_MD5" "$NOTES_MD5" > out/COMPLETE.md5
-          # Completion marker last.
-          rclone copyto out/COMPLETE.md5 "$DEST/meta/COMPLETE.md5"
+          rclone copyto out/COMPLETE.md5 "$OPENITI_DEST/meta/COMPLETE.md5"
+
+  normalize:
+    needs: ingest
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+      NORMALIZED_DEST: "gdrive:龍族古籍源庫｜Dragon Source Corpus/OPEN_CURATED_CORPORA/openiti/2025.1.9/normalized/v1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install normalizer dependencies and Drive auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pyarrow==25.0.1
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Build deterministic OpenITI Parquet sidecar
+        shell: bash
+        run: |
+          set -euo pipefail
+          if rclone cat "$NORMALIZED_DEST/MANIFEST.json" >/tmp/manifest 2>/dev/null; then
+            python - <<'PY'
+          import json
+          m=json.load(open('/tmp/manifest',encoding='utf-8'))
+          assert m.get('format') == 'osr-openiti-normalized/v1'
+          assert int(m.get('documents',0)) > 0
+          print('OpenITI normalized inventory already complete:',m.get('inventory_sha256'))
+          PY
+            exit 0
+          fi
+
+          test "$(rclone cat "$OPENITI_DEST/meta/COMPLETE.md5" | grep -c '95cf19a9320fee6c37c4c26c9fa860b1')" -ge 1
+          mkdir -p in out/openiti
+          rclone copyto "$OPENITI_DEST/raw/OpenITI_data_2025-1-9.zip" in/OpenITI_data_2025-1-9.zip --drive-chunk-size 64M --retries 8 --low-level-retries 16 --stats 30s
+          rclone copyto "$OPENITI_DEST/meta/OpenITI_metadata_2025-1-9.tsv" in/OpenITI_metadata_2025-1-9.tsv --retries 8
+          echo '95cf19a9320fee6c37c4c26c9fa860b1  in/OpenITI_data_2025-1-9.zip' | md5sum -c -
+
+          python control/openiti_zip_to_parquet.py \
+            --zip in/OpenITI_data_2025-1-9.zip \
+            --metadata-tsv in/OpenITI_metadata_2025-1-9.tsv \
+            --out-dir out/openiti \
+            --partitions 32 \
+            --version 2025.1.9
+
+          python - <<'PY'
+          import json, pathlib
+          m=json.load(open('out/openiti/MANIFEST.json',encoding='utf-8'))
+          assert m['documents'] > 0, m
+          assert len(m['parts']) == 32, m
+          for p in m['parts']:
+              f=pathlib.Path('out/openiti')/p['file']
+              assert f.exists() and f.stat().st_size > 0, p
+          print('NORMALIZE_PASS',m['documents'],m['text_chars'],m['inventory_sha256'])
+          PY
+
+          rclone copy out/openiti "$NORMALIZED_DEST/parquet" --include '*.parquet' --drive-chunk-size 64M --transfers 4 --retries 8 --low-level-retries 16 --stats 30s
+          # Manifest is the completion marker and must be written last.
+          rclone copyto out/openiti/MANIFEST.json "$NORMALIZED_DEST/MANIFEST.json"
