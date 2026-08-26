@@ -143,6 +143,8 @@ def main() -> int:
             tf.add(corpus_root / rid, arcname=rid)
         tf.add(manifest_path, arcname='MANIFEST.json')
 
+    hard_failures = [f for f in failures if f.get('error') != 'HEAD_NOT_FOUND']
+    source_gaps = [f for f in failures if f.get('error') == 'HEAD_NOT_FOUND']
     result = {
         'category': args.category,
         'partition': args.partition,
@@ -152,12 +154,14 @@ def main() -> int:
         'bundle_sha256': sha256_file(bundle_path),
         'repos_completed': len(records),
         'repos_failed': len(failures),
+        'source_gaps': len(source_gaps),
+        'hard_failures': len(hard_failures),
         'corpus_root': str(corpus_root),
         'catalog_commit': catalog_commit,
     }
     (out / 'RESULT.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(result, ensure_ascii=False, indent=2))
-    return 0 if not failures else 3
+    return 0 if not hard_failures else 3
 
 
 if __name__ == '__main__':
