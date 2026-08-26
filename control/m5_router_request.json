@@ -1,7 +1,15 @@
 {
-  "id": 4,
-  "run_id": "m5-router-ming-qing-dense-001",
-  "terms": ["女娲", "共工", "炎帝", "神农", "黄帝", "洪水", "治水", "补天", "不周山", "祭祀", "祖灵", "图腾"],
-  "top_k": 50,
-  "purpose": "Rank myth-rich candidate shards from the compact M2 index for a Ming-Qing dense-source smoke. Exact retrieval will apply the source profile and begin with only 4 shards."
+  "id": 5,
+  "run_id": "m5-router-ghost-discovery-001",
+  "terms": [
+    "疫鬼","疟鬼","瘟鬼","水鬼","溺鬼","河鬼","江鬼","井鬼","船鬼",
+    "厉鬼","恶鬼","饿鬼","尸鬼","冤鬼","怨鬼","孤魂野鬼",
+    "尺郭","天郭","赤郭","食邪","黄父",
+    "钟馗","中魁","终葵","钟葵","魌头",
+    "神荼","郁垒","方相氏","大傩","逐疫",
+    "罔两","罔象","象罔","蝄蜽","魍魉","魍魉鬼","魑魅",
+    "黎丘鬼","野仲","游光","黄父鬼","黄文鬼","鬼母","鬼姑","虚耗","魖耗"
+  ],
+  "top_k": 80,
+  "purpose": "Ghost Discovery Pack v1. Rank candidate shards from the compact M2 index. Do not exact-scan more than 4 shards until yield is measured."
 }
