@@ -1,10 +1,15 @@
 {
-  "schema_version": "osr-wikisource-ingest-status-v1",
+  "schema_version": "osr-wikisource-ingest-status-v2",
   "request_id": "wikisource-drive-pilot-v1-001",
-  "github_run_id": "32946494331",
+  "github_run_id": "32947687594",
   "github_run_attempt": "1",
   "auth_result": "failure",
+  "prepare_result": "skipped",
   "ingest_result": "skipped",
+  "expected_shards": 5,
+  "result_records": 0,
+  "unique_shards": 0,
+  "failed_records": 0,
   "status": "NEEDS_DRIVE_AUTH",
   "workers": []
 }
