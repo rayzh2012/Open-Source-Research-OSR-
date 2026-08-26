@@ -162,6 +162,456 @@
           "actual_in_sample": false,
           "all_2grams_present": false,
           "all_3grams_present": true
+        },
+        {
+          "query": "孺帝",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "少昊孺帝颛顼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "颛顼之子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "颛顼子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "颛顼之后",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "高阳氏之子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "高阳氏之后",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "高阳之后",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "元子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "颛顼崩",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "帝喾立",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "恶鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "惡鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "厉鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "厲鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "疫鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "疟鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "瘧鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "病鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "疾病鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "伥鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "倀鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "水鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "溺鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "河鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "江鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "井鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "船鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "饿鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "餓鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "尸鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "屍鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "小鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "老鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "孤魂",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "野鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "冤鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "怨鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "虚耗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "虛耗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬼母",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬼姑",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "黄父鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "黃父鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "黄父",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "黃父",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "尺郭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "赤郭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "天郭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "食邪",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "中魁",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "钟馗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鍾馗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "终葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "終葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "钟葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鍾葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "神荼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "郁垒",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬱壘",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "方相氏",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "傩",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "儺",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魑魅魍魉",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魑魅魍魎",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "野仲",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "游光",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬾蜮",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "毕方",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "畢方",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魌头",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魌頭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "渐耳",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "漸耳",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
         }
       ],
       "fingerprint_sha256": "239c56d2c4b0b32bbfea17f3c4d40c26dea1ce78f286ce47b8aa9b0c0daa93e9"
@@ -324,6 +774,456 @@
         },
         {
           "query": "祀典",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "孺帝",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "少昊孺帝颛顼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "颛顼之子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "颛顼子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "颛顼之后",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "高阳氏之子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "高阳氏之后",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "高阳之后",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "元子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "颛顼崩",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "帝喾立",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "恶鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "惡鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "厉鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "厲鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "疫鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "疟鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "瘧鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "病鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "疾病鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "伥鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "倀鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "水鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "溺鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "河鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "江鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "井鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "船鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "饿鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "餓鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "尸鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "屍鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "小鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "老鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "孤魂",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "野鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "冤鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "怨鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "虚耗",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "虛耗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬼母",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬼姑",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "黄父鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "黃父鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "黄父",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "黃父",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "尺郭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "赤郭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "天郭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "食邪",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "中魁",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "钟馗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鍾馗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "终葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "終葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "钟葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鍾葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "神荼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "郁垒",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬱壘",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "方相氏",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "傩",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "儺",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魑魅魍魉",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "魑魅魍魎",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "野仲",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "游光",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬾蜮",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "毕方",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "畢方",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魌头",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魌頭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "渐耳",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "漸耳",
           "actual_in_sample": false,
           "all_2grams_present": false,
           "all_3grams_present": true
@@ -492,6 +1392,456 @@
           "actual_in_sample": false,
           "all_2grams_present": false,
           "all_3grams_present": true
+        },
+        {
+          "query": "孺帝",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "少昊孺帝颛顼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "颛顼之子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "颛顼子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "颛顼之后",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "高阳氏之子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "高阳氏之后",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "高阳之后",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "元子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "颛顼崩",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "帝喾立",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "恶鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "惡鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "厉鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "厲鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "疫鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "疟鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "瘧鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "病鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "疾病鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "伥鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "倀鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "水鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "溺鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "河鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "江鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "井鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "船鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "饿鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "餓鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "尸鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "屍鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "小鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "老鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "孤魂",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "野鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "冤鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "怨鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "虚耗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "虛耗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬼母",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬼姑",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "黄父鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "黃父鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "黄父",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "黃父",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "尺郭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "赤郭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "天郭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "食邪",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "中魁",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "钟馗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鍾馗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "终葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "終葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "钟葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鍾葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "神荼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "郁垒",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬱壘",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "方相氏",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "傩",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "儺",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魑魅魍魉",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "魑魅魍魎",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "野仲",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "游光",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬾蜮",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "毕方",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "畢方",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魌头",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魌頭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "渐耳",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "漸耳",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
         }
       ],
       "fingerprint_sha256": "d41e27eeab326e2a42141c33339fdbdb0f7e14efe3c0cdbad147aa4e8c5ace5e"
@@ -657,12 +2007,462 @@
           "actual_in_sample": false,
           "all_2grams_present": false,
           "all_3grams_present": true
+        },
+        {
+          "query": "孺帝",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "少昊孺帝颛顼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "颛顼之子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "颛顼子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "颛顼之后",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "高阳氏之子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "高阳氏之后",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "高阳之后",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "元子",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "颛顼崩",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "帝喾立",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "恶鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "惡鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "厉鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "厲鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "疫鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "疟鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "瘧鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "病鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "疾病鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "伥鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "倀鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "水鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "溺鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "河鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "江鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "井鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "船鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "饿鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "餓鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "尸鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "屍鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "小鬼",
+          "actual_in_sample": true,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "老鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "孤魂",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "野鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "冤鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "怨鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "虚耗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "虛耗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬼母",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬼姑",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "黄父鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "黃父鬼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "黄父",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "黃父",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "尺郭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "赤郭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "天郭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "食邪",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "中魁",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "钟馗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鍾馗",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "终葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "終葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "钟葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鍾葵",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "神荼",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "郁垒",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬱壘",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "方相氏",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "傩",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "儺",
+          "actual_in_sample": false,
+          "all_2grams_present": true,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魑魅魍魉",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "魑魅魍魎",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": false
+        },
+        {
+          "query": "野仲",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "游光",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "鬾蜮",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "毕方",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "畢方",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魌头",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "魌頭",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "渐耳",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
+        },
+        {
+          "query": "漸耳",
+          "actual_in_sample": false,
+          "all_2grams_present": false,
+          "all_3grams_present": true
         }
       ],
       "fingerprint_sha256": "88994ab0b319f02819bb78f2c44a411a36e2fe241d8eac8bd3d71276defcf35c"
     }
   ],
-  "created_unix": 1787630648.2438319,
+  "created_unix": 1787732374.3199654,
   "held_out_queries": [
     "女娲",
     "共工",
@@ -687,7 +2487,82 @@
     "淮南子",
     "三皇本纪",
     "方志",
-    "祀典"
+    "祀典",
+    "孺帝",
+    "少昊孺帝颛顼",
+    "颛顼之子",
+    "颛顼子",
+    "颛顼之后",
+    "高阳氏之子",
+    "高阳氏之后",
+    "高阳之后",
+    "元子",
+    "颛顼崩",
+    "帝喾立",
+    "鬼",
+    "恶鬼",
+    "惡鬼",
+    "厉鬼",
+    "厲鬼",
+    "疫鬼",
+    "疟鬼",
+    "瘧鬼",
+    "病鬼",
+    "疾病鬼",
+    "伥鬼",
+    "倀鬼",
+    "水鬼",
+    "溺鬼",
+    "河鬼",
+    "江鬼",
+    "井鬼",
+    "船鬼",
+    "饿鬼",
+    "餓鬼",
+    "尸鬼",
+    "屍鬼",
+    "小鬼",
+    "老鬼",
+    "孤魂",
+    "野鬼",
+    "冤鬼",
+    "怨鬼",
+    "虚耗",
+    "虛耗",
+    "鬼母",
+    "鬼姑",
+    "黄父鬼",
+    "黃父鬼",
+    "黄父",
+    "黃父",
+    "尺郭",
+    "赤郭",
+    "天郭",
+    "食邪",
+    "中魁",
+    "钟馗",
+    "鍾馗",
+    "终葵",
+    "終葵",
+    "钟葵",
+    "鍾葵",
+    "神荼",
+    "郁垒",
+    "鬱壘",
+    "方相氏",
+    "傩",
+    "儺",
+    "魑魅魍魉",
+    "魑魅魍魎",
+    "野仲",
+    "游光",
+    "鬾蜮",
+    "毕方",
+    "畢方",
+    "魌头",
+    "魌頭",
+    "渐耳",
+    "漸耳"
   ],
   "summary": {
     "shard_count": 4,
@@ -698,10 +2573,10 @@
     "mean_bloom_bytes_fpr_0_1pct": 1927315.75,
     "projected_1788_shards_mib_fpr_1pct": 2190.9341526031494,
     "projected_1788_shards_mib_fpr_0_1pct": 3286.4003763198853,
-    "exact_2gram_rejection_rate_on_probe": 0.8043478260869565,
-    "exact_3gram_rejection_rate_on_probe": 1.0,
-    "probe_checks_2gram": 92,
-    "probe_checks_3gram": 20,
+    "exact_2gram_rejection_rate_on_probe": 0.9,
+    "exact_3gram_rejection_rate_on_probe": 0.9875,
+    "probe_checks_2gram": 380,
+    "probe_checks_3gram": 80,
     "note": "Bounded shard samples only. Rejection metrics are exact-set upper-bound routing tests before Bloom/XOR false positives. Full-shard cardinality may be higher."
   }
 }
