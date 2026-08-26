@@ -1,0 +1,1547 @@
+{
+  "status": "PARTIAL",
+  "run_id": "feature-store-v1-resilient-001",
+  "format": "osr-feature-store-status/v2",
+  "feature_schema_version": "v1.0.1",
+  "feature_schema_sha256": "972e195a5455be1ae0d5969e73e22c5f14b53322193820e56cf1774309f4ef70",
+  "source_inventory_sha256": "9e79715325382ef680161621874e464f42f5d05f4605d1693bcd8b78e557c556",
+  "source_inventory_content_sha256": "86e587c9f43c36adc575892457354728edea3f1cb9ef09c5d170590a9a29c06f",
+  "m2_run_id": "stage2-query-index-backfill-v1-001",
+  "expected_partitions": 128,
+  "complete_partitions": 2,
+  "bad_partitions": [
+    {
+      "partition": 0,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 1,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 2,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 3,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 4,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 5,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 6,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 7,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 8,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 9,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 11,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 12,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 13,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 14,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 15,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 16,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 17,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 19,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 20,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 21,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 22,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 23,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 24,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 25,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 26,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 27,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 28,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 29,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 30,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 31,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 32,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 33,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 34,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 35,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 36,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 37,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 38,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 39,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 40,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 41,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 42,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 43,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 44,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 45,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 46,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 47,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 48,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 49,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 50,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 51,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 52,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 53,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 54,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 55,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 56,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 57,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 58,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 59,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 60,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 61,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 62,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 63,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 64,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 65,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 66,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 67,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 68,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 69,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 70,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 71,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 72,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 73,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 74,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 75,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 76,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 77,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 78,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 79,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 80,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 81,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 82,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 83,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 84,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 85,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 86,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 87,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 88,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 89,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 90,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 91,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 92,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 93,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 94,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 95,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 96,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 97,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 98,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 99,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 100,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 101,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 102,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 103,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 104,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 105,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 106,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 107,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 108,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 109,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 110,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 111,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 112,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 113,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 114,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 115,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 116,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 117,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 118,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 119,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 120,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 121,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 122,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 123,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 124,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 125,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 126,
+      "reason": "missing_summary"
+    },
+    {
+      "partition": 127,
+      "reason": "missing_summary"
+    }
+  ],
+  "expected_shards": 1788,
+  "shards_scanned": 28,
+  "missing_shards_count": 1760,
+  "missing_shards": [
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000000.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000001.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000002.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000003.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000004.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000005.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000006.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000007.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000008.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000009.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000011.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000012.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000013.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000014.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000015.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000016.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000017.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000019.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000020.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000021.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000022.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000023.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000024.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000025.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000026.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000027.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000028.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000029.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000030.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000031.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000032.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000033.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000034.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000035.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000036.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000037.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000038.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000039.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000040.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000041.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000042.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000043.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000044.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000045.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000046.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000047.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000048.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000049.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000050.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000051.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000052.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000053.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000054.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000055.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000056.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000057.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000058.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000059.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000060.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000061.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000062.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000063.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000064.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000065.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000066.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000067.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000068.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000069.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000070.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000071.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000072.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000073.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000074.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000075.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000076.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000077.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000078.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000079.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000080.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000081.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000082.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000083.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000084.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000085.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000086.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000087.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000088.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000089.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000090.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000091.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000092.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000093.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000094.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000095.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000096.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000097.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000098.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000099.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000100.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000101.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000102.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000103.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000104.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000105.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000106.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000107.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000108.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000109.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000110.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000111.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000112.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000113.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000114.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000115.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000116.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000117.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000118.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000119.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000120.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000121.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000122.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000123.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000124.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000125.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000126.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000127.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000128.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000129.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000130.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000131.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000132.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000133.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000134.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000135.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000136.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000137.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000139.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000140.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000141.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000142.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000143.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000144.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000145.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000147.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000148.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000149.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000150.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000151.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000152.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000153.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000154.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000155.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000156.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000157.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000158.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000159.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000160.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000161.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000162.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000163.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000164.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000165.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000166.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000167.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000168.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000169.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000170.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000171.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000172.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000173.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000174.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000175.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000176.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000177.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000178.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000179.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000180.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000181.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000182.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000183.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000184.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000185.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000186.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000187.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000188.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000189.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000190.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000191.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000192.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000193.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000194.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000195.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000196.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000197.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000198.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000199.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000200.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000201.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000202.parquet"
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "shard": "data/CASIA-LM_ChineseWebText2.0_partial-000203.parquet"
+    }
+  ],
+  "extra_shards_count": 0,
+  "sha_mismatches_count": 0,
+  "sha_mismatches": [],
+  "duplicate_shards_count": 0,
+  "summary_errors": [],
+  "bytes_downloaded": 6503276207,
+  "aggregate_download_GiB": 6.057,
+  "rows_scanned": 3093566,
+  "signal_rows": 1746459,
+  "max_partition_elapsed_seconds": 546.264,
+  "initial_extract_result": "cancelled",
+  "recovery_requested": "true",
+  "recovery_result": "cancelled",
+  "durable_store": {
+    "type": "GitHub Release assets",
+    "tag": "feature-store-v1-resilient-001",
+    "partition_data_assets": "partition-XXXX-data.tar or split parts",
+    "partition_commit_markers": "partition-XXXX-summary.json",
+    "resume_rule": "same run_id skips COMPLETE identity-matching partitions and computes only gaps"
+  },
+  "strict_pass_rule": "all partitions COMPLETE + exact 1788-shard inventory set + every shard SHA matches M2 inventory + no duplicates/extras/schema/reducer errors",
+  "github_run_id": "32947601660",
+  "github_sha": "8242b84ffbc0b8d9e336f01f0c9de05ccf1a33e8",
+  "finished_unix": 1787733306.7805467
+}
