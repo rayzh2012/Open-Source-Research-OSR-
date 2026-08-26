@@ -1,0 +1,6 @@
+{
+  "action": "RECOVER_GONGGONG_RUN",
+  "old_run_id": 32933592814,
+  "worker_count": 20,
+  "purpose": "Recover only missing worker fault domains from the cancelled Gonggong-Gun full 508GB scan. Reuse all surviving original worker artifacts, dynamically recompute only missing worker assignments, then strict-reduce to exact 1,788-shard PASS."
+}
