@@ -7,7 +7,7 @@ on:
       - '.github/workflows/ancient-feature-store.yml'
       - 'control/ancient_feature_inventory.py'
       - 'tools/osr_ancient_feature_item.py'
-      - 'control/feature_schema_v1.json'
+      - 'control/ancient_feature_schema_v1.json'
   workflow_dispatch:
 
 permissions:
@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: ancient-corpus-feature-store
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   FEATURE_ROOT: "gdrive:龍族古籍源庫｜Dragon Source Corpus/ANCIENT_FEATURE_STORE"
@@ -111,7 +111,7 @@ jobs:
           PYTHONPATH=tools python tools/osr_ancient_feature_item.py \
             --item-json /tmp/item.json \
             --out-dir out \
-            --feature-schema control/feature_schema_v1.json \
+            --feature-schema control/ancient_feature_schema_v1.json \
             --feature-remote-root "$FEATURE_ROOT"
       - name: Publish item data then completion marker
         shell: bash
@@ -165,7 +165,7 @@ jobs:
           mkdir -p "$HOME/.config/rclone"
           printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
           chmod 600 "$HOME/.config/rclone/rclone.conf"
-          SCHEMA_SHA=$(sha256sum control/feature_schema_v1.json | awk '{print $1}')
+          SCHEMA_SHA=$(sha256sum control/ancient_feature_schema_v1.json | awk '{print $1}')
           export SCHEMA_SHA
           python - <<'PY' > /tmp/checkpoints.tsv
           import hashlib, json, os, re
