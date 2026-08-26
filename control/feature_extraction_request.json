@@ -1,8 +1,9 @@
 {
-  "id": 3,
+  "id": 4,
   "action": "FEATURE_EXTRACT",
-  "run_id": "feature-store-v1-full-002",
-  "worker_count": 20,
-  "limit_per_worker": 0,
-  "purpose": "M3 full 508GB Feature Store v1 backfill after representative smoke PASS. Process all 1,788 Hugging Face Parquet shards with standard public GitHub-hosted runners only. Extract compact structural/domain features, temporal and place hints, motif signals, sparse co-occurrence, exact shard/row/hash provenance, and aggregate into control/feature_catalog.json + control/feature_extraction_status.json. Never persist raw text and never use the Mac data path."
+  "run_id": "feature-store-v1-resilient-001",
+  "partition_count": 128,
+  "max_parallel": 20,
+  "limit_per_partition": 0,
+  "purpose": "Recovery-safe full 508GB Feature Store v1 backfill across the exact 1,788-shard M2 inventory. Use 128 small fault-domain partitions with at most 20 concurrent standard public GitHub-hosted runners. Persist each completed partition into durable GitHub Release assets with summary-last commit markers; automatically rerun missing or partial partitions once; strict final PASS requires exact shard-set coverage and every shard SHA matching the M2 inventory. Never persist raw source text and never use the Mac data path."
 }
