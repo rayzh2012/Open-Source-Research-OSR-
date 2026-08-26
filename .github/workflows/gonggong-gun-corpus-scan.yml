@@ -19,9 +19,9 @@ on:
       worker_count:
         description: Number of active workers
         required: true
-        default: '20'
+        default: '12'
         type: choice
-        options: ['4', '10', '20']
+        options: ['4', '10', '12', '20']
 
 concurrency:
   group: gonggong-gun-${{ github.workflow }}-${{ github.ref }}
@@ -41,7 +41,8 @@ jobs:
     timeout-minutes: 350
     strategy:
       fail-fast: false
-      max-parallel: 20
+      # Fair-share default: never let one 508GB batch consume all 20 hosted-runner slots.
+      max-parallel: 12
       matrix:
         worker: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     steps:
@@ -56,7 +57,7 @@ jobs:
       - name: Scan assigned corpus shards
         env:
           SCAN_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'full' }}
-          REQUESTED_WORKERS: ${{ github.event_name == 'workflow_dispatch' && inputs.worker_count || '20' }}
+          REQUESTED_WORKERS: ${{ github.event_name == 'workflow_dispatch' && inputs.worker_count || '12' }}
         run: |
           if [ "${{ matrix.worker }}" -ge "$REQUESTED_WORKERS" ]; then
             mkdir -p "out/worker-${{ matrix.worker }}"
