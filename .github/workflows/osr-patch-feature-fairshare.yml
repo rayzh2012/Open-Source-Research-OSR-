@@ -25,26 +25,40 @@ jobs:
           p=Path('.github/workflows/osr-feature-extraction.yml')
           s=p.read_text('utf-8')
 
-          old_outputs="""      partition_count: ${{ steps.plan.outputs.partition_count }}
-      limit_per_partition: ${{ steps.plan.outputs.limit_per_partition }}"""
-          new_outputs="""      partition_count: ${{ steps.plan.outputs.partition_count }}
-      max_parallel: ${{ steps.plan.outputs.max_parallel }}
-      limit_per_partition: ${{ steps.plan.outputs.limit_per_partition }}"""
+          dollar='$'
+          partition_expr=dollar+'{{ steps.plan.outputs.partition_count }}'
+          max_expr=dollar+'{{ steps.plan.outputs.max_parallel }}'
+          limit_expr=dollar+'{{ steps.plan.outputs.limit_per_partition }}'
+          matrix_expr=dollar+'{{ fromJson(needs.plan.outputs.max_parallel) }}'
+
+          old_outputs=(
+              '      partition_count: '+partition_expr+'\n'
+              '      limit_per_partition: '+limit_expr
+          )
+          new_outputs=(
+              '      partition_count: '+partition_expr+'\n'
+              '      max_parallel: '+max_expr+'\n'
+              '      limit_per_partition: '+limit_expr
+          )
           assert old_outputs in s, 'plan output insertion anchor missing'
           s=s.replace(old_outputs,new_outputs,1)
 
-          old_write="""              f.write(f'partition_count={partition_count}\\n')
-              f.write(f'limit_per_partition={limit}\\n')"""
-          new_write="""              f.write(f'partition_count={partition_count}\\n')
-              f.write(f'max_parallel={max_parallel}\\n')
-              f.write(f'limit_per_partition={limit}\\n')"""
+          old_write=(
+              "              f.write(f'partition_count={partition_count}\\n')\n"
+              "              f.write(f'limit_per_partition={limit}\\n')"
+          )
+          new_write=(
+              "              f.write(f'partition_count={partition_count}\\n')\n"
+              "              f.write(f'max_parallel={max_parallel}\\n')\n"
+              "              f.write(f'limit_per_partition={limit}\\n')"
+          )
           assert old_write in s, 'plan GITHUB_OUTPUT insertion anchor missing'
           s=s.replace(old_write,new_write,1)
 
           old='      max-parallel: 20\n'
           count=s.count(old)
           assert count == 2, f'expected exactly 2 hard-coded max-parallel lines, got {count}'
-          s=s.replace(old,'      max-parallel: ${{ fromJson(needs.plan.outputs.max_parallel) }}\n')
+          s=s.replace(old,'      max-parallel: '+matrix_expr+'\n')
 
           p.write_text(s,'utf-8')
           print('PATCH_PASS: plan output + extract/recover fair-share wiring updated')
