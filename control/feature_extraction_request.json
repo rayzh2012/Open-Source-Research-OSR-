@@ -1,9 +1,9 @@
 {
-  "id": 4,
+  "id": 5,
   "action": "FEATURE_EXTRACT",
   "run_id": "feature-store-v1-resilient-001",
   "partition_count": 128,
-  "max_parallel": 20,
+  "max_parallel": 12,
   "limit_per_partition": 0,
-  "purpose": "Recovery-safe full 508GB Feature Store v1 backfill across the exact 1,788-shard M2 inventory. Use 128 small fault-domain partitions with at most 20 concurrent standard public GitHub-hosted runners. Persist each completed partition into durable GitHub Release assets with summary-last commit markers; automatically rerun missing or partial partitions once; strict final PASS requires exact shard-set coverage and every shard SHA matching the M2 inventory. Never persist raw source text and never use the Mac data path."
+  "purpose": "Recovery-safe full 508GB Feature Store v1 backfill across the exact 1,788-shard M2 inventory after validating/fixing feature schema v1.0.1. Reuse the same durable Release run_id; skip only identity-valid completed partitions. Use 128 small fault-domain partitions. Requested fair-share is 12 concurrent standard public GitHub-hosted runners; never persist raw source text and never use the Mac data path. Strict PASS requires exact shard-set coverage and every shard SHA matching M2."
 }
