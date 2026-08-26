@@ -7,6 +7,7 @@ import json
 import re
 import subprocess
 import time
+import unicodedata
 from pathlib import Path
 
 import osr_feature_extractor_v1 as base
@@ -30,16 +31,23 @@ def rclone_cat(remote: str) -> str | None:
     return p.stdout if p.returncode == 0 else None
 
 
-def expand_case_variants(schema: dict) -> dict:
+def expand_match_variants(schema: dict) -> dict:
     expanded = json.loads(json.dumps(schema, ensure_ascii=False))
     for feat in expanded.get("features", []):
         terms = []
         seen = set()
         for term in feat.get("terms", []):
-            for variant in (term, term.casefold(), term.lower(), term.upper(), term.title()):
-                if variant and variant not in seen:
-                    seen.add(variant)
-                    terms.append(variant)
+            forms = [
+                term,
+                unicodedata.normalize("NFC", term),
+                unicodedata.normalize("NFD", term),
+                unicodedata.normalize("NFKC", term),
+            ]
+            for form in forms:
+                for variant in (form, form.casefold(), form.lower(), form.upper(), form.title()):
+                    if variant and variant not in seen:
+                        seen.add(variant)
+                        terms.append(variant)
         feat["terms"] = terms
     return expanded
 
@@ -84,7 +92,7 @@ def main() -> int:
         except Exception:
             pass
 
-    matcher_schema = expand_case_variants(schema)
+    matcher_schema = expand_match_variants(schema)
     machine, regexes, family = base.build_feature_machine(matcher_schema)
     local = Path("/tmp") / ("ancient-feature-" + hashlib.sha1(item["remote"].encode()).hexdigest()[:12] + ".parquet")
     started = time.time()
@@ -118,6 +126,7 @@ def main() -> int:
         "format": "osr-ancient-feature-files/v1",
         "source_parquet_sha256": actual_sha,
         "feature_schema_sha256": schema_sha,
+        "matcher_normalization": ["NFC", "NFD", "NFKC", "Unicode case variants"],
         "files": files,
     }
     (out / "FILES.json").write_text(json.dumps(files_manifest, ensure_ascii=False, indent=2) + "\n", "utf-8")
@@ -134,6 +143,7 @@ def main() -> int:
         "source_bytes": size,
         "feature_schema_version": schema.get("version"),
         "feature_schema_sha256": schema_sha,
+        "matcher_normalization": ["NFC", "NFD", "NFKC", "Unicode case variants"],
         "rows": int(shard_record["rows"]),
         "rows_nonempty": int(shard_record["rows_nonempty"]),
         "signal_rows": int(shard_record["signal_rows"]),
