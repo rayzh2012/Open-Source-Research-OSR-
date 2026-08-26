@@ -5,8 +5,10 @@ import argparse
 import hashlib
 import json
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
+from threading import Lock
 
 ROOTS = [
     ("curated", "gdrive:龍族古籍源庫｜Dragon Source Corpus/OPEN_CURATED_CORPORA"),
@@ -32,9 +34,10 @@ def lsjson(remote: str) -> list[dict]:
 def sha_from_sidecar(text: str | None, filename: str) -> str | None:
     if not text:
         return None
-    for line in text.splitlines():
+    lines = text.splitlines()
+    for line in lines:
         parts = line.strip().split()
-        if len(parts) >= 2 and (parts[-1].lstrip("*") == filename or len(text.splitlines()) == 1):
+        if len(parts) >= 2 and (parts[-1].lstrip("*") == filename or len(lines) == 1):
             token = parts[0].lower()
             if len(token) == 64 and all(c in "0123456789abcdef" for c in token):
                 return token
@@ -50,23 +53,27 @@ def parse_time(value: str | None) -> float:
         return 0.0
 
 
-def curated_item(root: str, obj: dict, manifest_cache: dict[str, dict]) -> dict | None:
+def curated_item(root: str, obj: dict, manifest_cache: dict[str, dict], cache_lock: Lock) -> dict | None:
     rel = obj["Path"]
     if "/parquet/" not in rel or not rel.endswith(".parquet"):
         return None
     if rel.startswith("openiti/") and "/normalized/v1/parquet/" in rel:
         prefix = rel.split("/parquet/", 1)[0]
         manifest_remote = f"{root}/{prefix}/MANIFEST.json"
-        if manifest_remote not in manifest_cache:
+        with cache_lock:
+            manifest = manifest_cache.get(manifest_remote)
+        if manifest is None:
             raw = cat(manifest_remote)
             if not raw:
                 return None
             try:
-                manifest_cache[manifest_remote] = json.loads(raw)
+                manifest = json.loads(raw)
             except Exception:
                 return None
+            with cache_lock:
+                manifest_cache[manifest_remote] = manifest
         name = Path(rel).name
-        part = next((x for x in manifest_cache[manifest_remote].get("parts", []) if x.get("file") == name), None)
+        part = next((x for x in manifest.get("parts", []) if x.get("file") == name), None)
         if not part or not part.get("sha256"):
             return None
         return {
@@ -77,8 +84,7 @@ def curated_item(root: str, obj: dict, manifest_cache: dict[str, dict]) -> dict 
 
     source_id = rel.split("/", 1)[0]
     base = rel.split("/parquet/", 1)[0]
-    side = cat(f"{root}/{base}/meta/PARQUET.sha256")
-    sha = sha_from_sidecar(side, Path(rel).name)
+    sha = sha_from_sidecar(cat(f"{root}/{base}/meta/PARQUET.sha256"), Path(rel).name)
     if not sha:
         return None
     return {
@@ -131,22 +137,31 @@ def wikisource_item(root: str, obj: dict) -> dict | None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--output", required=True)
+    ap.add_argument("--workers", type=int, default=8)
     args = ap.parse_args()
-    candidates: list[dict] = []
-    manifest_cache: dict[str, dict] = {}
+    if not 1 <= args.workers <= 32:
+        raise SystemExit("workers must be 1..32")
 
-    for kind, root in ROOTS:
-        for obj in lsjson(root):
-            if obj.get("IsDir"):
-                continue
-            if kind == "curated":
-                item = curated_item(root, obj, manifest_cache)
-            elif kind == "kanripo":
-                item = kanripo_item(root, obj)
-            else:
-                item = wikisource_item(root, obj)
-            if item:
-                candidates.append(item)
+    manifest_cache: dict[str, dict] = {}
+    cache_lock = Lock()
+    tasks: list[tuple[str, str, dict]] = []
+    with ThreadPoolExecutor(max_workers=min(3, args.workers)) as ex:
+        listings = list(ex.map(lambda kr: (kr[0], kr[1], lsjson(kr[1])), ROOTS))
+    for kind, root, listing in listings:
+        for obj in listing:
+            if not obj.get("IsDir") and "/parquet/" in obj.get("Path", "") and obj.get("Path", "").endswith(".parquet"):
+                tasks.append((kind, root, obj))
+
+    def resolve(task: tuple[str, str, dict]) -> dict | None:
+        kind, root, obj = task
+        if kind == "curated":
+            return curated_item(root, obj, manifest_cache, cache_lock)
+        if kind == "kanripo":
+            return kanripo_item(root, obj)
+        return wikisource_item(root, obj)
+
+    with ThreadPoolExecutor(max_workers=args.workers) as ex:
+        candidates = [x for x in ex.map(resolve, tasks) if x]
 
     # Immutable snapshots can coexist. Keep only the newest snapshot for a logical corpus/partition.
     chosen: dict[str, dict] = {}
@@ -168,6 +183,7 @@ def main() -> int:
         "item_count": len(items),
         "groups": {g: sum(1 for x in items if x["group"] == g) for g in sorted({x["group"] for x in items})},
         "identity_contract": "exact upstream parquet SHA256 + immutable remote path; newest snapshot per logical corpus/partition",
+        "checksum_discovery_workers": args.workers,
     }
     Path(args.output).write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", "utf-8")
     print(json.dumps({"item_count": manifest["item_count"], "groups": manifest["groups"], "inventory_sha256": manifest["inventory_sha256"]}, ensure_ascii=False))
