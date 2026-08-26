@@ -55,10 +55,10 @@ jobs:
     needs: [plan, auth]
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 6
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
     env:
       RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
       DEST_ROOT: ${{ needs.plan.outputs.destination_root }}
@@ -144,7 +144,6 @@ jobs:
           rclone copyto "out/${SOURCE_ID}.parquet.summary.json" "${REMOTE_BASE}/meta/parquet.summary.json"
           rclone copyto out/SOURCE.json "${REMOTE_BASE}/meta/SOURCE.json"
           rclone copyto out/PARQUET.sha256 "${REMOTE_BASE}/meta/PARQUET.sha256"
-          # Completion marker last: its presence means both raw and Parquet uploads finished.
           rclone copyto out/SNAPSHOT.sha256 "${REMOTE_BASE}/meta/SNAPSHOT.sha256"
           echo "ARCHIVED ${SOURCE_ID}@${COMMIT_SHA}"
       - name: Upload tiny recovery metadata
