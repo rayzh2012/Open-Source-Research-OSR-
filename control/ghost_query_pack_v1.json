@@ -1,0 +1,26 @@
+{
+  "pack_id": "ghost-discovery-v1",
+  "purpose": "Discover ghost entities, aliases, local variants, disease/water/death-function classes, and exorcist interfaces without forcing ontology merges.",
+  "families": {
+    "disease_ghosts": ["疫鬼","疟鬼","虐鬼","瘟鬼","病鬼","疾病鬼","疫神","厉神"],
+    "water_ghosts": ["水鬼","溺鬼","河鬼","江鬼","井鬼","船鬼","水精","若水","江水"],
+    "danger_states": ["厉鬼","厉","恶鬼","饿鬼","尸鬼","冤鬼","怨鬼","孤魂野鬼"],
+    "ghost_predators": ["尺郭","天郭","赤郭","食邪","黄父"],
+    "zhongkui_cluster": ["钟馗","鍾馗","中魁","终葵","钟葵","魌头"],
+    "ritual_exorcists": ["神荼","郁垒","方相氏","大傩","逐疫","桃弧","棘矢"],
+    "wangliang_cluster": ["罔两","罔象","象罔","蝄蜽","魍魉","魍魉鬼","魑魅"],
+    "local_unknown": ["黎丘鬼","野仲","游光","黄父鬼","黄文鬼","鬼母","鬼姑","虚耗","魖耗"]
+  },
+  "routing_policy": {
+    "default_exact_shards": 4,
+    "max_without_scale_justification": 4,
+    "source_density_first": true,
+    "preferred_source_signals": ["方志","府志","州志","县志","笔记","类书","祀典","祠","庙","谱牒","四库","古今图书集成","永乐大典"],
+    "never_auto_merge": [
+      ["魍魉-A","魍魉鬼-B"],
+      ["罔象","罔两"],
+      ["尺郭-黄父","黄父疫鬼"],
+      ["中魁","钟馗"]
+    ]
+  }
+}
