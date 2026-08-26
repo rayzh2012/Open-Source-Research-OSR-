@@ -1,0 +1,61 @@
+name: OSR Patch Feature Fairshare
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'control/patch_feature_fairshare.json'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+          fetch-depth: 0
+      - name: Patch Feature Store workflow to honor request max_parallel
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('.github/workflows/osr-feature-extraction.yml')
+          s=p.read_text('utf-8')
+
+          old_outputs="""      partition_count: ${{ steps.plan.outputs.partition_count }}
+      limit_per_partition: ${{ steps.plan.outputs.limit_per_partition }}"""
+          new_outputs="""      partition_count: ${{ steps.plan.outputs.partition_count }}
+      max_parallel: ${{ steps.plan.outputs.max_parallel }}
+      limit_per_partition: ${{ steps.plan.outputs.limit_per_partition }}"""
+          assert old_outputs in s, 'plan output insertion anchor missing'
+          s=s.replace(old_outputs,new_outputs,1)
+
+          old_write="""              f.write(f'partition_count={partition_count}\\n')
+              f.write(f'limit_per_partition={limit}\\n')"""
+          new_write="""              f.write(f'partition_count={partition_count}\\n')
+              f.write(f'max_parallel={max_parallel}\\n')
+              f.write(f'limit_per_partition={limit}\\n')"""
+          assert old_write in s, 'plan GITHUB_OUTPUT insertion anchor missing'
+          s=s.replace(old_write,new_write,1)
+
+          old='      max-parallel: 20\n'
+          count=s.count(old)
+          assert count == 2, f'expected exactly 2 hard-coded max-parallel lines, got {count}'
+          s=s.replace(old,'      max-parallel: ${{ fromJson(needs.plan.outputs.max_parallel) }}\n')
+
+          p.write_text(s,'utf-8')
+          print('PATCH_PASS: plan output + extract/recover fair-share wiring updated')
+      - name: Commit patch to Feature Store branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add .github/workflows/osr-feature-extraction.yml
+          git diff --cached --check
+          git commit -m 'feature-store: honor request max_parallel in extract and recover'
+          git pull --rebase origin stage2-direct-miner-v3-1
+          git push origin HEAD:stage2-direct-miner-v3-1
