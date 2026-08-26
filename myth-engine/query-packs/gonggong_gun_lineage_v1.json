@@ -1,0 +1,42 @@
+{
+  "pack_id": "gonggong-gun-lineage-v1.0",
+  "purpose": "Test whether Gun/Chongbo belongs to, descends from, succeeds, allies with, or merely overlaps the Gonggong-Houtu network; separately collate Gun's Huangxiong/Huangneng transformation tradition and Zhou/Xia linkage.",
+  "epistemic_rule": "Surface co-occurrence is retrieval evidence only. Distinguish SAME_PERSON, SAME_CLAN_BRANCH, SUCCESSION, ALLIANCE, SHARED_TECHNIQUE, SHARED_GEOGRAPHY, ENEMY_OCCUPATION, and LATER_TEXTUAL_CONFLATION.",
+  "seed_groups": {
+    "gonggong": ["共工", "共工氏", "共工国", "共工國"],
+    "gun_chongbo": ["鲧", "鯀", "崇伯", "崇伯鲧", "崇伯鯀", "伯鲧", "伯鯀"],
+    "houtu_julong": ["后土", "後土", "句龙", "句龍", "勾龙", "勾龍"],
+    "siyue": ["四岳", "四嶽", "共之从孙", "共之從孫", "共工从孙", "共工從孫"],
+    "yu": ["禹", "大禹", "夏禹"],
+    "transformation": ["黄熊", "黃熊", "黄能", "黃能", "三足鳖", "三足鱉", "鳖三足", "鱉三足", "羽渊", "羽淵", "夏郊"],
+    "water_method": ["壅防百川", "堕高堙庳", "墮高堙庳", "堙障", "障洪水", "息壤", "洪水"],
+    "punishment": ["流共工", "殛鲧", "殛鯀", "羽山", "幽州"],
+    "genealogy": ["后裔", "後裔", "苗裔", "从孙", "從孫", "同姓", "同族", "氏", "族", "子", "孙", "孫", "支", "宗"],
+    "yan_ba": ["炎帝", "祝融", "巴", "巴人", "巴族"],
+    "zhou_link": ["周", "周人", "姬姓", "姜姓", "姜嫄", "后稷", "後稷", "有吕", "有呂", "吕", "呂"]
+  },
+  "anchors": {
+    "early_sources": ["尚书", "尚書", "尧典", "堯典", "舜典", "国语", "國語", "周语", "周語", "鲁语", "魯語", "左传", "左傳", "山海经", "山海經", "荀子", "楚辞", "楚辭", "天问", "天問", "史记", "史記", "汉书", "漢書", "淮南子", "论衡", "論衡"],
+    "later_sources": ["吴越春秋", "吳越春秋", "越绝书", "越絕書", "帝王世纪", "帝王世紀", "路史", "太平御览", "太平御覽", "水经注", "水經注"],
+    "kinship": ["生", "子", "孙", "孫", "从孙", "從孫", "后", "後", "裔", "祖", "宗", "姓", "氏", "族", "支", "伯"],
+    "office_polity": ["氏", "国", "國", "伯", "侯", "帝", "官", "土正", "后土", "社", "封", "邑"],
+    "water_soil": ["水", "洪", "河", "川", "壅", "防", "堙", "障", "土", "九土", "九州", "息壤", "治水", "平水土"],
+    "conflict": ["流", "殛", "杀", "殺", "逐", "伐", "攻", "诛", "誅", "灭", "滅", "争", "爭", "罪", "过", "過"],
+    "geography": ["共山", "共水", "崇山", "嵩山", "羽山", "羽渊", "羽淵", "幽州", "河南", "河内", "河內", "冀州", "黄河", "黃河"],
+    "animal_ritual": ["熊", "能", "鳖", "鱉", "龟", "龜", "鼋", "黿", "三足", "郊", "祀", "祭", "神", "化"],
+    "zhou_xia": ["夏", "夏后", "夏後", "夏后氏", "夏後氏", "周", "周人", "后稷", "後稷", "姬", "姜", "吕", "呂"]
+  },
+  "context_radius": 260,
+  "minimum_distinct_seed_groups": 2,
+  "retain_single_group_if_anchor_groups": 3,
+  "priority_pairs": [
+    ["gonggong", "gun_chongbo"],
+    ["gun_chongbo", "siyue"],
+    ["gonggong", "siyue"],
+    ["gun_chongbo", "houtu_julong"],
+    ["gun_chongbo", "transformation"],
+    ["gun_chongbo", "zhou_link"],
+    ["gonggong", "yan_ba"],
+    ["houtu_julong", "yan_ba"]
+  ]
+}
