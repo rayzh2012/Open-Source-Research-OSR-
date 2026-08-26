@@ -28,26 +28,71 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Gate on strict M3 PASS
+      - name: Gate on strict resilient M3 PASS
         shell: python
         run: |
           import json, pathlib
-          p=pathlib.Path('control/feature_extraction_status.json')
-          if not p.exists(): raise SystemExit('M3 status missing')
-          s=json.load(open(p,encoding='utf-8'))
-          required={
-            'status':'PASS',
-            'expected_workers':20,
-            'workers_completed':20,
-            'expected_shards':1788,
-            'shards_scanned':1788,
-            'failed_shards_count':0,
+
+          def load(path):
+              p = pathlib.Path(path)
+              if not p.exists():
+                  raise SystemExit(f'missing required M3 control file: {path}')
+              return json.load(open(p, encoding='utf-8'))
+
+          req = load('control/feature_extraction_request.json')
+          status = load('control/feature_extraction_status.json')
+          catalog = load('control/feature_catalog.json')
+          integrity = load('control/feature_release_integrity.json')
+
+          run_id = req.get('run_id')
+          partitions = int(req.get('partition_count', 128))
+          expected_shards = 1788
+
+          bad = {}
+          expected_status = {
+              'status': 'PASS',
+              'run_id': run_id,
+              'expected_partitions': partitions,
+              'complete_partitions': partitions,
+              'expected_shards': expected_shards,
+              'shards_scanned': expected_shards,
+              'missing_shards_count': 0,
           }
-          bad={k:{'expected':v,'got':s.get(k)} for k,v in required.items() if s.get(k)!=v}
-          if bad: raise SystemExit(f'M3 strict gate failed: {bad}')
-          if int(s.get('completed_shards_from_manifests',0)) != 1788:
-              raise SystemExit(f"M3 manifest completion mismatch: {s.get('completed_shards_from_manifests')}")
-          print(json.dumps({'status':'M3_GATE_PASS','run_id':s.get('run_id'),'shards':s.get('shards_scanned')},ensure_ascii=False))
+          for k, v in expected_status.items():
+              if status.get(k) != v:
+                  bad[f'status.{k}'] = {'expected': v, 'got': status.get(k)}
+
+          expected_catalog = {
+              'status': 'PASS',
+              'run_id': run_id,
+              'expected_shards': expected_shards,
+              'shards_scanned': expected_shards,
+          }
+          for k, v in expected_catalog.items():
+              if catalog.get(k) != v:
+                  bad[f'catalog.{k}'] = {'expected': v, 'got': catalog.get(k)}
+
+          expected_integrity = {
+              'status': 'PASS',
+              'run_id': run_id,
+              'partition_count_expected': partitions,
+              'partition_summaries_found': partitions,
+              'source_shards_expected': expected_shards,
+              'source_shards_found': expected_shards,
+          }
+          for k, v in expected_integrity.items():
+              if integrity.get(k) != v:
+                  bad[f'integrity.{k}'] = {'expected': v, 'got': integrity.get(k)}
+
+          if bad:
+              raise SystemExit(f'M3 resilient strict gate failed: {bad}')
+
+          print(json.dumps({
+              'status': 'M3_RESILIENT_GATE_PASS',
+              'run_id': run_id,
+              'partitions': partitions,
+              'shards': expected_shards,
+          }, ensure_ascii=False))
       - name: Build compact research aggregation
         run: python tools/osr_m4_aggregate_v1.py
       - name: Build and optionally send Notion writeback
