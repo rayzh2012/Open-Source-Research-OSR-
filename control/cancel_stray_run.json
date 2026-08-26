@@ -1,0 +1,5 @@
+{
+  "action": "CANCEL_STRAY_RUN",
+  "run_id": 32946769630,
+  "reason": "Accidental 508GB Gonggong rerun triggered only by editing its workflow scheduling policy. Preserve the original in-progress run 32933592814 and do not duplicate the corpus scan."
+}
