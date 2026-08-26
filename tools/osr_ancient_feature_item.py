@@ -30,11 +30,25 @@ def rclone_cat(remote: str) -> str | None:
     return p.stdout if p.returncode == 0 else None
 
 
+def expand_case_variants(schema: dict) -> dict:
+    expanded = json.loads(json.dumps(schema, ensure_ascii=False))
+    for feat in expanded.get("features", []):
+        terms = []
+        seen = set()
+        for term in feat.get("terms", []):
+            for variant in (term, term.casefold(), term.lower(), term.upper(), term.title()):
+                if variant and variant not in seen:
+                    seen.add(variant)
+                    terms.append(variant)
+        feat["terms"] = terms
+    return expanded
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--item-json", required=True)
     ap.add_argument("--out-dir", required=True)
-    ap.add_argument("--feature-schema", default="control/feature_schema_v1.json")
+    ap.add_argument("--feature-schema", default="control/ancient_feature_schema_v1.json")
     ap.add_argument("--feature-remote-root", required=True)
     args = ap.parse_args()
 
@@ -70,7 +84,8 @@ def main() -> int:
         except Exception:
             pass
 
-    machine, regexes, family = base.build_feature_machine(schema)
+    matcher_schema = expand_case_variants(schema)
+    machine, regexes, family = base.build_feature_machine(matcher_schema)
     local = Path("/tmp") / ("ancient-feature-" + hashlib.sha1(item["remote"].encode()).hexdigest()[:12] + ".parquet")
     started = time.time()
     p = subprocess.run(
