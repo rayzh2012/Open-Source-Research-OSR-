@@ -7,7 +7,6 @@ on:
       - 'myth-engine/query-packs/gonggong_gun_lineage_v1.json'
       - 'myth-engine/tools/scan_lineage_corpus.py'
       - 'myth-engine/tools/reduce_lineage_scan.py'
-      - '.github/workflows/gonggong-gun-corpus-scan.yml'
   workflow_dispatch:
     inputs:
       mode:
