@@ -13,7 +13,6 @@ from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-TEXT_STATUS = {"completed", "inProgress", "mARkdown"}
 HEADER_END = "#META#Header#End#"
 URI_RE = re.compile(r"^(?P<uri>.+)\.(?P<status>completed|inProgress|mARkdown)$")
 
@@ -32,6 +31,14 @@ SCHEMA = pa.schema([
     ("text_chars", pa.int64()),
     ("text_sha256", pa.string()),
 ])
+
+
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(8 * 1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def stable_partition(key: str, count: int) -> int:
@@ -54,7 +61,7 @@ def strip_openiti_header(text: str) -> tuple[str, str]:
     return head.strip(), body.lstrip("\r\n ")
 
 
-def parse_uri(name: str) -> tuple[str, str, str, str, str] | None:
+def parse_uri(name: str) -> tuple[str, str, str, str] | None:
     base = Path(name).name
     m = URI_RE.match(base)
     if not m:
@@ -64,7 +71,7 @@ def parse_uri(name: str) -> tuple[str, str, str, str, str] | None:
     parts = version_uri.split(".")
     author_uri = parts[0] if parts else version_uri
     book_uri = ".".join(parts[:2]) if len(parts) >= 2 else author_uri
-    return version_uri, status, author_uri, book_uri, base
+    return version_uri, status, author_uri, book_uri
 
 
 def load_metadata(path: Path | None) -> dict[str, dict[str, str]]:
@@ -139,7 +146,7 @@ def main() -> int:
             if parsed is None:
                 skipped += 1
                 continue
-            version_uri, status, author_uri, book_uri, _ = parsed
+            version_uri, status, author_uri, book_uri = parsed
             data = zf.read(info)
             total_uncompressed += len(data)
             text0 = decode_text(data)
@@ -149,8 +156,8 @@ def main() -> int:
                 skipped += 1
                 continue
             row_meta = meta.get(version_uri) or meta.get(book_uri) or meta.get(author_uri) or {}
-            title = pick(row_meta, "title", "book")
-            author = pick(row_meta, "author", "name")
+            title = pick(row_meta, "title")
+            author = pick(row_meta, "author")
             idx = stable_partition(version_uri, args.partitions)
             encoded = text.encode("utf-8")
             buffers[idx].append({
@@ -183,14 +190,13 @@ def main() -> int:
         path = out / f"openiti-{args.version}-part-{idx:03d}.parquet"
         if not path.exists():
             pq.write_table(pa.Table.from_pylist([], schema=SCHEMA), path, compression="zstd")
-        sha = hashlib.sha256(path.read_bytes()).hexdigest()
         parts.append({
             "partition": idx,
             "file": path.name,
             "documents": docs[idx],
             "text_chars": chars[idx],
             "bytes": path.stat().st_size,
-            "sha256": sha,
+            "sha256": sha256_file(path),
         })
 
     manifest = {
