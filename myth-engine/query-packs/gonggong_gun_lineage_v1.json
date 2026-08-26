@@ -1,9 +1,9 @@
 {
-  "pack_id": "gonggong-gun-lineage-v1.0",
+  "pack_id": "gonggong-gun-lineage-v1.1",
   "purpose": "Test whether Gun/Chongbo belongs to, descends from, succeeds, allies with, or merely overlaps the Gonggong-Houtu network; separately collate Gun's Huangxiong/Huangneng transformation tradition and Zhou/Xia linkage.",
   "epistemic_rule": "Surface co-occurrence is retrieval evidence only. Distinguish SAME_PERSON, SAME_CLAN_BRANCH, SUCCESSION, ALLIANCE, SHARED_TECHNIQUE, SHARED_GEOGRAPHY, ENEMY_OCCUPATION, and LATER_TEXTUAL_CONFLATION.",
   "seed_groups": {
-    "gonggong": ["共工", "共工氏", "共工国", "共工國"],
+    "gonggong": ["共工", "共工氏", "共工国", "共工國", "称遂共工之过", "稱遂共工之過"],
     "gun_chongbo": ["鲧", "鯀", "崇伯", "崇伯鲧", "崇伯鯀", "伯鲧", "伯鯀"],
     "houtu_julong": ["后土", "後土", "句龙", "句龍", "勾龙", "勾龍"],
     "siyue": ["四岳", "四嶽", "共之从孙", "共之從孫", "共工从孙", "共工從孫"],
