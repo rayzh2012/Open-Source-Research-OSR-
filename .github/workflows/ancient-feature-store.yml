@@ -1,0 +1,225 @@
+name: Ancient Corpus Feature Store
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - '.github/workflows/ancient-feature-store.yml'
+      - 'control/ancient_feature_inventory.py'
+      - 'tools/osr_ancient_feature_item.py'
+      - 'control/feature_schema_v1.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ancient-corpus-feature-store
+  cancel-in-progress: false
+
+env:
+  FEATURE_ROOT: "gdrive:龍族古籍源庫｜Dragon Source Corpus/ANCIENT_FEATURE_STORE"
+
+jobs:
+  auth:
+    runs-on: ubuntu-latest
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - run: test -n "${RCLONE_CONFIG_B64:-}" || { echo '::error::Missing RCLONE_CONFIG_B64'; exit 42; }
+
+  plan:
+    needs: auth
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      inventory_sha256: ${{ steps.plan.outputs.inventory_sha256 }}
+      item_count: ${{ steps.plan.outputs.item_count }}
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - name: Configure Drive inventory access
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - id: plan
+        name: Build checksum-locked feature-ready inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python control/ancient_feature_inventory.py --output out/SOURCE_INVENTORY.json
+          python - <<'PY'
+          import json, os
+          m=json.load(open('out/SOURCE_INVENTORY.json',encoding='utf-8'))
+          matrix={'include':[{'item':x} for x in m['items']]}
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write('matrix='+json.dumps(matrix,ensure_ascii=False,separators=(',',':'))+'\n')
+              f.write('inventory_sha256='+m['inventory_sha256']+'\n')
+              f.write('item_count='+str(m['item_count'])+'\n')
+          print(json.dumps({'items':m['item_count'],'groups':m['groups'],'inventory_sha256':m['inventory_sha256']},ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ancient-feature-inventory-${{ github.run_id }}
+          path: out/SOURCE_INVENTORY.json
+          retention-days: 14
+          compression-level: 6
+
+  extract:
+    needs: plan
+    if: needs.plan.outputs.item_count != '0'
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+      ITEM_JSON: ${{ toJSON(matrix.item) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install feature dependencies and configure Drive
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pyarrow==25.0.1 pyahocorasick==2.2.0 requests==2.32.4 huggingface_hub==0.34.4
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          printf '%s' "$ITEM_JSON" > /tmp/item.json
+      - name: Extract or resume source features
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          PYTHONPATH=tools python tools/osr_ancient_feature_item.py \
+            --item-json /tmp/item.json \
+            --out-dir out \
+            --feature-schema control/feature_schema_v1.json \
+            --feature-remote-root "$FEATURE_ROOT"
+      - name: Publish item data then completion marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS=$(python -c "import json;print(json.load(open('out/RESULT.json'))['status'])")
+          REL=$(python -c "import json;print(json.load(open('out/RESULT.json'))['remote_rel'])")
+          REMOTE="$FEATURE_ROOT/$REL"
+          if [[ "$STATUS" == 'SKIPPED_ALREADY_COMPLETE' ]]; then
+            echo "Already complete: $REL"
+            exit 0
+          fi
+          test "$STATUS" = 'COMPLETE'
+          test -f out/FILES.json
+          rclone copy out/features "$REMOTE/features" --drive-chunk-size 64M --transfers 4 --retries 8 --low-level-retries 16 --stats 30s
+          rclone copyto out/FILES.json "$REMOTE/FILES.json"
+          # COMPLETE.json is written last and is the item commit marker.
+          rclone copyto out/RESULT.json "$REMOTE/COMPLETE.json"
+      - name: Keep tiny diagnostic result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ancient-feature-item-${{ strategy.job-index }}-${{ github.run_id }}
+          path: |
+            out/RESULT.json
+            out/FILES.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  finalize:
+    if: always()
+    needs: [plan, extract]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+      EXPECTED_INVENTORY_SHA: ${{ needs.plan.outputs.inventory_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/download-artifact@v4
+        with:
+          name: ancient-feature-inventory-${{ github.run_id }}
+          path: out
+      - name: Configure Drive and validate every item checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          SCHEMA_SHA=$(sha256sum control/feature_schema_v1.json | awk '{print $1}')
+          export SCHEMA_SHA
+          python - <<'PY' > /tmp/checkpoints.tsv
+          import hashlib, json, os, re
+          m=json.load(open('out/SOURCE_INVENTORY.json',encoding='utf-8'))
+          assert m['inventory_sha256'] == os.environ['EXPECTED_INVENTORY_SHA']
+          schema=os.environ['SCHEMA_SHA']
+          def safe(v):
+              s=re.sub(r'[^0-9A-Za-z._-]+','_',v).strip('_')[:80]
+              return s or 'source'
+          for x in m['items']:
+              lh=hashlib.sha256(x['logical_key'].encode()).hexdigest()[:16]
+              rel='/'.join(['v1',schema,safe(x['group']),safe(x['corpus']),lh,x['sha256'].lower()])
+              print('\t'.join([rel,x['sha256'].lower(),x['logical_key']]))
+          PY
+
+          mkdir -p /tmp/completions
+          total=0; missing=0; bad=0
+          while IFS=$'\t' read -r rel sha key; do
+            total=$((total+1))
+            file="/tmp/completions/$(printf '%s' "$key" | sha256sum | awk '{print $1}').json"
+            if ! rclone copyto "$FEATURE_ROOT/$rel/COMPLETE.json" "$file" --retries 3 >/dev/null 2>&1; then
+              echo "MISSING $key"; missing=$((missing+1)); continue
+            fi
+            if ! python - "$file" "$sha" "$SCHEMA_SHA" <<'PY'
+          import json,sys
+          o=json.load(open(sys.argv[1],encoding='utf-8'))
+          assert o.get('status') == 'COMPLETE', o
+          assert o.get('source_parquet_sha256') == sys.argv[2], o
+          assert o.get('feature_schema_sha256') == sys.argv[3], o
+          PY
+            then
+              echo "BAD $key"; bad=$((bad+1))
+            fi
+          done < /tmp/checkpoints.tsv
+
+          python - <<PY
+          import json
+          inv=json.load(open('out/SOURCE_INVENTORY.json',encoding='utf-8'))
+          status={
+            'format':'osr-ancient-feature-inventory-status/v1',
+            'status':'COMPLETE' if int('$missing')==0 and int('$bad')==0 else 'PARTIAL',
+            'inventory_sha256':inv['inventory_sha256'],
+            'item_count':inv['item_count'],
+            'feature_schema_sha256':'$SCHEMA_SHA',
+            'missing_item_checkpoints':int('$missing'),
+            'bad_item_checkpoints':int('$bad'),
+            'raw_text_persisted':False,
+          }
+          open('out/INVENTORY_COMPLETE.json','w',encoding='utf-8').write(json.dumps(status,ensure_ascii=False,indent=2)+'\n')
+          print(json.dumps(status,ensure_ascii=False,indent=2))
+          if status['status'] != 'COMPLETE': raise SystemExit(3)
+          PY
+
+          SNAP="$FEATURE_ROOT/inventories/$EXPECTED_INVENTORY_SHA"
+          rclone copyto out/SOURCE_INVENTORY.json "$SNAP/SOURCE_INVENTORY.json"
+          # Inventory completion marker last.
+          rclone copyto out/INVENTORY_COMPLETE.json "$SNAP/INVENTORY_COMPLETE.json"
