@@ -1,5 +1,5 @@
 {
-  "schema_version": "osr-islamicate-rescue-targets-v3",
+  "schema_version": "osr-islamicate-rescue-targets-v4",
   "destination_root": "龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE",
   "sources": [
     {
@@ -10,7 +10,7 @@
       "kind": "existing_pipeline",
       "version": "2025.1.9",
       "source_url": "https://zenodo.org/records/17767721",
-      "notes": "Already has immutable raw release + metadata + deterministic Parquet sidecar pipeline. Do not duplicate."
+      "notes": "Immutable raw release + metadata + deterministic Parquet sidecar pipeline. Do not duplicate."
     },
     {
       "id": "ganjoor",
@@ -37,14 +37,13 @@
     {
       "id": "loc_persian_manuscripts",
       "label": "Library of Congress Persian Manuscripts",
-      "enabled": true,
-      "kind": "loc_collection",
-      "loc_search_paths": ["https://www.loc.gov/manuscripts/", "https://www.loc.gov/search/"],
-      "loc_partof": "Persian Manuscripts",
-      "collection_url": "https://www.loc.gov/",
+      "enabled": false,
+      "kind": "dedicated_pipeline",
+      "managed_by": ".github/workflows/loc-persian-pdf-rescue.yml",
       "expected_items": 173,
-      "capture": ["collection_search_row", "iiif_manifest"],
-      "image_policy": "collection-rights-cleared-backfill",
+      "capture": ["item_api_json", "official_pdf", "page_file_inventory"],
+      "image_policy": "PDF-first; original-page backfill later from preserved FILES.json",
+      "access_note": "LOC item JSON API is reachable from GitHub; Presentation Manifest endpoint is Cloudflare-challenged on GitHub-hosted runners, so the rescue pipeline uses the official item JSON resources and PDF directly.",
       "rights_note": "LOC Persian Language Manuscript Project items are public domain or have no known copyright restrictions and are free to use and reuse."
     },
     {
