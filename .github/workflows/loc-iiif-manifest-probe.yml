@@ -1,0 +1,92 @@
+name: LOC IIIF Manifest Probe
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - '.github/workflows/loc-iiif-manifest-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe one known Persian manuscript
+        shell: bash
+        run: |
+          set -euo pipefail
+          ITEM='2017498321'
+          echo '=== direct manifest ==='
+          curl -sS -L --connect-timeout 20 --max-time 60 \
+            -H 'Accept: application/json,application/ld+json;q=0.9,*/*;q=0.5' \
+            -D /tmp/manifest.headers \
+            -o /tmp/manifest.body \
+            -w 'HTTP=%{http_code} FINAL=%{url_effective} TYPE=%{content_type} BYTES=%{size_download}\n' \
+            "https://www.loc.gov/item/$ITEM/manifest.json" || true
+          sed -n '1,40p' /tmp/manifest.headers || true
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/manifest.body')
+          b=p.read_bytes() if p.exists() else b''
+          print('BODY_PREFIX=',repr(b[:500]))
+          try:
+              import json
+              obj=json.loads(b)
+              print('MANIFEST_JSON=1')
+              print('TOP_KEYS=',sorted(obj)[:80] if isinstance(obj,dict) else type(obj).__name__)
+          except Exception as e:
+              print('MANIFEST_JSON=0',repr(e))
+          PY
+
+          echo '=== LOC item JSON ==='
+          curl -sS -L --connect-timeout 20 --max-time 60 \
+            -H 'Accept: application/json' \
+            -o /tmp/item.json \
+            -w 'HTTP=%{http_code} FINAL=%{url_effective} TYPE=%{content_type} BYTES=%{size_download}\n' \
+            "https://www.loc.gov/item/$ITEM/?fo=json" || true
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          b=Path('/tmp/item.json').read_bytes()
+          print('ITEM_PREFIX=',repr(b[:200]))
+          try:
+              obj=json.loads(b)
+          except Exception as e:
+              print('ITEM_JSON=0',repr(e)); raise SystemExit(0)
+          print('ITEM_JSON=1')
+          hits=[]
+          def walk(x,path=''):
+              if isinstance(x,dict):
+                  for k,v in x.items():
+                      kp=f'{path}.{k}' if path else str(k)
+                      if any(t in str(k).lower() for t in ('iiif','manifest','resource','image')):
+                          hits.append((kp,v))
+                      walk(v,kp)
+              elif isinstance(x,list):
+                  for i,v in enumerate(x): walk(v,f'{path}[{i}]')
+              elif isinstance(x,str) and ('iiif' in x.lower() or 'manifest' in x.lower()):
+                  hits.append((path,x))
+          walk(obj)
+          print('HITS=',len(hits))
+          for path,val in hits[:120]:
+              s=repr(val)
+              print(path,'=',s[:1000])
+          PY
+
+          echo '=== Collection result row ==='
+          curl -sS -L --connect-timeout 20 --max-time 60 \
+            -H 'Accept: application/json' \
+            -o /tmp/search.json \
+            "https://www.loc.gov/manuscripts/?fo=json&c=100&fa=partof:Persian%20Manuscripts" || true
+          python - <<'PY'
+          import json
+          obj=json.load(open('/tmp/search.json'))
+          for row in obj.get('results',[]):
+              if str(row.get('item_id'))=='2017498321':
+                  print(json.dumps(row,ensure_ascii=False,indent=2)[:30000])
+                  break
+          PY
