@@ -5,7 +5,8 @@ import argparse
 import json
 from pathlib import Path
 
-from control.loc_persian_pdf_rescue_worker import (
+# This script executes from control/, so its own directory is already on sys.path.
+from loc_persian_pdf_rescue_worker import (
     ROOT, session, rclone_cat, get_json_with_retry, dump, sha256_file,
     find_resource_payload, flatten_original_files, rclone_copyto, download,
 )
