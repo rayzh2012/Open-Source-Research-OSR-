@@ -23,7 +23,6 @@ def session() -> requests.Session:
                   status_forcelist=(429,500,502,503,504),
                   allowed_methods=frozenset(["GET","HEAD"]), raise_on_status=False)
     s=requests.Session()
-    # LOC JSON API is publicly reachable from GitHub; keep the request explicitly API-oriented.
     s.headers.update({"Accept":"application/json,*/*;q=0.5"})
     s.mount("https://",HTTPAdapter(max_retries=retry))
     return s
@@ -59,8 +58,6 @@ def dump(path:Path,obj)->None:
 
 
 def discover_from_rescued_catalog()->list[dict]:
-    # The collection discovery already succeeded 173/173 and its search-row snapshots
-    # are durable on Drive. Reuse that fixed catalog instead of repeatedly querying LOC.
     p=run(["rclone","lsjson",f"{ROOT}/item_json","--files-only"],capture=True)
     entries=json.loads(p.stdout or "[]")
     rows=[]
@@ -73,6 +70,25 @@ def discover_from_rescued_catalog()->list[dict]:
     if len(rows)!=EXPECTED:
         raise RuntimeError(f"Rescued LOC catalog expected {EXPECTED}, got {len(rows)}")
     return rows
+
+
+def get_json_with_retry(s:requests.Session,url:str,*,params:dict|None=None,attempts:int=8)->dict:
+    last:Exception|None=None
+    for attempt in range(1,attempts+1):
+        try:
+            r=s.get(url,params=params,timeout=(30,240),headers={"Accept":"application/json,*/*;q=0.5"})
+            r.raise_for_status()
+            obj=r.json()
+            if not isinstance(obj,dict):
+                raise ValueError(f"Expected JSON object, got {type(obj).__name__}")
+            return obj
+        except (requests.RequestException, ValueError) as exc:
+            last=exc
+            print(f"JSON_RETRY attempt={attempt}/{attempts} url={url} error={exc!r}",flush=True)
+            if attempt<attempts:
+                time.sleep(min(30,2**attempt))
+    assert last is not None
+    raise last
 
 
 def find_resource_payload(obj:dict)->tuple[str|None,list[dict],dict|None]:
@@ -111,18 +127,33 @@ def flatten_original_files(resources:list[dict])->list[dict]:
     return rows
 
 
-def download(s:requests.Session,url:str,out:Path)->tuple[int,str,str]:
+def download(s:requests.Session,url:str,out:Path,attempts:int=8)->tuple[int,str,str]:
     out.parent.mkdir(parents=True,exist_ok=True)
-    tmp=out.with_suffix(out.suffix+".part"); tmp.unlink(missing_ok=True)
-    h=hashlib.sha256(); size=0; ctype=""
-    with s.get(url,stream=True,timeout=(30,1800),headers={"Accept":"application/pdf,*/*;q=0.5"}) as r:
-        r.raise_for_status(); ctype=r.headers.get("Content-Type","")
-        with tmp.open("wb") as f:
-            for chunk in r.iter_content(8*1024*1024):
-                if not chunk: continue
-                f.write(chunk); h.update(chunk); size+=len(chunk)
-    os.replace(tmp,out)
-    return size,h.hexdigest(),ctype
+    tmp=out.with_suffix(out.suffix+".part")
+    last:Exception|None=None
+    for attempt in range(1,attempts+1):
+        tmp.unlink(missing_ok=True)
+        h=hashlib.sha256(); size=0; ctype=""
+        try:
+            with s.get(url,stream=True,timeout=(30,1800),headers={"Accept":"application/pdf,*/*;q=0.5"}) as r:
+                r.raise_for_status(); ctype=r.headers.get("Content-Type","")
+                expected=int(r.headers.get("Content-Length") or 0)
+                with tmp.open("wb") as f:
+                    for chunk in r.iter_content(8*1024*1024):
+                        if not chunk: continue
+                        f.write(chunk); h.update(chunk); size+=len(chunk)
+                if expected and size!=expected:
+                    raise IOError(f"Short download: got {size}, expected {expected}")
+            os.replace(tmp,out)
+            return size,h.hexdigest(),ctype
+        except (requests.RequestException, OSError) as exc:
+            last=exc
+            print(f"PDF_RETRY attempt={attempt}/{attempts} url={url} bytes={size} error={exc!r}",flush=True)
+            tmp.unlink(missing_ok=True)
+            if attempt<attempts:
+                time.sleep(min(45,2**attempt))
+    assert last is not None
+    raise last
 
 
 def main()->int:
@@ -151,8 +182,7 @@ def main()->int:
 
         print(f"[{n}/{len(chosen)}] ITEM {iid}",flush=True)
         try:
-            jr=s.get(f"https://www.loc.gov/item/{iid}/",params={"fo":"json"},timeout=180)
-            jr.raise_for_status(); obj=jr.json()
+            obj=get_json_with_retry(s,f"https://www.loc.gov/item/{iid}/",params={"fo":"json"})
             item_path=work/f"{iid}.item.json"; dump(item_path,obj)
             item_sha=sha256_file(item_path)
             pdf_url,resources,_=find_resource_payload(obj)
