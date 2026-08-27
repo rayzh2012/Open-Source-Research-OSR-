@@ -7,6 +7,7 @@ on:
     paths:
       - 'control/islamicate_rescue_status.json'
       - 'control/iiif_image_rescue_worker.py'
+      - 'control/iiif_image_rescue_worker_v2.py'
       - '.github/workflows/islamicate-iiif-image-backfill.yml'
   workflow_dispatch:
 
@@ -74,7 +75,7 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p result
-          python control/iiif_image_rescue_worker.py \
+          python control/iiif_image_rescue_worker_v2.py \
             --source-id '${{ matrix.source_id }}' \
             --partition '${{ matrix.partition }}' \
             --partitions '${{ matrix.partitions }}' \
