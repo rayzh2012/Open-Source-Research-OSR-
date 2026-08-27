@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import time
 
@@ -14,7 +15,6 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 ROOT = "gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/loc_persian_manuscripts"
-PARTOF = "Persian Manuscripts"
 EXPECTED = 173
 
 
@@ -23,10 +23,8 @@ def session() -> requests.Session:
                   status_forcelist=(429,500,502,503,504),
                   allowed_methods=frozenset(["GET","HEAD"]), raise_on_status=False)
     s=requests.Session()
-    s.headers.update({
-        "User-Agent":"Mozilla/5.0 (compatible; OSR-Preservation/1.0; +https://github.com/rayzh2012/Open-Source-Research-OSR-)",
-        "Accept":"application/json,text/plain;q=0.9,*/*;q=0.5",
-    })
+    # LOC JSON API is publicly reachable from GitHub; keep the request explicitly API-oriented.
+    s.headers.update({"Accept":"application/json,*/*;q=0.5"})
     s.mount("https://",HTTPAdapter(max_retries=retry))
     return s
 
@@ -60,28 +58,25 @@ def dump(path:Path,obj)->None:
     path.write_text(json.dumps(obj,ensure_ascii=False,indent=2,sort_keys=True)+"\n",encoding="utf-8")
 
 
-def discover(s:requests.Session)->list[dict]:
-    all_rows=[]
-    page=1
-    while page<=20:
-        r=s.get("https://www.loc.gov/manuscripts/",params={"fo":"json","c":100,"sp":page,"fa":f"partof:{PARTOF}"},timeout=120)
-        r.raise_for_status(); obj=r.json(); batch=obj.get("results") or []
-        all_rows.extend(batch)
-        if not batch or not (obj.get("pagination") or {}).get("next"): break
-        page+=1
-    unique={}
-    for row in all_rows:
-        iid=str(row.get("item_id") or "").strip()
-        if iid: unique[iid]=row
-    rows=sorted(unique.values(),key=lambda x:str(x.get("item_id")))
+def discover_from_rescued_catalog()->list[dict]:
+    # The collection discovery already succeeded 173/173 and its search-row snapshots
+    # are durable on Drive. Reuse that fixed catalog instead of repeatedly querying LOC.
+    p=run(["rclone","lsjson",f"{ROOT}/item_json","--files-only"],capture=True)
+    entries=json.loads(p.stdout or "[]")
+    rows=[]
+    for x in entries:
+        name=str(x.get("Name") or x.get("Path") or "")
+        m=re.fullmatch(r"(\d+)\.json",Path(name).name)
+        if m:
+            rows.append({"item_id":m.group(1)})
+    rows=sorted({r["item_id"]:r for r in rows}.values(),key=lambda r:r["item_id"])
     if len(rows)!=EXPECTED:
-        raise RuntimeError(f"LOC discovery expected {EXPECTED}, got {len(rows)}")
+        raise RuntimeError(f"Rescued LOC catalog expected {EXPECTED}, got {len(rows)}")
     return rows
 
 
 def find_resource_payload(obj:dict)->tuple[str|None,list[dict],dict|None]:
     resources=[]
-    # LOC item JSON exposes both top-level resources and item.resources.
     for candidate in (obj.get("resources"), (obj.get("item") or {}).get("resources")):
         if isinstance(candidate,list):
             resources.extend(x for x in candidate if isinstance(x,dict))
@@ -136,7 +131,7 @@ def main()->int:
     ap.add_argument("--partitions",type=int,required=True)
     ap.add_argument("--work-dir",required=True)
     args=ap.parse_args()
-    s=session(); rows=discover(s)
+    s=session(); rows=discover_from_rescued_catalog()
     chosen=[r for r in rows if int(hashlib.sha1(str(r["item_id"]).encode()).hexdigest(),16)%args.partitions==args.partition]
     print(f"LOC_PERSIAN_PDF partition={args.partition}/{args.partitions} selected={len(chosen)} total={len(rows)}",flush=True)
     work=Path(args.work_dir); work.mkdir(parents=True,exist_ok=True)
@@ -156,25 +151,25 @@ def main()->int:
 
         print(f"[{n}/{len(chosen)}] ITEM {iid}",flush=True)
         try:
-            # API JSON is reachable from GitHub even when the Presentation Manifest endpoint is Cloudflare-challenged.
             jr=s.get(f"https://www.loc.gov/item/{iid}/",params={"fo":"json"},timeout=180)
             jr.raise_for_status(); obj=jr.json()
             item_path=work/f"{iid}.item.json"; dump(item_path,obj)
             item_sha=sha256_file(item_path)
-            pdf_url,resources,chosen_resource=find_resource_payload(obj)
+            pdf_url,resources,_=find_resource_payload(obj)
             files=flatten_original_files(resources)
             files_path=work/f"{iid}.files.json"; dump(files_path,{"item_id":iid,"resources":resources,"pages":files})
             files_sha=sha256_file(files_path)
             rclone_copyto(item_path,f"{remote}/metadata/item.json")
             rclone_copyto(files_path,f"{remote}/metadata/FILES.json")
 
+            item_meta=obj.get("item") or {}
             complete={
                 "schema_version":"osr-loc-persian-manuscript-complete-v1",
                 "item_id":iid,
                 "canonical_url":f"https://www.loc.gov/item/{iid}/",
-                "title":row.get("title"),
-                "date":row.get("date"),
-                "language":row.get("language"),
+                "title":item_meta.get("title") or obj.get("title"),
+                "date":item_meta.get("date") or obj.get("date"),
+                "language":item_meta.get("language") or obj.get("language"),
                 "rights":"LOC Persian Language Manuscript Project: public domain or no known restrictions",
                 "item_json_sha256":item_sha,
                 "files_inventory_sha256":files_sha,
@@ -192,7 +187,6 @@ def main()->int:
                 complete.update({"status":"METADATA_ONLY_NO_PDF"})
                 metadata_only+=1
             cp=work/f"{iid}.COMPLETE.json"; dump(cp,complete)
-            # Durable item checkpoint LAST.
             rclone_copyto(cp,f"{remote}/COMPLETE.json")
             result.append({"item_id":iid,"status":complete["status"],"pdf_bytes":complete.get("pdf_bytes",0),"pages":len(files)})
         except Exception as exc:
@@ -201,7 +195,7 @@ def main()->int:
         finally:
             for p in work.glob(f"{iid}.*"):
                 p.unlink(missing_ok=True)
-            time.sleep(0.35)
+            time.sleep(0.5)
 
     summary={
         "schema_version":"osr-loc-persian-pdf-partition-result-v1",
