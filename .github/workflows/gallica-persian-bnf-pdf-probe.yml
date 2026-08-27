@@ -1,0 +1,62 @@
+name: Gallica Persian BnF PDF Probe
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/gallica-persian-bnf-pdf-probe.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Exact BnF count and one PDF probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import urllib.parse, urllib.request, xml.etree.ElementTree as ET, re
+          base='((dc.language all "per") or (dc.language all "fas")) and (dc.type all "manuscrit")'
+          q=base+' and (provenance adj "bnf.fr")'
+          params=urllib.parse.urlencode({'version':'1.2','operation':'searchRetrieve','query':q,'maximumRecords':1,'collapsing':'false'},quote_via=urllib.parse.quote)
+          req=urllib.request.Request('https://gallica.bnf.fr/SRU?'+params,headers={'User-Agent':'OSR-Preservation/1.0','Accept':'application/xml'})
+          with urllib.request.urlopen(req,timeout=90) as r:data=r.read()
+          root=ET.fromstring(data)
+          vals=[x.text.strip() for x in root.iter() if x.tag.rsplit('}',1)[-1]=='numberOfRecords' and x.text]
+          print('GALLICA_BNF_PERSIAN_MANUSCRIPTS='+str(int(vals[0]) if vals else 0))
+          texts=[x.text.strip() for x in root.iter() if x.text and 'ark:/12148/' in x.text]
+          ark=None
+          for t in texts:
+              m=re.search(r'ark:/12148/([A-Za-z0-9]+)',t)
+              if m: ark=m.group(1);break
+          if not ark: raise SystemExit('no ARK in first SRU result')
+          print('FIRST_ARK='+ark)
+          print('PDF_URL=https://gallica.bnf.fr/ark:/12148/'+ark+'.pdf')
+          PY
+          ARK=$(python - <<'PY'
+          import urllib.parse,urllib.request,xml.etree.ElementTree as ET,re
+          q='((dc.language all "per") or (dc.language all "fas")) and (dc.type all "manuscrit") and (provenance adj "bnf.fr")'
+          p=urllib.parse.urlencode({'version':'1.2','operation':'searchRetrieve','query':q,'maximumRecords':1,'collapsing':'false'},quote_via=urllib.parse.quote)
+          with urllib.request.urlopen(urllib.request.Request('https://gallica.bnf.fr/SRU?'+p,headers={'User-Agent':'OSR-Preservation/1.0'}),timeout=90) as r: root=ET.fromstring(r.read())
+          for x in root.iter():
+              if x.text and 'ark:/12148/' in x.text:
+                  m=re.search(r'ark:/12148/([A-Za-z0-9]+)',x.text)
+                  if m: print(m.group(1));break
+          PY
+          )
+          URL="https://gallica.bnf.fr/ark:/12148/${ARK}.pdf"
+          echo "=== HEAD $URL ==="
+          curl -sS -L -I --connect-timeout 20 --max-time 90 -A 'OSR-Preservation/1.0' "$URL" | sed -n '1,60p'
+          echo "=== RANGE ==="
+          CODE=$(curl -sS -L --range 0-4095 --connect-timeout 20 --max-time 90 -A 'OSR-Preservation/1.0' -o /tmp/sample.bin -w '%{http_code}' "$URL")
+          echo "HTTP=$CODE BYTES=$(wc -c </tmp/sample.bin) MIME=$(file -b --mime-type /tmp/sample.bin)"
+          python - <<'PY'
+          b=open('/tmp/sample.bin','rb').read(32)
+          print('PREFIX='+repr(b))
+          if not b.startswith(b'%PDF-'):
+              raise SystemExit('not a PDF payload')
+          PY
