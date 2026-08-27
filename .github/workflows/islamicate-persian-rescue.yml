@@ -8,6 +8,7 @@ on:
       - '.github/workflows/islamicate-persian-rescue.yml'
       - 'control/islamicate_rescue_targets.json'
       - 'control/islamicate_rescue_worker.py'
+      - 'control/islamicate_rescue_worker_v2.py'
   workflow_dispatch:
 
 permissions:
@@ -84,14 +85,14 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p "rescue-result/${{ matrix.source_id }}"
-          python control/islamicate_rescue_worker.py \
+          python control/islamicate_rescue_worker_v2.py \
             --source-id '${{ matrix.source_id }}' \
             --registry control/islamicate_rescue_targets.json \
             --work-dir "/tmp/osr-rescue-${{ matrix.source_id }}" \
             2>&1 | tee "rescue-result/${{ matrix.source_id }}/worker.log"
           grep '^RESULT_JSON=' "rescue-result/${{ matrix.source_id }}/worker.log" | tail -1 | sed 's/^RESULT_JSON=//' > "rescue-result/${{ matrix.source_id }}/result.json"
           python - <<'PY'
-          import json, os
+          import json
           p='rescue-result/${{ matrix.source_id }}/result.json'
           obj=json.load(open(p,encoding='utf-8'))
           print(json.dumps(obj,ensure_ascii=False,indent=2))
@@ -144,7 +145,7 @@ jobs:
           elif rr=='success' and rows and all(x.get('status') in {'PASS','SKIP_COMPLETE','PARTIAL'} for x in rows): status='PASS_WITH_POSSIBLE_PARTIALS' if any(x.get('status')=='PARTIAL' for x in rows) else 'PASS'
           elif rr in {'failure','cancelled'}: status='PARTIAL_OR_FAILED'
           else: status='INCOMPLETE'
-          obj={'schema_version':'osr-islamicate-rescue-status-v1','github_run_id':os.environ.get('RUN_ID'),'github_run_attempt':os.environ.get('RUN_ATTEMPT'),'auth_result':auth,'rescue_result':rr,'status':status,'sources':sorted(rows,key=lambda x:x.get('source_id',''))}
+          obj={'schema_version':'osr-islamicate-rescue-status-v2','github_run_id':os.environ.get('RUN_ID'),'github_run_attempt':os.environ.get('RUN_ATTEMPT'),'auth_result':auth,'rescue_result':rr,'status':status,'sources':sorted(rows,key=lambda x:x.get('source_id',''))}
           pathlib.Path('/tmp/islamicate_rescue_status.json').write_text(json.dumps(obj,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
           print(json.dumps(obj,ensure_ascii=False,indent=2))
           PY
