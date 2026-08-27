@@ -1,5 +1,5 @@
 {
-  "schema_version": "osr-islamicate-rescue-targets-v2",
+  "schema_version": "osr-islamicate-rescue-targets-v3",
   "destination_root": "龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE",
   "sources": [
     {
@@ -43,38 +43,22 @@
       "loc_partof": "Persian Manuscripts",
       "collection_url": "https://www.loc.gov/",
       "expected_items": 173,
-      "capture": ["item_json", "item_html", "iiif_manifest"],
-      "image_policy": "manifest-first",
+      "capture": ["collection_search_row", "iiif_manifest"],
+      "image_policy": "collection-rights-cleared-backfill",
       "rights_note": "LOC Persian Language Manuscript Project items are public domain or have no known copyright restrictions and are free to use and reuse."
     },
     {
       "id": "qdl_arabic_scientific_manuscripts",
       "label": "Qatar Digital Library Arabic Scientific Manuscripts",
-      "enabled": true,
-      "kind": "qdl_manifest_discovery",
-      "search_base": "https://www.qdl.qa/en/search/site/",
-      "queries": [
-        "Arabic manuscript medicine",
-        "Arabic manuscript astronomy",
-        "Arabic manuscript astrology",
-        "Arabic manuscript mathematics",
-        "Arabic manuscript science",
-        "Arabic scientific manuscript"
-      ],
-      "seed_archive_urls": [
-        "https://www.qdl.qa/en/archive/81055/vdc_100099023112.0x000001",
-        "https://www.qdl.qa/en/archive/81055/vdc_100036848060.0x000001",
-        "https://www.qdl.qa/en/archive/81055/vdc_100023522512.0x000004"
-      ],
-      "verified_seed_manifests": [
-        "https://www.qdl.qa/en/iiif/81055/vdc_100099023112.0x000001/manifest",
-        "https://www.qdl.qa/en/iiif/81055/vdc_100000000046.0x0001c7/manifest"
-      ],
-      "max_pages_per_query": 12,
-      "minimum_manifests": 2,
-      "capture": ["record_html", "iiif_manifest"],
-      "image_policy": "rights-checked-backfill-only",
-      "rights_note": "Preserve metadata/manifests first. Page-image backfill only for explicit Public Domain or Open Government Licence records."
+      "enabled": false,
+      "kind": "external_acquisition_required",
+      "registry": "control/qdl_public_domain_rescue_registry.json",
+      "access_state": "GITHUB_HOSTED_RUNNER_BLOCKED_403",
+      "verified_at": "2026-08-27",
+      "blocked_planes": ["www.qdl.qa", "iiif.qdl.qa"],
+      "next_plane": "non-GitHub acquisition with ordinary permitted public access",
+      "image_policy": "public-domain-or-explicit-open-rights-only",
+      "rights_note": "Do not attempt to bypass QDL access controls. Preserve verified public metadata/manifest/image identities and acquire only through a permitted network plane."
     },
     {
       "id": "gallica_persian_manuscripts",
