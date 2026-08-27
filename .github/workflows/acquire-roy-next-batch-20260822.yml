@@ -1,0 +1,161 @@
+name: Acquire Roy Next Batch 20260822
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/acquire-roy-next-batch-20260822.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  hill-bhuiyas:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Hill Bhuiyas 1935
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          URL='https://ocrdigitalfile.nvli.in/cslrepository/4023/RB805-ocr.pdf'
+          curl -fL -A 'Mozilla/5.0' --retry 4 --retry-all-errors --connect-timeout 30 --max-time 1800 "$URL" -o out/1935_Roy_The_Hill_Bhuiyas_of_Orissa.pdf
+          test "$(head -c 5 out/1935_Roy_The_Hill_Bhuiyas_of_Orissa.pdf)" = '%PDF-'
+          stat -c '%s' out/1935_Roy_The_Hill_Bhuiyas_of_Orissa.pdf | tee out/size.txt
+          sha256sum out/1935_Roy_The_Hill_Bhuiyas_of_Orissa.pdf | tee out/sha256.txt
+          echo "$URL" > out/source.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roy-hill-bhuiyas-1935
+          path: out/
+          compression-level: 0
+          retention-days: 7
+
+  oraons-1915:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve and fetch Oraons 1915
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p raw parts
+          IA='in.ernet.dli.2015.277270'
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 30 --max-time 120 "https://archive.org/metadata/$IA" -o raw/meta.json
+          python - <<'PY' > raw/selected.txt
+          import json
+          d=json.load(open('raw/meta.json'))
+          c=[]
+          for f in d.get('files',[]):
+              n=f.get('name','')
+              if not n.lower().endswith('.pdf'): continue
+              try:s=int(f.get('size') or 0)
+              except:s=0
+              score=(60 if '_text.pdf' in n.lower() else 0)+(50 if f.get('source')=='original' else 0)+(20 if s>50_000_000 else 0)
+              c.append((score,s,n))
+          if not c: raise SystemExit('NO_PDF')
+          c.sort(reverse=True)
+          print(c[0][2])
+          print(c[0][1])
+          for x in c[:20]: print('CANDIDATE',x)
+          PY
+          PDFNAME="$(head -n1 raw/selected.txt)"
+          URL="https://archive.org/download/$IA/$PDFNAME"
+          echo "$URL" | tee raw/source.txt
+          aria2c -x 8 -s 8 -k 1M --file-allocation=none --max-tries=5 --retry-wait=3 -o oraons.pdf -d raw "$URL"
+          test "$(head -c 5 raw/oraons.pdf)" = '%PDF-'
+          sha256sum raw/oraons.pdf | tee raw/sha256.txt
+          stat -c '%s' raw/oraons.pdf | tee raw/size.txt
+          python -m pip install --quiet pypdf
+          python - <<'PY'
+          from pypdf import PdfReader, PdfWriter
+          from pathlib import Path
+          src=Path('raw/oraons.pdf')
+          r=PdfReader(str(src))
+          n=len(r.pages)
+          print('PAGES',n)
+          cuts=[(1,140),(141,280),(281,420),(421,n)]
+          for a,b in cuts:
+              if a>n: continue
+              b=min(b,n)
+              w=PdfWriter()
+              for i in range(a-1,b): w.add_page(r.pages[i])
+              p=Path(f'parts/1915_Roy_The_Oraons_of_Chota_Nagpur_Part{len(list(Path("parts").glob("*.pdf")))+1}_pp{a:03d}-{b:03d}.pdf')
+              with p.open('wb') as f: w.write(f)
+              print(p, p.stat().st_size)
+          PY
+          ls -lh parts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roy-oraons-1915-part1
+          path: parts/*Part1*.pdf
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roy-oraons-1915-part2
+          path: parts/*Part2*.pdf
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roy-oraons-1915-part3
+          path: parts/*Part3*.pdf
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roy-oraons-1915-part4
+          path: parts/*Part4*.pdf
+          compression-level: 0
+          retention-days: 7
+
+  kharias-discovery:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Discover 1937 Kharias full scans
+        shell: bash
+        run: |
+          set -u
+          mkdir -p out
+          curl -A 'Mozilla/5.0' -L --retry 3 --get --data-urlencode 'title=The Kharias' --data-urlencode 'author=Sarat Chandra Roy' --data-urlencode 'limit=50' 'https://openlibrary.org/search.json' -o out/openlibrary.json || true
+          curl -A 'Mozilla/5.0' -L --retry 3 --get --data-urlencode 'q=title:(The Kharias) AND creator:(Sarat Chandra Roy)' --data-urlencode 'fl[]=identifier,title,creator,date,year' --data-urlencode 'rows=100' --data-urlencode 'output=json' 'https://archive.org/advancedsearch.php' -o out/ia.json || true
+          curl -A 'Mozilla/5.0' -L --retry 3 --get --data-urlencode 'q="The Kharias" "Sarat Chandra Roy"' --data-urlencode 'fl[]=identifier,title,creator,date,year' --data-urlencode 'rows=100' --data-urlencode 'output=json' 'https://archive.org/advancedsearch.php' -o out/ia_broad.json || true
+          python - <<'PY' | tee out/discovery.txt
+          import json, pathlib
+          ids=[]
+          for fn in ['openlibrary.json','ia.json','ia_broad.json']:
+              p=pathlib.Path('out')/fn
+              if not p.exists() or not p.stat().st_size: continue
+              try:d=json.load(open(p))
+              except Exception as e:
+                  print(fn,'JSON_ERR',e); continue
+              if 'docs' in d:
+                  for x in d.get('docs',[]):
+                      print('OL',x.get('title'),x.get('first_publish_year'),x.get('ia'))
+                      ids.extend(x.get('ia') or [])
+              for x in d.get('response',{}).get('docs',[]):
+                  print('IA',x)
+                  if x.get('identifier'): ids.append(x['identifier'])
+          ids=list(dict.fromkeys(ids))
+          print('IDS',ids)
+          pathlib.Path('out/ids.txt').write_text('\n'.join(ids))
+          PY
+          while IFS= read -r id; do
+            [[ -z "$id" ]] && continue
+            curl -fL --retry 2 --max-time 90 "https://archive.org/metadata/$id" -o "out/meta_${id//\//_}.json" || continue
+            python - "$id" <<'PY'
+          import json,sys,glob,os
+          id=sys.argv[1]
+          fn='out/meta_'+id.replace('/','_')+'.json'
+          try:d=json.load(open(fn))
+          except: raise SystemExit
+          print('\nMETA',id,d.get('metadata',{}).get('title'),d.get('metadata',{}).get('creator'),d.get('metadata',{}).get('date'))
+          for f in d.get('files',[]):
+              n=f.get('name','')
+              if n.lower().endswith(('.pdf','.djvu','.epub')):
+                  print('FILE',n,f.get('size'),f.get('format'),f.get('source'))
+          PY
+          done < out/ids.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roy-kharias-1937-discovery
+          path: out/
+          compression-level: 0
+          retention-days: 7

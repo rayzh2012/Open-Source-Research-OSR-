@@ -1,0 +1,38 @@
+name: Discover Riedel 1886 Full View
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/discover-riedel1886.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scrape other-edition identifiers from Google Books
+        shell: bash
+        run: |
+          set -u
+          mkdir -p out
+          url='https://books.google.com/books?id=jelU0AEACAAJ&hl=en'
+          curl -fL --retry 2 -A 'Mozilla/5.0' "$url" -o out/riedel_books.html
+          python - <<'PY' | tee out/candidates.txt
+          import re, html, pathlib
+          t=html.unescape(pathlib.Path('out/riedel_books.html').read_text(errors='ignore'))
+          seen=set()
+          for m in re.finditer(r'(?i)(?:id=|books\?id=)([A-Za-z0-9_-]{8,20})', t):
+              bid=m.group(1)
+              if bid in seen: continue
+              seen.add(bid)
+              s=max(0,m.start()-600); e=min(len(t),m.end()+1000)
+              ctx=re.sub(r'\s+',' ',t[s:e])
+              if 'Riedel' in ctx or 'sluik' in ctx.lower() or '1886' in ctx:
+                  print('ID',bid,'CTX',ctx[:1400])
+          print('ALL_IDS',sorted(seen))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: riedel1886-discovery
+          path: out/
+          retention-days: 3

@@ -1,0 +1,41 @@
+name: Discover Baree Volume III
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/discover-baree3.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query Google Books and Play metadata
+        shell: bash
+        run: |
+          set -u
+          mkdir -p out
+          q='De Baree sprekende Toradjas van Midden-Celebes Deel 3 Adriani Kruyt'
+          curl -fL --retry 2 --get --data-urlencode "q=$q" 'https://www.googleapis.com/books/v1/volumes' -o out/google_books.json || true
+          curl -fL --retry 2 'https://play.google.com/store/books/details/Nicolaus_Adriani_De_Bare_e_sprekende_Toradjas_van?id=YONWAAAAYAAJ&hl=en' -o out/vol2_play.html || true
+          python - <<'PY'
+          import json, re, pathlib
+          p=pathlib.Path('out/google_books.json')
+          if p.exists():
+              try:
+                  data=json.loads(p.read_text(errors='ignore'))
+                  for item in data.get('items',[]):
+                      v=item.get('volumeInfo',{})
+                      print(item.get('id'), repr(v.get('title')), repr(v.get('subtitle')), v.get('publishedDate'), item.get('accessInfo',{}).get('viewability'), item.get('accessInfo',{}).get('pdf',{}).get('isAvailable'))
+              except Exception as e: print('JSONERR',e)
+          h=pathlib.Path('out/vol2_play.html')
+          if h.exists():
+              text=h.read_text(errors='ignore')
+              for m in re.finditer(r".{0,500}De Bare[^<]{0,120}Deel 3.{0,1000}", text, re.I|re.S):
+                  print('PLAY_MATCH', re.sub(r'\s+',' ',m.group(0))[:1500])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: baree3-discovery
+          path: out/
+          retention-days: 3
