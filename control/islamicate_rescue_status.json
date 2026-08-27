@@ -1,18 +1,19 @@
 {
-  "schema_version": "osr-islamicate-rescue-status-v1",
-  "github_run_id": "33120158121",
+  "schema_version": "osr-islamicate-rescue-status-v2",
+  "github_run_id": "33120235396",
   "github_run_attempt": "1",
   "auth_result": "success",
   "rescue_result": "failure",
   "status": "PARTIAL_OR_FAILED",
   "sources": [
     {
-      "elapsed_seconds": 4.948,
-      "identity": "703b364204596c6d9d96c9f266b0a8211d6ca87cb78953e4a4f2cc2cd310ab8e",
-      "kind": "hmml_metadata",
-      "snapshot": "Sun_23_Aug_2026_06-05-48_GMT",
-      "source_id": "hmml_reading_room",
-      "status": "SKIP_COMPLETE"
+      "archive_sha256": "bd5c24e273ed4f09c073a82443d31ad02715414d67a32de7291183cfea3a42dc",
+      "elapsed_seconds": 17.133,
+      "identity": "7119d68037a7ef894520682295b2444f8ac44ba9406165ecc604202942092525",
+      "kind": "ganjoor_sqlite",
+      "source_id": "ganjoor",
+      "sqlite_sha256": "51c614af33968211c7d21afd089662fe01ccd2b400d90a1eb8957c644273b1de",
+      "status": "PASS"
     }
   ]
 }
