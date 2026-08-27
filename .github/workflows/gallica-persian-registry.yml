@@ -1,0 +1,53 @@
+name: Gallica Persian Manuscript Registry
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - '.github/workflows/gallica-persian-registry.yml'
+      - 'control/gallica_persian_registry_worker.py'
+      - 'control/gallica_persian_registry_request.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure preservation environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Build Gallica Persian registry
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p result
+          python control/gallica_persian_registry_worker.py --work-dir /tmp/gallica-persian \
+            2>&1 | tee result/worker.log
+          grep '^RESULT_JSON=' result/worker.log | tail -1 | sed 's/^RESULT_JSON=//' > result/result.json
+      - name: Save recovery result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gallica-persian-registry-${{ github.run_id }}
+          path: result/
+          retention-days: 30
+          if-no-files-found: warn
