@@ -1,5 +1,5 @@
 {
-  "schema_version": "osr-islamicate-rescue-targets-v1",
+  "schema_version": "osr-islamicate-rescue-targets-v2",
   "destination_root": "龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE",
   "sources": [
     {
@@ -39,12 +39,13 @@
       "label": "Library of Congress Persian Manuscripts",
       "enabled": true,
       "kind": "loc_collection",
-      "collection_slug": "persian-manuscripts",
-      "collection_url": "https://www.loc.gov/collections/persian-manuscripts/",
+      "loc_search_paths": ["https://www.loc.gov/manuscripts/", "https://www.loc.gov/search/"],
+      "loc_partof": "Persian Manuscripts",
+      "collection_url": "https://www.loc.gov/",
       "expected_items": 173,
       "capture": ["item_json", "item_html", "iiif_manifest"],
       "image_policy": "manifest-first",
-      "rights_note": "LOC states Persian Language Manuscript Project contents are public domain or have no known copyright restrictions and are free to use and reuse."
+      "rights_note": "LOC Persian Language Manuscript Project items are public domain or have no known copyright restrictions and are free to use and reuse."
     },
     {
       "id": "qdl_arabic_scientific_manuscripts",
@@ -60,10 +61,20 @@
         "Arabic manuscript science",
         "Arabic scientific manuscript"
       ],
+      "seed_archive_urls": [
+        "https://www.qdl.qa/en/archive/81055/vdc_100099023112.0x000001",
+        "https://www.qdl.qa/en/archive/81055/vdc_100036848060.0x000001",
+        "https://www.qdl.qa/en/archive/81055/vdc_100023522512.0x000004"
+      ],
+      "verified_seed_manifests": [
+        "https://www.qdl.qa/en/iiif/81055/vdc_100099023112.0x000001/manifest",
+        "https://www.qdl.qa/en/iiif/81055/vdc_100000000046.0x0001c7/manifest"
+      ],
       "max_pages_per_query": 12,
+      "minimum_manifests": 2,
       "capture": ["record_html", "iiif_manifest"],
       "image_policy": "rights-checked-backfill-only",
-      "rights_note": "Preserve metadata/manifests first. Page-image backfill must obey each QDL record's Usage terms (e.g. Public Domain or Open Government Licence)."
+      "rights_note": "Preserve metadata/manifests first. Page-image backfill only for explicit Public Domain or Open Government Licence records."
     },
     {
       "id": "gallica_persian_manuscripts",
