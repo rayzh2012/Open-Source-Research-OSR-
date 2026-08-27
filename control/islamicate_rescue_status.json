@@ -1,0 +1,19 @@
+{
+  "schema_version": "osr-islamicate-rescue-status-v1",
+  "github_run_id": "33119800744",
+  "github_run_attempt": "1",
+  "auth_result": "success",
+  "rescue_result": "failure",
+  "status": "PARTIAL_OR_FAILED",
+  "sources": [
+    {
+      "archive_pages": 0,
+      "elapsed_seconds": 11.444,
+      "identity": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "iiif_manifests": 0,
+      "kind": "qdl_manifest_discovery",
+      "source_id": "qdl_arabic_scientific_manuscripts",
+      "status": "PARTIAL"
+    }
+  ]
+}
