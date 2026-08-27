@@ -1,0 +1,37 @@
+name: QDL IIIF Data Plane Probe
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - '.github/workflows/qdl-iiif-dataplane-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe known Public Domain Or 5591 IIIF image service
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://iiif.qdl.qa/iiif/images/81055/vdc_100099023112.0x000001/Or%205591_0004.jp2'
+          for URL in \
+            "$BASE/info.json" \
+            "$BASE/full/!280,240/0/default.jpg"; do
+            echo "PROBE=$URL"
+            CODE=$(curl -L --retry 3 --connect-timeout 20 --max-time 90 \
+              -A 'Mozilla/5.0' -H 'Accept: application/json,image/avif,image/webp,image/*,*/*;q=0.8' \
+              -sS -o /tmp/qdl-probe.bin -w '%{http_code}' "$URL" || true)
+            SIZE=$(wc -c < /tmp/qdl-probe.bin 2>/dev/null || echo 0)
+            TYPE=$(file -b --mime-type /tmp/qdl-probe.bin 2>/dev/null || true)
+            echo "HTTP=$CODE BYTES=$SIZE MIME=$TYPE"
+            if [[ "$CODE" != "200" ]]; then
+              exit 2
+            fi
+          done
+          echo 'QDL_IIIF_DATAPLANE_OK=1'
