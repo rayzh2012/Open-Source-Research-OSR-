@@ -1,0 +1,91 @@
+name: Islamicate IIIF Image Backfill
+
+on:
+  push:
+    branches:
+      - stage2-direct-miner-v3-1
+    paths:
+      - 'control/islamicate_rescue_status.json'
+      - 'control/iiif_image_rescue_worker.py'
+      - '.github/workflows/islamicate-iiif-image-backfill.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: islamicate-iiif-image-backfill
+  cancel-in-progress: false
+
+jobs:
+  auth:
+    runs-on: ubuntu-latest
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - run: test -n "${RCLONE_CONFIG_B64:-}" || { echo '::error::Missing RCLONE_CONFIG_B64'; exit 42; }
+
+  backfill:
+    needs: auth
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        include:
+          - {source_id: loc_persian_manuscripts, partition: 0, partitions: 8, rights_policy: collection_clear}
+          - {source_id: loc_persian_manuscripts, partition: 1, partitions: 8, rights_policy: collection_clear}
+          - {source_id: loc_persian_manuscripts, partition: 2, partitions: 8, rights_policy: collection_clear}
+          - {source_id: loc_persian_manuscripts, partition: 3, partitions: 8, rights_policy: collection_clear}
+          - {source_id: loc_persian_manuscripts, partition: 4, partitions: 8, rights_policy: collection_clear}
+          - {source_id: loc_persian_manuscripts, partition: 5, partitions: 8, rights_policy: collection_clear}
+          - {source_id: loc_persian_manuscripts, partition: 6, partitions: 8, rights_policy: collection_clear}
+          - {source_id: loc_persian_manuscripts, partition: 7, partitions: 8, rights_policy: collection_clear}
+          - {source_id: qdl_arabic_scientific_manuscripts, partition: 0, partitions: 8, rights_policy: manifest_allowlist}
+          - {source_id: qdl_arabic_scientific_manuscripts, partition: 1, partitions: 8, rights_policy: manifest_allowlist}
+          - {source_id: qdl_arabic_scientific_manuscripts, partition: 2, partitions: 8, rights_policy: manifest_allowlist}
+          - {source_id: qdl_arabic_scientific_manuscripts, partition: 3, partitions: 8, rights_policy: manifest_allowlist}
+          - {source_id: qdl_arabic_scientific_manuscripts, partition: 4, partitions: 8, rights_policy: manifest_allowlist}
+          - {source_id: qdl_arabic_scientific_manuscripts, partition: 5, partitions: 8, rights_policy: manifest_allowlist}
+          - {source_id: qdl_arabic_scientific_manuscripts, partition: 6, partitions: 8, rights_policy: manifest_allowlist}
+          - {source_id: qdl_arabic_scientific_manuscripts, partition: 7, partitions: 8, rights_policy: manifest_allowlist}
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure image rescue environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Backfill ${{ matrix.source_id }} partition ${{ matrix.partition }}
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p result
+          python control/iiif_image_rescue_worker.py \
+            --source-id '${{ matrix.source_id }}' \
+            --partition '${{ matrix.partition }}' \
+            --partitions '${{ matrix.partitions }}' \
+            --rights-policy '${{ matrix.rights_policy }}' \
+            --work-dir "/tmp/iiif-${{ matrix.source_id }}-${{ matrix.partition }}" \
+            2>&1 | tee "result/${{ matrix.source_id }}-${{ matrix.partition }}.log"
+      - name: Save recovery log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iiif-rescue-${{ matrix.source_id }}-${{ matrix.partition }}-${{ github.run_id }}
+          path: result/
+          retention-days: 14
+          if-no-files-found: warn
