@@ -1,0 +1,144 @@
+name: Gallica 1472 Pagecount Census v1
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['control/gallica_pagecount_census_request.json']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.plan.outputs.enabled }}
+      destination: ${{ steps.plan.outputs.destination }}
+      sleep_seconds: ${{ steps.plan.outputs.sleep_seconds }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          r=json.load(open('control/gallica_pagecount_census_request.json',encoding='utf-8'))
+          print('enabled='+('true' if r.get('enabled') else 'false'))
+          print('destination='+r['destination'])
+          print('sleep_seconds='+str(r.get('sleep_seconds',2.5)))
+          PY
+
+  census:
+    needs: plan
+    if: needs.plan.outputs.enabled == 'true'
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        partition: [0, 1, 2, 3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Census assigned ARKs
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p result
+          python control/gallica_pagecount_census_worker.py \
+            --partition '${{ matrix.partition }}' \
+            --partitions 4 \
+            --sleep-seconds '${{ needs.plan.outputs.sleep_seconds }}' \
+            --destination '${{ needs.plan.outputs.destination }}' \
+            --work-dir '/tmp/gallica-pagecount-${{ matrix.partition }}' \
+            2>&1 | tee 'result/part-${{ matrix.partition }}.log'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gallica-pagecount-part-${{ matrix.partition }}-${{ github.run_id }}
+          path: result/
+          retention-days: 30
+
+  finalize:
+    needs: [plan, census]
+    if: always() && needs.plan.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+      DESTINATION: ${{ needs.plan.outputs.destination }}
+    steps:
+      - name: Strict aggregate audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          python - <<'PY'
+          import hashlib,json,os,statistics,subprocess,tempfile
+          from pathlib import Path
+          base='gdrive:'+os.environ['DESTINATION']
+          rows=[]; part_summaries=[]; errors=[]
+          for p in range(4):
+              root=f'{base}/parts/part-{p:02d}'
+              q=subprocess.run(['rclone','cat',root+'/COMPLETE.json'],text=True,capture_output=True)
+              if q.returncode:
+                  errors.append({'partition':p,'error':'missing_COMPLETE'}); continue
+              try:s=json.loads(q.stdout)
+              except Exception as e:
+                  errors.append({'partition':p,'error':'bad_COMPLETE','detail':repr(e)}); continue
+              part_summaries.append(s)
+              if s.get('status')!='PASS': errors.append({'partition':p,'error':'part_not_PASS','summary':s})
+              d=subprocess.run(['rclone','cat',root+'/part.jsonl'],text=True,capture_output=True)
+              if d.returncode:
+                  errors.append({'partition':p,'error':'missing_jsonl'}); continue
+              raw=d.stdout.encode('utf-8')
+              if hashlib.sha256(raw).hexdigest()!=s.get('jsonl_sha256'):
+                  errors.append({'partition':p,'error':'jsonl_sha256'})
+              for line in d.stdout.splitlines():
+                  if line.strip(): rows.append(json.loads(line))
+          ids=[x.get('ark') for x in rows]
+          counts=[int(x.get('page_count') or 0) for x in rows if x.get('status')=='PASS']
+          bad=[x for x in rows if x.get('status')!='PASS' or int(x.get('page_count') or 0)<=0]
+          if len(rows)!=1472: errors.append({'error':'row_count','got':len(rows),'expected':1472})
+          if len(set(ids))!=1472: errors.append({'error':'unique_ark_count','got':len(set(ids)),'expected':1472})
+          if bad: errors.append({'error':'bad_rows','count':len(bad),'arks':[x.get('ark') for x in bad[:50]]})
+          counts_sorted=sorted(counts)
+          def pct(frac):
+              if not counts_sorted:return 0
+              return counts_sorted[min(len(counts_sorted)-1,round((len(counts_sorted)-1)*frac))]
+          out={
+              'schema_version':'osr-gallica-pagecount-census-v1',
+              'expected_arks':1472,'rows':len(rows),'unique_arks':len(set(ids)),
+              'passed':len(counts),'failed':len(bad),
+              'total_pages':sum(counts),'min_pages':min(counts,default=0),'max_pages':max(counts,default=0),
+              'mean_pages':round(statistics.mean(counts),3) if counts else 0,
+              'median_pages':statistics.median(counts) if counts else 0,
+              'p90_pages':pct(.90),'p95_pages':pct(.95),'p99_pages':pct(.99),
+              'partitions':part_summaries,'errors':errors,
+          }
+          out['status']='PASS' if len(rows)==1472 and len(set(ids))==1472 and len(counts)==1472 and not bad and not errors else 'FAIL'
+          print('RESULT_JSON='+json.dumps(out,ensure_ascii=False,sort_keys=True))
+          tmp=Path(tempfile.gettempdir())/'PAGECOUNT_CENSUS_COMPLETE.json'
+          tmp.write_text(json.dumps(out,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          subprocess.run(['rclone','copyto',str(tmp),base+'/PAGECOUNT_CENSUS_COMPLETE.json','--retries','8','--low-level-retries','16'],check=True)
+          if out['status']!='PASS': raise SystemExit(2)
+          PY
