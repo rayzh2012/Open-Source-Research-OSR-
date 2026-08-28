@@ -44,13 +44,21 @@ def fetch_bytes(session:requests.Session,url:str,out:Path,accept:str,attempts:in
     for attempt in range(1,attempts+1):
         tmp=out.with_suffix(out.suffix+'.part'); tmp.unlink(missing_ok=True)
         try:
-            with session.get(url,stream=True,timeout=(30,600),allow_redirects=True,headers={'Accept':accept}) as r:
+            headers={'Accept':accept,'Accept-Encoding':'identity'}
+            with session.get(url,stream=True,timeout=(30,600),allow_redirects=True,headers=headers) as r:
                 if r.status_code in (429,503): backoff(r,attempt); continue
-                r.raise_for_status(); expected=int(r.headers.get('Content-Length') or 0); n=0
+                r.raise_for_status()
+                expected=int(r.headers.get('Content-Length') or 0)
+                content_encoding=(r.headers.get('Content-Encoding') or '').strip().lower()
+                n=0
                 with tmp.open('wb') as f:
                     for chunk in r.iter_content(4*1024*1024):
                         if chunk: f.write(chunk); n+=len(chunk)
-                if expected and n!=expected: raise IOError(f'short payload {n}!={expected}')
+                # requests.iter_content yields decoded bytes. Content-Length describes the
+                # encoded transfer representation when Content-Encoding is present, so a
+                # direct comparison would produce false "short payload" failures for gzip.
+                if expected and not content_encoding and n!=expected:
+                    raise IOError(f'short payload {n}!={expected}')
                 tmp.replace(out)
                 return n,(r.headers.get('Content-Type') or '').lower()
         except Exception as e:
@@ -118,8 +126,9 @@ def main():
         rc_copyto(out,f'{remote}/raw/pages/f{i:04d}.jpg')
         rec={'page':i,'canvas_id':canvas.get('@id'),'width':canvas.get('width'),'height':canvas.get('height'),'url':url,'bytes':n,'sha256':digest,'content_type':ctype}
         checkpoint['done'][key]=rec; index.append(rec); image_bytes+=n; out.unlink(missing_ok=True)
-        if i%5==0 or i==selected:
-            cp=w/'CHECKPOINT.json'; write_json(cp,checkpoint); rc_copyto(cp,f'{remote}/CHECKPOINT.json')
+        # Persist every completed page. Gallica full-resolution pages are large enough
+        # that a five-page checkpoint window loses too much work on runner failure.
+        cp=w/'CHECKPOINT.json'; write_json(cp,checkpoint); rc_copyto(cp,f'{remote}/CHECKPOINT.json')
         print(f'PAGE {i}/{selected} bytes={n}',flush=True); time.sleep(2)
 
     idx=w/'PAGE_INDEX.json'; write_json(idx,{'schema_version':'osr-gallica-iiif-page-index-v1','ark':ark,'page_count':page_count,'selected_pages':selected,'pages':index}); rc_copyto(idx,f'{remote}/PAGE_INDEX.json')
