@@ -1,0 +1,32 @@
+name: Gallica IIIF Pagecount Smoke
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/gallica-iiif-pagecount-smoke.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read manifest page counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,urllib.request
+          out=[]
+          for ark in ['btv1b10025022q','btv1b10025026h']:
+              u=f'https://gallica.bnf.fr/iiif/ark:/12148/{ark}/manifest.json'
+              req=urllib.request.Request(u,headers={'User-Agent':'OSR-Preservation/1.0'})
+              with urllib.request.urlopen(req,timeout=60) as r:m=json.load(r)
+              cs=((m.get('sequences') or [{}])[0].get('canvases') or [])
+              dims=[(int(c.get('width') or 0),int(c.get('height') or 0)) for c in cs]
+              out.append({'ark':ark,'page_count':len(cs),'max_width':max((a for a,_ in dims),default=0),'max_height':max((b for _,b in dims),default=0)})
+          print('RESULT_JSON='+json.dumps(out,sort_keys=True))
+          PY
