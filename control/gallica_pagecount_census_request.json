@@ -1,6 +1,7 @@
 {
   "schema_version": "osr-gallica-pagecount-census-request-v1",
   "enabled": false,
+  "staged_revision": 1,
   "expected_arks": 1472,
   "partitions": 4,
   "max_parallel": 2,
