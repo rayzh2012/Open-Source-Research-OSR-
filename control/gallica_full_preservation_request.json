@@ -1,0 +1,11 @@
+{
+  "schema_version": "osr-gallica-full-preservation-request-v1",
+  "enabled": false,
+  "expected_arks": 1472,
+  "requires_pagecount_census_pass": true,
+  "requires_smoke_audit_pass": true,
+  "max_parallel": 2,
+  "page_sleep_seconds": 2.0,
+  "destination_root": "龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/gallica_persian_manuscripts/items",
+  "release_gate": "Do not enable until PAGECOUNT_CENSUS_COMPLETE.json and GALlica_IIIF_FULL_SMOKE_AUDIT.json both report PASS; choose partitioning after census storage estimate."
+}
