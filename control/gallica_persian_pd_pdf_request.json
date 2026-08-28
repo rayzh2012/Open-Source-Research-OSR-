@@ -1,0 +1,12 @@
+{
+  "schema_version": "osr-gallica-persian-pd-pdf-request-v1",
+  "mode": "smoke",
+  "requested_at": "2026-08-27",
+  "purpose": "Bounded end-to-end preservation pilot for the existing 1,472-item explicit-public-domain BnF Gallica Persian manuscript worklist. Verify anonymous public PDF retrieval, PDF identity, SHA256, canonical Drive write, and Drive COMPLETE readback before any full expansion.",
+  "constraints": {
+    "standard_github_hosted_runner_only": true,
+    "no_paid_compute": true,
+    "no_access_control_bypass": true,
+    "drive_is_canonical_artifact_store": true
+  }
+}
