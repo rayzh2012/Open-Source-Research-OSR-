@@ -4,6 +4,9 @@ on:
   workflow_run:
     workflows: ['Gallica IIIF Full Preservation Smoke v1']
     types: [completed]
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['control/gallica_full_smoke_audit_request.json']
   workflow_dispatch:
 
 permissions:
