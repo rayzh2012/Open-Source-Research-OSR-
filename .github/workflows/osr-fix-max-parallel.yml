@@ -48,7 +48,6 @@ jobs:
           assert text.count(hardcoded) == 2, text.count(hardcoded)
           text = text.replace(hardcoded, dynamic)
 
-          # Static control-plane proof: both extract/recover now source the validated request value.
           assert text.count("max_parallel: ${{ steps.plan.outputs.max_parallel }}") == 1
           assert text.count("f.write(f'max_parallel={max_parallel}\\n')") == 1
           assert text.count(dynamic) == 2
@@ -87,3 +86,5 @@ jobs:
           git commit -m 'fix: honor M3 request max_parallel in extract and recover'
           git pull --rebase origin stage2-direct-miner-v3-1
           git push origin HEAD:stage2-direct-miner-v3-1
+
+# trigger: 2026-08-27T22:10-04:00
