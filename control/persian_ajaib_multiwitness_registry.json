@@ -1,0 +1,16 @@
+{
+  "schema_version":"osr-persian-witness-set-registry-v1",
+  "id":"ajaib_al_makhluqat_multiwitness_pdm",
+  "ia_id":"kitab-ajaib-al-makhluqat-manuscript-collection",
+  "title":"Kitab Ajaib al-Makhluqat wa Gharaib al-Mawjudat - multi-witness set",
+  "collection":"Internet Archive / public-domain manuscript witness collection",
+  "license":"Public Domain Mark 1.0",
+  "licenseurl":"https://creativecommons.org/publicdomain/mark/1.0/",
+  "destination_root":"龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/manuscripts",
+  "witnesses":[
+    {"witness_id":"cod_arab_464","label":"Cod.arab. 464","source_filename":"Cod.arab. 464.pdf","source_bytes":1047968659,"source_sha1":"e8f69a511731323ce62e0e82d428997ff86bff28"},
+    {"witness_id":"nn_3_74","label":"Nn.3.74","source_filename":"Nn.3.74.pdf","source_bytes":1944883204,"source_sha1":"20f9b62f73f030676069d73b0d0cd83f094a70f1"},
+    {"witness_id":"or_14140","label":"Or. 14140","source_filename":"Or. 14140.pdf","source_bytes":1178500781,"source_sha1":"df207fde5aaca554d024058ff054aeb1b3407e69"},
+    {"witness_id":"or_8907","label":"Or. 8907","source_filename":"Or. 8907.pdf","source_bytes":628120471,"source_sha1":"399b33d47550990443251d8a56342c43aa24deef"}
+  ]
+}
