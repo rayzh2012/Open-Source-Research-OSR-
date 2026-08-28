@@ -30,7 +30,7 @@ jobs:
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import json
           p=json.load(open('control/wellcome_pre1700_small_tranche_request.json'))
-          assert p['mode']=='small_tranche'
+          assert p['mode'] in {'small_tranche','failed_tail_retry'}
           ids=p['work_ids']
           assert len(ids)==p['expected_items']==len(set(ids))
           print('matrix='+json.dumps({'work_id':ids},separators=(',',':')))
