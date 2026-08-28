@@ -7,18 +7,30 @@ on:
 permissions:
   contents: read
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - id: plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          o=json.load(open('control/persian_catalogue_rescue_targets.json',encoding='utf-8'))
+          ids=[x['id'] for x in o.get('items',[]) if x.get('id')]
+          if not ids: raise SystemExit('no catalogue targets')
+          print('matrix='+json.dumps({'target_id':ids},separators=(',',':')))
+          PY
   rescue:
+    needs: plan
     strategy:
       fail-fast: false
-      max-parallel: 6
-      matrix:
-        target_id:
-          - cambridge_browne_1896
-          - british_museum_rieu_v1_1879
-          - british_museum_rieu_v2_1879
-          - british_museum_rieu_v3_1879
-          - british_museum_rieu_supplement_1895
-          - india_office_ethe_v1_1903
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
