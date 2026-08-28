@@ -12,7 +12,7 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     env:
       RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
     steps:
@@ -31,7 +31,7 @@ jobs:
           root='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/gallica_persian_manuscripts/items'
           audit_root='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/gallica_persian_manuscripts/_audit'
           expected={'btv1b10025022q':78,'btv1b10025026h':66}
-          rows=[]; errors=[]; total_pages=0; total_bytes=0
+          rows=[]; errors=[]; total_pages=0; total_bytes=0; total_readback_bytes=0
 
           def cat_bytes(path):
               q=subprocess.run(['rclone','cat',path],capture_output=True)
@@ -41,6 +41,20 @@ jobs:
 
           def cat_json(path):
               return json.loads(cat_bytes(path).decode('utf-8'))
+
+          def stream_sha256(path):
+              p=subprocess.Popen(['rclone','cat',path],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+              h=hashlib.sha256(); n=0
+              assert p.stdout is not None
+              while True:
+                  chunk=p.stdout.read(8*1024*1024)
+                  if not chunk: break
+                  h.update(chunk); n+=len(chunk)
+              stderr=(p.stderr.read() if p.stderr else b'')
+              rc=p.wait()
+              if rc:
+                  raise RuntimeError(stderr.decode('utf-8','replace') or f'cat failed: {path}')
+              return n,h.hexdigest()
 
           for ark, exp in expected.items():
               base=f'{root}/{ark}'
@@ -82,12 +96,19 @@ jobs:
                   if index_bytes<=0 or drive_bytes<=0 or complete_bytes<=0: local_errors.append('nonpositive_bytes')
                   if not (index_bytes==drive_bytes==complete_bytes): local_errors.append('byte_total_mismatch')
 
+                  readback_bytes=0
                   for i in range(1,exp+1):
                       a=index_by_page.get(i) or {}; b=done_by_page.get(i) or {}
                       name=f'raw/pages/f{i:04d}.jpg'
-                      if not a.get('sha256') or a.get('sha256')!=b.get('sha256'): local_errors.append(f'page_{i}_sha_record')
+                      expected_sha=a.get('sha256')
+                      if not expected_sha or expected_sha!=b.get('sha256'): local_errors.append(f'page_{i}_sha_record')
                       if int(a.get('bytes') or -1)!=int(b.get('bytes') or -2): local_errors.append(f'page_{i}_checkpoint_bytes')
                       if int(a.get('bytes') or -1)!=page_files.get(name,-3): local_errors.append(f'page_{i}_drive_bytes')
+                      actual_n,actual_sha=stream_sha256(f'{base}/{name}')
+                      readback_bytes+=actual_n
+                      if actual_n!=int(a.get('bytes') or -1): local_errors.append(f'page_{i}_readback_bytes')
+                      if actual_sha!=expected_sha: local_errors.append(f'page_{i}_readback_sha256')
+                      print(f'READBACK ark={ark} page={i}/{exp} bytes={actual_n}',flush=True)
 
                   manifest_sha=hashlib.sha256(manifest_bytes).hexdigest()
                   if manifest_sha!=complete.get('manifest_sha256') or manifest_sha!=checkpoint.get('manifest_sha256'):
@@ -95,9 +116,10 @@ jobs:
                   page_index_bytes=cat_bytes(f'{base}/PAGE_INDEX.json')
                   if hashlib.sha256(page_index_bytes).hexdigest()!=complete.get('page_index_sha256'):
                       local_errors.append('page_index_sha256')
+                  if readback_bytes!=drive_bytes: local_errors.append('readback_total_bytes')
 
-                  row.update({'status':'PASS' if not local_errors else 'FAIL','page_count':exp,'image_bytes':drive_bytes,'raw_page_files':len(page_files),'errors':local_errors})
-                  total_pages+=exp; total_bytes+=drive_bytes
+                  row.update({'status':'PASS' if not local_errors else 'FAIL','page_count':exp,'image_bytes':drive_bytes,'raw_page_files':len(page_files),'readback_pages':exp,'readback_bytes':readback_bytes,'errors':local_errors})
+                  total_pages+=exp; total_bytes+=drive_bytes; total_readback_bytes+=readback_bytes
                   errors.extend({'ark':ark,'error':e} for e in local_errors)
               except Exception as e:
                   row.update({'status':'FAIL','errors':[repr(e)]})
@@ -105,15 +127,16 @@ jobs:
               rows.append(row)
 
           out={
-              'schema_version':'osr-gallica-iiif-full-smoke-audit-v1',
+              'schema_version':'osr-gallica-iiif-full-smoke-audit-v2',
               'expected_items':2,
               'expected_pages':144,
               'items':rows,
               'total_pages':total_pages,
               'total_image_bytes':total_bytes,
+              'total_readback_bytes':total_readback_bytes,
               'errors':errors,
           }
-          out['status']='PASS' if len(rows)==2 and total_pages==144 and total_bytes>0 and not errors and all(x.get('status')=='PASS' for x in rows) else 'FAIL'
+          out['status']='PASS' if len(rows)==2 and total_pages==144 and total_bytes>0 and total_readback_bytes==total_bytes and not errors and all(x.get('status')=='PASS' for x in rows) else 'FAIL'
           print('RESULT_JSON='+json.dumps(out,ensure_ascii=False,sort_keys=True))
           p=Path(tempfile.gettempdir())/'GALlica_IIIF_FULL_SMOKE_AUDIT.json'
           p.write_text(json.dumps(out,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
