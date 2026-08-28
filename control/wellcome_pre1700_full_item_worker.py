@@ -106,7 +106,16 @@ def get_manifest_json(s:requests.Session,url:str):
                 print(f'MANIFEST_RETRY status={r.status_code} sleep={wait}s url={candidate}',flush=True)
                 time.sleep(wait)
                 continue
-            if r.status_code in (403,404):
+            if r.status_code==403:
+                # A same-identity official route can recover after a short edge/CDN cooldown.
+                # Retry it once only; do not change identity, headers, or access method.
+                if attempt==1:
+                    wait=60
+                    print(f'MANIFEST_403_COOLDOWN sleep={wait}s url={candidate}',flush=True)
+                    time.sleep(wait)
+                    continue
+                break
+            if r.status_code==404:
                 break
             r.raise_for_status()
     raise RuntimeError('official IIIF manifest unavailable without access bypass: '+json.dumps(failures,sort_keys=True))
