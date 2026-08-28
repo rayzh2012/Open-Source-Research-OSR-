@@ -1,0 +1,122 @@
+name: Gallica IIIF Full Smoke Drive Audit
+
+on:
+  workflow_run:
+    workflows: ['Gallica IIIF Full Preservation Smoke v1']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - name: Audit Gallica IIIF smoke on Drive
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          python - <<'PY'
+          import hashlib, json, subprocess, tempfile
+          from pathlib import Path
+
+          root='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/gallica_persian_manuscripts/items'
+          audit_root='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/gallica_persian_manuscripts/_audit'
+          expected={'btv1b10025022q':78,'btv1b10025026h':66}
+          rows=[]; errors=[]; total_pages=0; total_bytes=0
+
+          def cat_bytes(path):
+              q=subprocess.run(['rclone','cat',path],capture_output=True)
+              if q.returncode:
+                  raise RuntimeError(q.stderr.decode('utf-8','replace') or f'cat failed: {path}')
+              return q.stdout
+
+          def cat_json(path):
+              return json.loads(cat_bytes(path).decode('utf-8'))
+
+          for ark, exp in expected.items():
+              base=f'{root}/{ark}'
+              row={'ark':ark,'expected_pages':exp}
+              try:
+                  complete=cat_json(f'{base}/COMPLETE.json')
+                  index=cat_json(f'{base}/PAGE_INDEX.json')
+                  checkpoint=cat_json(f'{base}/CHECKPOINT.json')
+                  manifest_bytes=cat_bytes(f'{base}/metadata/manifest.json')
+                  pagination_bytes=cat_bytes(f'{base}/metadata/pagination.xml')
+                  listing=json.loads(subprocess.run(
+                      ['rclone','lsjson',base,'--recursive','--files-only'],
+                      text=True,capture_output=True,check=True
+                  ).stdout or '[]')
+                  page_files={x['Path']:int(x.get('Size') or 0) for x in listing if x.get('Path','').startswith('raw/pages/') and x.get('Path','').endswith('.jpg')}
+
+                  pages=index.get('pages') or []
+                  done=checkpoint.get('done') or {}
+                  index_by_page={int(p.get('page')):p for p in pages}
+                  done_by_page={int(k):v for k,v in done.items()}
+                  expected_names={f'raw/pages/f{i:04d}.jpg' for i in range(1,exp+1)}
+                  actual_names=set(page_files)
+
+                  local_errors=[]
+                  if complete.get('status')!='PASS': local_errors.append('complete_status')
+                  if complete.get('delivery_mode')!='iiif_pages': local_errors.append('delivery_mode')
+                  if int(complete.get('page_count') or -1)!=exp: local_errors.append('complete_page_count')
+                  if int(complete.get('preserved_pages') or -1)!=exp: local_errors.append('complete_preserved_pages')
+                  if int(index.get('page_count') or -1)!=exp or int(index.get('selected_pages') or -1)!=exp: local_errors.append('index_counts')
+                  if len(pages)!=exp or set(index_by_page)!=set(range(1,exp+1)): local_errors.append('index_page_set')
+                  if int(checkpoint.get('page_count') or -1)!=exp or int(checkpoint.get('selected_pages') or -1)!=exp: local_errors.append('checkpoint_counts')
+                  if len(done)!=exp or set(done_by_page)!=set(range(1,exp+1)): local_errors.append('checkpoint_page_set')
+                  if actual_names!=expected_names: local_errors.append('drive_raw_page_set')
+                  if not manifest_bytes or not pagination_bytes: local_errors.append('metadata_empty')
+
+                  index_bytes=sum(int((p or {}).get('bytes') or 0) for p in pages)
+                  drive_bytes=sum(page_files.values())
+                  complete_bytes=int(complete.get('image_bytes') or 0)
+                  if index_bytes<=0 or drive_bytes<=0 or complete_bytes<=0: local_errors.append('nonpositive_bytes')
+                  if not (index_bytes==drive_bytes==complete_bytes): local_errors.append('byte_total_mismatch')
+
+                  for i in range(1,exp+1):
+                      a=index_by_page.get(i) or {}; b=done_by_page.get(i) or {}
+                      name=f'raw/pages/f{i:04d}.jpg'
+                      if not a.get('sha256') or a.get('sha256')!=b.get('sha256'): local_errors.append(f'page_{i}_sha_record')
+                      if int(a.get('bytes') or -1)!=int(b.get('bytes') or -2): local_errors.append(f'page_{i}_checkpoint_bytes')
+                      if int(a.get('bytes') or -1)!=page_files.get(name,-3): local_errors.append(f'page_{i}_drive_bytes')
+
+                  manifest_sha=hashlib.sha256(manifest_bytes).hexdigest()
+                  if manifest_sha!=complete.get('manifest_sha256') or manifest_sha!=checkpoint.get('manifest_sha256'):
+                      local_errors.append('manifest_sha256')
+                  page_index_bytes=cat_bytes(f'{base}/PAGE_INDEX.json')
+                  if hashlib.sha256(page_index_bytes).hexdigest()!=complete.get('page_index_sha256'):
+                      local_errors.append('page_index_sha256')
+
+                  row.update({'status':'PASS' if not local_errors else 'FAIL','page_count':exp,'image_bytes':drive_bytes,'raw_page_files':len(page_files),'errors':local_errors})
+                  total_pages+=exp; total_bytes+=drive_bytes
+                  errors.extend({'ark':ark,'error':e} for e in local_errors)
+              except Exception as e:
+                  row.update({'status':'FAIL','errors':[repr(e)]})
+                  errors.append({'ark':ark,'error':repr(e)})
+              rows.append(row)
+
+          out={
+              'schema_version':'osr-gallica-iiif-full-smoke-audit-v1',
+              'expected_items':2,
+              'expected_pages':144,
+              'items':rows,
+              'total_pages':total_pages,
+              'total_image_bytes':total_bytes,
+              'errors':errors,
+          }
+          out['status']='PASS' if len(rows)==2 and total_pages==144 and total_bytes>0 and not errors and all(x.get('status')=='PASS' for x in rows) else 'FAIL'
+          print('RESULT_JSON='+json.dumps(out,ensure_ascii=False,sort_keys=True))
+          p=Path(tempfile.gettempdir())/'GALlica_IIIF_FULL_SMOKE_AUDIT.json'
+          p.write_text(json.dumps(out,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          subprocess.run(['rclone','copyto',str(p),f'{audit_root}/GALlica_IIIF_FULL_SMOKE_AUDIT.json','--retries','8','--low-level-retries','16'],check=True)
+          if out['status']!='PASS': raise SystemExit(2)
+          PY
