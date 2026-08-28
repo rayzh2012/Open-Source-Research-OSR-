@@ -1,0 +1,10 @@
+{
+  "schema_version": "osr-gallica-pagecount-census-request-v1",
+  "enabled": false,
+  "expected_arks": 1472,
+  "partitions": 4,
+  "max_parallel": 2,
+  "sleep_seconds": 2.5,
+  "destination": "龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/gallica_persian_manuscripts/census/pagecount_v1",
+  "release_gate": "Enable only after the 2-item full-resolution IIIF smoke Drive audit is PASS."
+}
