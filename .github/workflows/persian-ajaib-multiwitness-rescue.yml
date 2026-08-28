@@ -1,0 +1,49 @@
+name: Persian Ajaib Multi-witness Rescue
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - 'control/persian_ajaib_multiwitness_registry.json'
+      - 'control/persian_ia_exact_witness_set_worker.py'
+      - '.github/workflows/persian-ajaib-multiwitness-rescue.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rescue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Preserve four high-resolution witnesses only
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p result
+          python control/persian_ia_exact_witness_set_worker.py \
+            --registry control/persian_ajaib_multiwitness_registry.json \
+            --work-dir /tmp/ajaib-witness-set 2>&1 | tee result/ajaib.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ajaib-multiwitness-${{ github.run_id }}
+          path: result/
+          retention-days: 30
