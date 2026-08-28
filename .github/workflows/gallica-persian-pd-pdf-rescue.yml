@@ -4,6 +4,8 @@ on:
   push:
     branches: [stage2-direct-miner-v3-1]
     paths:
+      - '.github/workflows/gallica-persian-pd-pdf-rescue.yml'
+      - 'control/gallica_persian_pd_pdf_worker.py'
       - 'control/gallica_persian_pd_pdf_request.json'
   workflow_dispatch:
 
@@ -17,6 +19,7 @@ jobs:
       mode: ${{ steps.plan.outputs.mode }}
       partitions: ${{ steps.plan.outputs.partitions }}
       limit: ${{ steps.plan.outputs.limit }}
+      matrix: ${{ steps.plan.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,10 +33,16 @@ jobs:
           p='control/gallica_persian_pd_pdf_request.json'
           o=json.load(open(p,encoding='utf-8'))
           mode=o.get('mode','smoke')
-          if mode not in {'smoke','full'}: raise SystemExit('bad mode')
+          if mode not in {'smoke','full'}:
+              raise SystemExit('bad mode')
+          smoke = mode == 'smoke'
+          partitions = 1 if smoke else 4
+          limit = 2 if smoke else 0
+          matrix = {'include': [{'partition': i} for i in range(partitions)]}
           print('mode='+mode)
-          print('partitions=' + ('1' if mode=='smoke' else '4'))
-          print('limit=' + ('2' if mode=='smoke' else '0'))
+          print('partitions='+str(partitions))
+          print('limit='+str(limit))
+          print('matrix='+json.dumps(matrix,separators=(',',':')))
           PY
 
   rescue:
@@ -41,9 +50,7 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 4
-      matrix:
-        partition: [0,1,2,3]
-    if: ${{ needs.plan.outputs.mode == 'full' || matrix.partition == 0 }}
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
