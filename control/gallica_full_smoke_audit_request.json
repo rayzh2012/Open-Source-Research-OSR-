@@ -1,0 +1,7 @@
+{
+  "schema_version": "osr-gallica-full-smoke-audit-request-v1",
+  "enabled": false,
+  "expected_items": 2,
+  "expected_pages": 144,
+  "release_gate": "Enable only after both Gallica full-resolution smoke jobs complete successfully."
+}
