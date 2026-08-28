@@ -1,41 +1,32 @@
 {
   "schema_version": "osr-wellcome-pre1700-small-tranche-request-v1",
-  "request_id": "wellcome-pre1700-pages-83-90-001",
-  "mode": "small_tranche",
-  "requested_at": "2026-08-28T11:24:30Z",
-  "selection_rule": "All verified registry items with page_count 83 through 90 inclusive; all 107 existing COMPLETE item folders are excluded.",
+  "request_id": "wellcome-pre1700-pages-83-90-tail-001",
+  "mode": "failed_tail_retry",
+  "requested_at": "2026-08-28T14:18:00Z",
+  "selection_rule": "Retry only the two failed IDs from run 33167018996; all 121 PASS COMPLETE item folders are excluded.",
   "registry_sha256": "7a6d969e3b98b160db5a0f4cb19bbaaccaf3a3316ff716962ecdc18334f03a8b",
-  "previous_request_commit": "724b972608ed24154bcd05cc7ad202211257cead",
-  "previous_workflow_run_id": 33163009723,
-  "previous_verified_items": 107,
-  "previous_verified_pages": 5364,
-  "previous_verified_image_bytes": 22424511503,
-  "expected_items": 16,
-  "expected_total_pages": 1375,
+  "previous_request_commit": "6390b481e1ef59717c62b530f330654b87e0a149",
+  "previous_workflow_run_id": 33167018996,
+  "worker_repair_commit": "e4061420408b45c39e8794ac8460f0cb09752b8b",
+  "previous_verified_items": 121,
+  "previous_verified_pages": 6571,
+  "previous_verified_image_bytes": 27231648836,
+  "expected_items": 2,
+  "expected_total_pages": 168,
   "work_ids": [
-    "achxrgbd",
-    "avcdsz26",
-    "bdkdp3mv",
-    "fuq7s55d",
-    "jxt53aph",
-    "mp934hn4",
-    "nabs6vbg",
-    "qdevxk57",
-    "qssd8q6c",
-    "rkevgyz8",
-    "rq7wafp7",
     "sb4ha69n",
-    "u43qhup6",
-    "uf5f2nzq",
-    "whax44ab",
-    "z64fap8b"
+    "whax44ab"
   ],
+  "resume_evidence": {
+    "sb4ha69n": "No destination folder; retry exact official manifest routes with one bounded cooldown.",
+    "whax44ab": "Drive checkpoint verified through page 57 of 85; resume at page 58 without redownloading verified pages."
+  },
   "constraints": {
     "rights": "Recheck exact item location PDM and open access before retrieval.",
-    "retrieval": "Anonymous official Wellcome API/IIIF only; documented official presentation routes; no access-control bypass.",
+    "retrieval": "Anonymous official Wellcome API/IIIF only; same-identity documented routes and one bounded cooldown; no access-control bypass.",
     "compute": "Standard GitHub-hosted ubuntu-latest only.",
     "preservation": "Every page, raw work metadata and actual retrieved manifest, hashes, Drive fingerprint readback, checkpoint and COMPLETE.",
-    "capacity_gate": "Bounded 83-90 page tranche only; do not expand beyond these 16 until exact observed bytes and destination audit are known.",
-    "dedupe": "Skip only exact PASS COMPLETE records with drive_readback_verified=true; never replace a verified package silently."
+    "capacity_gate": "Failed tail only; do not start the next page band until both items reach PASS or produce a terminal bounded blocker.",
+    "dedupe": "Skip exact PASS COMPLETE records; reuse whax44ab checkpoint fingerprints; never replace a verified package silently."
   }
 }
