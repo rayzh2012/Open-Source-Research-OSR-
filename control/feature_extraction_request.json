@@ -1,9 +1,9 @@
 {
-  "id": 5,
+  "id": 6,
   "action": "FEATURE_EXTRACT",
   "run_id": "feature-store-v1-resilient-001",
   "partition_count": 128,
   "max_parallel": 12,
   "limit_per_partition": 0,
-  "purpose": "Recovery-safe full 508GB Feature Store v1 backfill across the exact 1,788-shard M2 inventory after validating/fixing feature schema v1.0.1. Reuse the same durable Release run_id; skip only identity-valid completed partitions. Use 128 small fault-domain partitions. Requested fair-share is 12 concurrent standard public GitHub-hosted runners; never persist raw source text and never use the Mac data path. Strict PASS requires exact shard-set coverage and every shard SHA matching M2."
+  "purpose": "Resume the recovery-safe full 508GB Feature Store v1 backfill after the max_parallel control-plane fix. Reuse the same durable Release run_id and identity-validate every existing partition summary before skipping it. Continue only missing partitions across the exact 1,788-shard M2 inventory. Use 128 small fault-domain partitions and at most 12 concurrent standard public GitHub-hosted ubuntu-latest runners; never persist raw source text and never use the Mac data path. Strict PASS still requires exact shard-set coverage and every shard SHA matching M2."
 }
