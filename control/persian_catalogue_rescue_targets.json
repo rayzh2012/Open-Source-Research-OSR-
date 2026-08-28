@@ -1,5 +1,5 @@
 {
-  "schema_version": "osr-persian-catalogue-rescue-v1",
+  "schema_version": "osr-persian-catalogue-rescue-v2",
   "destination_root": "龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/reference_catalogues",
   "items": [
     {"id":"cambridge_browne_1896","title":"A catalogue of the Persian manuscripts in the library of the University of Cambridge","year":1896,"ia_id":"catalogueofpersi00cambrich","rights":"Public domain","source_note":"Internet Archive scan; public-domain status independently evidenced by Wikimedia Commons and Halle PDM record."},
@@ -7,6 +7,7 @@
     {"id":"british_museum_rieu_v2_1879","title":"Catalogue of the Persian manuscripts in the British Museum, vol. 2","year":1879,"ia_id":"gri_33125008986313","rights":"Public domain","source_note":"Internet Archive scan; Wikimedia Commons marks public domain."},
     {"id":"british_museum_rieu_v3_1879","title":"Catalogue of the Persian manuscripts in the British Museum, vol. 3","year":1879,"ia_id":"gri_33125008986370","rights":"Public domain","source_note":"Internet Archive scan; Wikimedia Commons marks public domain."},
     {"id":"british_museum_rieu_supplement_1895","title":"Supplement to the Catalogue of the Persian manuscripts in the British Museum","year":1895,"ia_id":"supplementtocata00brit_0","rights":"Public domain","source_note":"Internet Archive scan; Wikimedia Commons marks public domain."},
-    {"id":"india_office_ethe_v1_1903","title":"Catalogue of Persian manuscripts in the library of the India Office, vol. 1","year":1903,"ia_id":"catalogueofpersi02greauoft","rights":"Public domain / PDM 1.0","source_note":"Internet Archive scan; Halle Share_it record marks Public Domain Mark 1.0."}
+    {"id":"india_office_ethe_v1_1903","title":"Catalogue of Persian manuscripts in the library of the India Office, vol. 1","year":1903,"ia_id":"catalogueofpersi01greauoft","rights":"Public-domain-era publication","source_note":"Internet Archive / University of Toronto scan of the 1903 volume 1; preserve IA metadata and provenance."},
+    {"id":"india_office_ethe_v2_1903","title":"Catalogue of Persian manuscripts in the library of the India Office, vol. 2","year":1903,"ia_id":"catalogueofpersi02greauoft","rights":"Public domain / PDM 1.0","source_note":"Internet Archive scan; identity corrected after IA volume metadata audit; Halle Share_it record marks Public Domain Mark 1.0."}
   ]
 }
