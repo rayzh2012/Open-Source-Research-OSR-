@@ -1,0 +1,38 @@
+{
+  "schema_version": "osr-wellcome-pre1700-small-tranche-request-v1",
+  "request_id": "wellcome-pre1700-smallest-19-after-smoke-001",
+  "mode": "small_tranche",
+  "requested_at": "2026-08-28T03:38:00Z",
+  "selection_rule": "All verified registry items with page_count <=25, excluding already COMPLETE Johnson Papyrus v3vxt8j9.",
+  "registry_sha256": "7a6d969e3b98b160db5a0f4cb19bbaaccaf3a3316ff716962ecdc18334f03a8b",
+  "expected_items": 19,
+  "expected_total_pages": 265,
+  "work_ids": [
+    "q4de9uxq",
+    "st8eb8fg",
+    "njb65fp8",
+    "qyvrwnsw",
+    "n5nst8qw",
+    "r9wu5pye",
+    "rgvswvcc",
+    "prrf9sds",
+    "qay8y64b",
+    "umjf3svt",
+    "xbsa6xky",
+    "qxjzy89y",
+    "qqxvanex",
+    "p5mfhgf5",
+    "apchf5w4",
+    "c6zug9t9",
+    "zb4weaep",
+    "bvgyb226",
+    "s8eutkmm"
+  ],
+  "constraints": {
+    "rights": "Recheck exact item location PDM and open access before retrieval.",
+    "retrieval": "Anonymous official Wellcome API/IIIF only; no access-control bypass.",
+    "compute": "Standard GitHub-hosted ubuntu-latest only.",
+    "preservation": "Every page, raw work metadata and manifest, hashes, Drive fingerprint readback, checkpoint and COMPLETE.",
+    "capacity_gate": "Bounded tranche only; do not expand beyond these 19 until exact observed bytes and Drive audit are known."
+  }
+}
