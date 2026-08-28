@@ -84,3 +84,5 @@ jobs:
           git commit -m 'fix: honor M3 request max_parallel in extract and recover'
           git pull --rebase origin stage2-direct-miner-v3-1
           git push origin HEAD:stage2-direct-miner-v3-1
+
+# trigger: 2026-08-27T22:10-04:00
