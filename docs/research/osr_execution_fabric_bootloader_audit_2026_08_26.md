@@ -19,7 +19,18 @@ Durable status/catalog now exist and are PARTIAL:
 
 Thus old `TRIGGERED / NO FINAL WRITEBACK` is superseded, but M3 FULL PASS is still false.
 
-Open control-plane bug: current feature workflow hard-codes matrix max-parallel 20 even though request asks 12. Recorded; not fixed in this Bootloader session because targeted patching of the large heavy workflow is preferable to risky full-file rewrite.
+### 2026-08-27 control-plane fix — HAN-94 CLOSED
+The previous concurrency contradiction is fixed and independently read back:
+- `plan.outputs.max_parallel` is now emitted from the validated request value;
+- `GITHUB_OUTPUT` now carries `max_parallel`;
+- both `extract.strategy.max-parallel` and `recover.strategy.max-parallel` use `fromJson(needs.plan.outputs.max_parallel)`;
+- current request value `12` therefore resolves to matrix cap `12` in both jobs;
+- the previous two hard-coded `max-parallel: 20` entries are gone.
+
+Implementation commit: `00511a32f160a0a33a9f53177c80d74abc3afc64`.
+Durable proof: `control/feature_concurrency_control_plane_check.json` = PASS for request `feature-store-v1-resilient-001`, requested/resolved max_parallel `12`, validated range `1..20`.
+
+The patch did **not** modify `control/feature_extraction_request.json`; recent stage2 Actions readback showed no new `OSR 508GB Feature Extraction` run from this control-plane change. M3 remains PARTIAL at 28/1788 shards: fixing scheduler control is not Feature Store completion.
 
 ## M4
 M4 already listens through `workflow_run`, but its old gate checked obsolete 20-worker M3 fields. Fixed on 2026-08-26 to gate against resilient M3 status + catalog + release-integrity objects.
