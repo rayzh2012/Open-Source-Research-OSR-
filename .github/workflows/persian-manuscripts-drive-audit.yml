@@ -26,6 +26,7 @@ jobs:
           chmod 600 "$HOME/.config/rclone/rclone.conf"
           python - <<'PY'
           import collections,json,subprocess
+          expected=15
           root='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/manuscripts'
           p=subprocess.run(['rclone','lsjson',root,'--recursive','--files-only'],text=True,capture_output=True,check=True)
           files=json.loads(p.stdout or '[]'); cps=[x['Path'] for x in files if x.get('Path','').endswith('/COMPLETE.json')]
@@ -44,8 +45,8 @@ jobs:
           for x in passed:
             by_license[x.get('license') or 'UNKNOWN']+=1
             for v in (x.get('files') or {}).values(): total+=int((v or {}).get('bytes') or 0);file_count+=1
-          out={'schema_version':'osr-persian-manuscript-audit-v1','complete_files':len(cps),'parsed':len(rows),'pass':len(passed),'file_count':file_count,'total_preserved_bytes':total,'by_license':dict(by_license),'identity_mismatches':mismatch,'duplicate_ia_ids':dup,'missing_licenseurl':missing_license,'parse_errors':errors,'ids':sorted(x.get('id','') for x in passed)}
-          out['status']='PASS' if len(cps)>=8 and len(cps)==len(rows)==len(passed) and not mismatch and not dup and not missing_license and not errors else 'FAIL'
+          out={'schema_version':'osr-persian-manuscript-audit-v1','expected':expected,'complete_files':len(cps),'parsed':len(rows),'pass':len(passed),'file_count':file_count,'total_preserved_bytes':total,'by_license':dict(by_license),'identity_mismatches':mismatch,'duplicate_ia_ids':dup,'missing_licenseurl':missing_license,'parse_errors':errors,'ids':sorted(x.get('id','') for x in passed)}
+          out['status']='PASS' if len(cps)==expected and len(cps)==len(rows)==len(passed) and not mismatch and not dup and not missing_license and not errors else 'FAIL'
           print('RESULT_JSON='+json.dumps(out,ensure_ascii=False,sort_keys=True))
           if out['status']!='PASS': raise SystemExit(2)
           PY
