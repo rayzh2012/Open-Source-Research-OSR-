@@ -1,0 +1,49 @@
+name: Persian Manuscript Batch 3 Dedupe Probe
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/persian-manuscript-batch3-dedupe-probe.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Compare IA original-file checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,urllib.request
+          ids=[
+            'alakhsahibapersianmanuscript8foliosreshiram',
+            'alakhsahibapersianmanuscript9foliosreshiramdhardedmari',
+            'RnnP_persian-manuscript-letter-writting-essay-writting-mansoor-daikoo-residence',
+            'AZen_persian-manuscript-shrimad-bhagavat-maha-puran-urdu-mansoor-daikoo-residence',
+            'yOIv_persian-manuscript-unidentified-title-mansoor-daikoo',
+            'persian-manuscript-unknown-title-mansoor-daikoo-residence',
+            'dzvy_shamail-e-atqiya-by-qazi-shaikh-imaduddin-chishtiya-sufism-related-persian-manus'
+          ]
+          rows=[]
+          for iid in ids:
+            req=urllib.request.Request('https://archive.org/metadata/'+iid,headers={'User-Agent':'OSR-Preservation/1.0'})
+            with urllib.request.urlopen(req,timeout=90) as r:o=json.load(r)
+            m=o.get('metadata') or {}; originals=[]
+            for f in o.get('files',[]):
+              n=f.get('name',''); src=f.get('source'); fmt=f.get('format','')
+              if src=='original' and n.lower().endswith(('.pdf','.tif','.tiff','.jpg','.jpeg','.jp2.zip')):
+                originals.append({'name':n,'format':fmt,'size':int(f.get('size') or 0),'md5':f.get('md5'),'sha1':f.get('sha1'),'crc32':f.get('crc32')})
+            rows.append({'id':iid,'title':m.get('title'),'licenseurl':m.get('licenseurl'),'originals':originals})
+          groups={}
+          for x in rows:
+            for f in x['originals']:
+              key=f.get('sha1') or f.get('md5') or ('size:'+str(f.get('size')))
+              groups.setdefault(key,[]).append({'id':x['id'],'name':f['name'],'size':f['size']})
+          dup={k:v for k,v in groups.items() if len(v)>1}
+          print('RESULT_JSON='+json.dumps({'rows':rows,'duplicate_groups':dup},ensure_ascii=False,sort_keys=True))
+          PY
