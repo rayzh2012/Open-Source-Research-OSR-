@@ -1,11 +1,14 @@
 {
-  "schema_version":"osr-persian-manuscript-rights-quarantine-v1",
+  "schema_version":"osr-persian-manuscript-rights-quarantine-v2",
   "policy":"Do not preserve bytes into the canonical manuscript corpus unless the source item exposes an explicit reusable license or independent rights evidence sufficient for the intended preservation use. Metadata-only discovery is allowed.",
   "items":[
     {"ia_id":"McGillLibrary-rbsc_isl_msp-leaf_072-19802","title":"[Page from an Indo-Persian manuscript]","reason":"IA metadata exposes no licenseurl. McGill archival copyright guidance states holdings may be McGill- or third-party-owned and uses beyond fair dealing may require permission.","status":"QUARANTINE_RIGHTS_UNCLEAR"},
     {"ia_id":"padmavatpersianmanuscript","title":"Padmavat - Persian Manuscript","licenseurl":"https://creativecommons.org/licenses/by-nc-nd/4.0/","reason":"NoDerivatives license; excluded from derivative-preservation pipeline pending a no-derivatives-safe handling policy.","status":"QUARANTINE_ND"},
     {"ia_id":"Maslak-ul-akhyar-PersianManuscript","title":"Maslak-ul-Akhyar - Persian manuscript","licenseurl":"http://creativecommons.org/licenses/by-nc-nd/3.0/","reason":"NoDerivatives license; excluded from derivative-preservation pipeline pending a no-derivatives-safe handling policy.","status":"QUARANTINE_ND"},
     {"ia_id":"fawaid-ul-fuwad-of-khwaja-hasan-sajzi-1685-persian-manuscript","title":"Fawaid Ul Fuwad Of Khwaja Hasan Sajzi 1685 Persian Manuscript","reason":"IA metadata exposes no explicit licenseurl despite a 1.2GB original PDF.","status":"QUARANTINE_RIGHTS_UNCLEAR"},
-    {"ia_id":"shamail-ul-atqiya-wa-fazail-e-auliya-shamail-ul-atqiya-wa-zail-ul-atqiya-persian","title":"Shamail Ul Atqiya Wa Fazail E Auliya ... 1045 Hijri / 1635 CE","reason":"IA metadata exposes no explicit licenseurl despite a 262MB original PDF.","status":"QUARANTINE_RIGHTS_UNCLEAR"}
+    {"ia_id":"shamail-ul-atqiya-wa-fazail-e-auliya-shamail-ul-atqiya-wa-zail-ul-atqiya-persian","title":"Shamail Ul Atqiya Wa Fazail E Auliya ... 1045 Hijri / 1635 CE","reason":"IA metadata exposes no explicit licenseurl; licensed CC0 Shamail scans exist but are different bitstreams, so they do not prove rights for this object.","status":"QUARANTINE_RIGHTS_UNCLEAR"}
+  ],
+  "resolved":[
+    {"ia_id":"muniyat-ul-musalli-subutu-fareezat-is-salati-arabic-persian-manuscript-on-islami","title":"Muniyat Ul Musalli ... Arabic, Persian Manuscript On Islamiyat","status":"SUPERSEDED_BY_LICENSED_EXACT_COPY","licensed_ia_id":"tjpv_muniyat-ul-musalli-subutu-fareezat-is-salati-arabic-persian-manuscript-on-islami_202412","licensed_canonical_id":"muniyat_musalli_peerzada_cc0","licensed_licenseurl":"https://creativecommons.org/publicdomain/zero/1.0/","original_pdf_sha1":"fcee426c28022b6d51767d36424f628b0ae061f6","original_pdf_md5":"3dbf74138fbbdfd5854c46823706d8af","original_pdf_bytes":96044843,"reason":"Quarantined no-license IA record is an exact bitstream duplicate of the preserved CC0 record; no need to preserve the ambiguous record's bytes."}
   ]
 }
