@@ -19,7 +19,7 @@ jobs:
           ref: stage2-direct-miner-v3-1
           fetch-depth: 0
 
-      - name: Patch and statically verify M3 concurrency wiring
+      - name: Generate patched workflow blob and proof without touching heavy trigger
         shell: python
         run: |
           import json
@@ -57,8 +57,9 @@ jobs:
           assert text.count("f.write(f'max_parallel={max_parallel}\\n')") == 1
           assert text.count(dynamic) == 2
           assert text.count(hardcoded) == 0
-          workflow.write_text(text, 'utf-8')
 
+          patched = pathlib.Path('control/osr_feature_extraction_patched.yml')
+          patched.write_text(text, 'utf-8')
           proof = {
               'status': 'PASS',
               'check': 'm3_max_parallel_control_plane',
@@ -72,7 +73,8 @@ jobs:
               'resolved_matrix_cap_for_current_request': requested,
               'raw_corpus_accessed': False,
               'feature_extraction_request_modified': False,
-              'heavy_m3_triggered_by_this_patch': False,
+              'heavy_m3_triggered_by_this_generation': False,
+              'patched_blob_path': str(patched),
               'verified_unix': time.time()
           }
           pathlib.Path('control/feature_concurrency_control_plane_check.json').write_text(
@@ -80,12 +82,12 @@ jobs:
           )
           print(json.dumps(proof, ensure_ascii=False, indent=2))
 
-      - name: Commit target workflow and proof to stage2 only
+      - name: Commit only ordinary control files to stage2
         run: |
           git config user.name 'osr-actions-bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add .github/workflows/osr-feature-extraction.yml control/feature_concurrency_control_plane_check.json
+          git add control/osr_feature_extraction_patched.yml control/feature_concurrency_control_plane_check.json
           git diff --cached --check
-          git commit -m 'fix: honor M3 request max_parallel in extract and recover'
+          git commit -m 'control: stage M3 max_parallel workflow patch and proof'
           git pull --rebase origin stage2-direct-miner-v3-1
           git push origin HEAD:stage2-direct-miner-v3-1
