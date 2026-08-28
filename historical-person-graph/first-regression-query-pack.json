@@ -1,0 +1,7 @@
+{
+  "version": "historical-person-graph-regression-v0.1",
+  "purpose": "Small, provenance-first regression pack for OSR Stage-2 -> Kimi Historical Extractor -> Person Graph Explorer. Do not expand to the full corpus before schema/provenance/idempotence gates pass.",
+  "terms": ["吕光", "吕绍", "吕纂", "吕隆", "吕超", "姚苌", "姚兴", "姚泓", "刘裕"],
+  "sample_hits_per_term_per_shard": 5,
+  "context_chars": 500
+}

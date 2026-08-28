@@ -1,0 +1,186 @@
+{
+  "status": "PASS",
+  "grounding": {
+    "grounded_evidence": 1.0,
+    "checks": 138,
+    "failures": []
+  },
+  "coverage": {
+    "nodes": 16,
+    "edges": 47,
+    "events": 38,
+    "slices": 37,
+    "sources": 21,
+    "required_people_present": [
+      "刘裕",
+      "吕光",
+      "吕弘",
+      "吕纂",
+      "吕绍",
+      "吕超",
+      "吕隆",
+      "姚泓",
+      "沮渠罗仇",
+      "沮渠蒙逊"
+    ],
+    "required_people_missing": [],
+    "optional_people_present": [
+      "姚兴",
+      "檀道济",
+      "王镇恶",
+      "苻坚"
+    ],
+    "optional_people_absent": [],
+    "chain_people_present": [
+      "刘裕",
+      "姚兴",
+      "姚泓",
+      "姚苌",
+      "苻坚"
+    ],
+    "chain_people_missing": []
+  },
+  "relation_counts": {
+    "father_of": 6,
+    "appoints": 6,
+    "succeeds": 5,
+    "supports": 4,
+    "kills": 4,
+    "enemy_of": 4,
+    "subordinate_to": 3,
+    "brother_of": 3,
+    "rebels_against": 3,
+    "commands": 3,
+    "captured_by": 2,
+    "executed_by": 2,
+    "uncle_of": 1,
+    "sends_envoy_to": 1
+  },
+  "bridge_edges": [
+    {
+      "source": "姚兴",
+      "target": "姚泓",
+      "relation": "father_of",
+      "evidence": "兴之长子也"
+    },
+    {
+      "source": "姚泓",
+      "target": "姚兴",
+      "relation": "succeeds",
+      "evidence": "以义熙十二年僭即帝位"
+    },
+    {
+      "source": "刘裕",
+      "target": "姚泓",
+      "relation": "enemy_of",
+      "evidence": "晋太尉刘裕总大军伐泓"
+    },
+    {
+      "source": "刘裕",
+      "target": "檀道济",
+      "relation": "commands",
+      "evidence": "遣冠军将军檀道济"
+    },
+    {
+      "source": "刘裕",
+      "target": "王镇恶",
+      "relation": "commands",
+      "evidence": "龙骧将军王镇恶"
+    },
+    {
+      "source": "姚泓",
+      "target": "王镇恶",
+      "relation": "captured_by",
+      "evidence": "王镇恶克长安，生擒泓"
+    },
+    {
+      "source": "姚泓",
+      "target": "刘裕",
+      "relation": "executed_by",
+      "evidence": "执送姚泓，斩于建康市"
+    }
+  ],
+  "chain_edges": {
+    "苻坚 appoints 姚苌": {
+      "source": "苻坚",
+      "target": "姚苌",
+      "relation": "appoints",
+      "evidence": "苻坚以苌为扬武将军"
+    },
+    "姚苌 subordinate_to 苻坚": {
+      "source": "姚苌",
+      "target": "苻坚",
+      "relation": "subordinate_to",
+      "evidence": "为坚将，累有大功"
+    },
+    "姚苌 rebels_against 苻坚": {
+      "source": "姚苌",
+      "target": "苻坚",
+      "relation": "rebels_against",
+      "evidence": "自称大将军、大单于、万年秦王"
+    },
+    "姚苌 enemy_of 苻坚": {
+      "source": "姚苌",
+      "target": "苻坚",
+      "relation": "enemy_of",
+      "evidence": "苌惧，奔于渭北"
+    },
+    "苻坚 captured_by 吴忠": {
+      "source": "苻坚",
+      "target": "吴忠",
+      "relation": "captured_by",
+      "evidence": "俄而忠至，执坚以归新平"
+    },
+    "苻坚 executed_by 姚苌": {
+      "source": "苻坚",
+      "target": "姚苌",
+      "relation": "executed_by",
+      "evidence": "苌乃缢坚于新平佛寺中"
+    },
+    "姚苌 father_of 姚兴": {
+      "source": "姚苌",
+      "target": "姚兴",
+      "relation": "father_of",
+      "evidence": "苌之长子也"
+    },
+    "姚兴 succeeds 姚苌": {
+      "source": "姚兴",
+      "target": "姚苌",
+      "relation": "succeeds",
+      "evidence": "太元十九年，僭即帝位"
+    },
+    "姚兴 father_of 姚泓": {
+      "source": "姚兴",
+      "target": "姚泓",
+      "relation": "father_of",
+      "evidence": "兴之长子也"
+    },
+    "姚泓 succeeds 姚兴": {
+      "source": "姚泓",
+      "target": "姚兴",
+      "relation": "succeeds",
+      "evidence": "以义熙十二年僭即帝位"
+    },
+    "刘裕 enemy_of 姚泓": {
+      "source": "刘裕",
+      "target": "姚泓",
+      "relation": "enemy_of",
+      "evidence": "晋太尉刘裕总大军伐泓"
+    },
+    "姚泓 captured_by 王镇恶": {
+      "source": "姚泓",
+      "target": "王镇恶",
+      "relation": "captured_by",
+      "evidence": "王镇恶克长安，生擒泓"
+    },
+    "姚泓 executed_by 刘裕": {
+      "source": "姚泓",
+      "target": "刘裕",
+      "relation": "executed_by",
+      "evidence": "执送姚泓，斩于建康市"
+    }
+  },
+  "missing_chain_edges": [],
+  "unsupported_relations": [],
+  "open_relations": []
+}
