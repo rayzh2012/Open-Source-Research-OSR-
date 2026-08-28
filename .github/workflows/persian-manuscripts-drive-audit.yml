@@ -26,7 +26,7 @@ jobs:
           chmod 600 "$HOME/.config/rclone/rclone.conf"
           python - <<'PY'
           import collections,json,subprocess
-          expected=45; expected_aliases=2
+          expected=46; expected_aliases=2
           root='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/manuscripts'
           p=subprocess.run(['rclone','lsjson',root,'--recursive','--files-only'],text=True,capture_output=True,check=True)
           files=json.loads(p.stdout or '[]')
@@ -44,10 +44,20 @@ jobs:
           passed=[x for x in rows if x.get('status')=='PASS']; ids=set(x.get('id') for x in passed)
           ia=collections.Counter(x.get('ia_id') for x in passed if x.get('ia_id')); dup=sorted(k for k,v in ia.items() if v>1)
           missing_license=[x.get('id') for x in passed if not x.get('licenseurl')]
-          total=0; by_license=collections.Counter(); file_count=0
+          total=0; by_license=collections.Counter(); file_count=0; witness_set_count=0; witness_file_count=0; witness_errors=[]
           for x in passed:
             by_license[x.get('license') or 'UNKNOWN']+=1
-            for v in (x.get('files') or {}).values(): total+=int((v or {}).get('bytes') or 0);file_count+=1
+            for v in (x.get('files') or {}).values():
+              total+=int((v or {}).get('bytes') or 0); file_count+=1
+            if x.get('schema_version')=='osr-persian-witness-set-complete-v1':
+              witness_set_count+=1; w=x.get('witnesses') or {}; subtotal=0
+              if len(w)!=int(x.get('witness_count') or -1): witness_errors.append({'id':x.get('id'),'error':'witness_count_mismatch'})
+              for wid,v in w.items():
+                if (v or {}).get('status')!='PASS' or not (v or {}).get('sha256') or not (v or {}).get('source_sha1'):
+                  witness_errors.append({'id':x.get('id'),'witness_id':wid,'error':'bad_witness_record'})
+                b=int((v or {}).get('bytes') or 0); subtotal+=b; witness_file_count+=1
+              if subtotal!=int(x.get('total_witness_bytes') or -1): witness_errors.append({'id':x.get('id'),'error':'witness_bytes_mismatch','computed':subtotal,'declared':x.get('total_witness_bytes')})
+              total+=subtotal; file_count+=len(w)
           aliases=[]; alias_errors=[]
           for path in aps:
             q=subprocess.run(['rclone','cat',f'{root}/{path}'],text=True,capture_output=True)
@@ -59,8 +69,8 @@ jobs:
             if not a.get('canonical_content_sha1'): alias_errors.append({'path':path,'error':'missing_checksum'})
             aliases.append(a)
           alias_ia=collections.Counter(x.get('ia_id') for x in aliases if x.get('ia_id')); alias_dup=sorted(k for k,v in alias_ia.items() if v>1)
-          out={'schema_version':'osr-persian-manuscript-audit-v2','expected':expected,'expected_aliases':expected_aliases,'complete_files':len(cps),'parsed':len(rows),'pass':len(passed),'alias_files':len(aps),'alias_parsed':len(aliases),'file_count':file_count,'total_preserved_bytes':total,'by_license':dict(by_license),'identity_mismatches':mismatch,'duplicate_ia_ids':dup,'missing_licenseurl':missing_license,'parse_errors':errors,'alias_errors':alias_errors,'duplicate_alias_ia_ids':alias_dup,'ids':sorted(x.get('id','') for x in passed),'alias_ia_ids':sorted(x.get('ia_id','') for x in aliases)}
-          out['status']='PASS' if len(cps)==expected and len(cps)==len(rows)==len(passed) and len(aps)==expected_aliases and len(aliases)==expected_aliases and not mismatch and not dup and not missing_license and not errors and not alias_errors and not alias_dup else 'FAIL'
+          out={'schema_version':'osr-persian-manuscript-audit-v3','expected':expected,'expected_aliases':expected_aliases,'complete_files':len(cps),'parsed':len(rows),'pass':len(passed),'alias_files':len(aps),'alias_parsed':len(aliases),'file_count':file_count,'witness_set_count':witness_set_count,'witness_file_count':witness_file_count,'total_preserved_bytes':total,'by_license':dict(by_license),'identity_mismatches':mismatch,'duplicate_ia_ids':dup,'missing_licenseurl':missing_license,'parse_errors':errors,'witness_errors':witness_errors,'alias_errors':alias_errors,'duplicate_alias_ia_ids':alias_dup,'ids':sorted(x.get('id','') for x in passed),'alias_ia_ids':sorted(x.get('ia_id','') for x in aliases)}
+          out['status']='PASS' if len(cps)==expected and len(cps)==len(rows)==len(passed) and len(aps)==expected_aliases and len(aliases)==expected_aliases and not mismatch and not dup and not missing_license and not errors and not witness_errors and not alias_errors and not alias_dup else 'FAIL'
           print('RESULT_JSON='+json.dumps(out,ensure_ascii=False,sort_keys=True))
           if out['status']!='PASS': raise SystemExit(2)
           PY
