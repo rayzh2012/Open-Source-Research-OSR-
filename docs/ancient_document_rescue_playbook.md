@@ -152,6 +152,39 @@ Minimum corpus audit:
 
 If `verified_complete < expected`, status is not `PASS` unless the declared target set itself was explicitly revised with evidence.
 
+### Page-level readback is stronger than marker-level readback
+
+A `COMPLETE` record is evidence to audit, not evidence to trust blindly. For a paged object, the strongest bounded verification streams every stored page from the destination, recomputes its byte count and SHA256, and reconciles that result against the page index, checkpoint, manifest fingerprint, and declared total.
+
+Do not call a full-item smoke green merely because the item folder exists or because `COMPLETE.json` says `PASS`. Require an exact page-name set, exact page count, exact total bytes, per-page hash agreement, metadata/manifest presence, and zero reconciliation errors.
+
+### Census before corpus-scale acquisition
+
+Page counts can vary by orders of magnitude within one institutional corpus. Item count alone is therefore a poor storage, bandwidth, and runner-time estimate.
+
+Before launching a large paged rescue:
+
+1. audit the qualifying registry and its rights boundary
+2. run a low-concurrency manifest/page-count census
+3. reconcile the census to the exact registry denominator
+4. estimate storage from observed bytes per page in completed bounded tranches
+5. expand by page-count bands, recording exact pages and bytes after each band
+
+This turns scale-up into a measured capacity decision and keeps a pathological long tail from invalidating an otherwise sound preservation adapter.
+
+### Destination reconciliation after a batch
+
+Counting successful jobs is not enough, especially when an API or workflow listing is paginated. Reconcile the destination itself:
+
+- enumerate the exact expected stable IDs
+- require one canonical item folder per ID
+- parse every item-level `COMPLETE` record
+- sum page counts and image bytes from those records
+- require the item-level destination-readback flag
+- compare the totals with the request and registry
+
+Only the intersection of workflow success, item-level evidence, and destination reconciliation supports a batch `PASS`.
+
 ## Separation of preservation and research claims
 
 Preservation records should remain factual:
