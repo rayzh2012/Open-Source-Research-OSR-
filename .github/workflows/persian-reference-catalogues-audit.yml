@@ -27,7 +27,7 @@ jobs:
           chmod 600 "$HOME/.config/rclone/rclone.conf"
           python - <<'PY'
           import collections,json,subprocess
-          expected=22
+          expected=26
           root='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/reference_catalogues'
           p=subprocess.run(['rclone','lsjson',root,'--recursive','--files-only'],text=True,capture_output=True,check=True)
           files=json.loads(p.stdout or '[]')
