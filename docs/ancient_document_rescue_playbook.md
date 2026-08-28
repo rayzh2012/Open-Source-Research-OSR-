@@ -100,6 +100,18 @@ Treat this as a bounded schema/availability fallback, not an access-control work
 - preserve and hash the manifest actually used
 - if every documented official variant is blocked, stop at `ACCESS_BLOCKED`
 
+### Field lesson: a transient 403 may justify one cooldown, never evasion
+
+A public-domain, anonymously accessible IIIF object can be rejected transiently by an institutional edge layer even when the exact same official URL succeeds later. The safe response is bounded patience, not browser impersonation or access-control circumvention.
+
+- retry the exact same official object route once after a meaningful cooldown
+- keep the same stable identifier, host, rights gate, and ordinary transparent request headers
+- do not rotate identities, spoof browsers, solve challenges, or expand to undocumented mirrors
+- if the bounded retry and documented same-identity variants remain blocked, stop and record `ACCESS_BLOCKED`
+- rerun only the failed item after the rest of the batch is destination-reconciled
+
+This reduces avoidable failed-tail orchestration while preserving the distinction between transient availability and access authorization.
+
 
 ## IIIF lessons
 
