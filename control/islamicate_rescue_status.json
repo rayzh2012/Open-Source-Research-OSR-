@@ -1,43 +1,18 @@
 {
-  "schema_version": "osr-islamicate-rescue-status-v3",
-  "github_run_id": "33121003438",
-  "github_run_attempt": "1",
+  "schema_version": "osr-islamicate-rescue-status-v2",
+  "github_run_id": "33120235396",
+  "github_run_attempt": "2",
   "auth_result": "success",
   "rescue_result": "failure",
   "status": "PARTIAL_OR_FAILED",
   "sources": [
     {
-      "elapsed_seconds": 3.083,
+      "elapsed_seconds": 3.256,
       "identity": "703b364204596c6d9d96c9f266b0a8211d6ca87cb78953e4a4f2cc2cd310ab8e",
       "kind": "hmml_metadata",
       "snapshot": "Sun_23_Aug_2026_06-05-48_GMT",
       "source_id": "hmml_reading_room",
       "status": "SKIP_COMPLETE"
-    },
-    {
-      "source_id": "loc_persian_manuscripts",
-      "kind": "loc_pdf_archive",
-      "status": "PASS",
-      "expected_items": 173,
-      "catalog_items": 173,
-      "checkpoints_present": 173,
-      "pdf_complete": 173,
-      "pdf_bytes": 15380053655,
-      "pdf_gib": 14.324,
-      "page_groups": 62130,
-      "missing_checkpoints": 0,
-      "metadata_only_no_pdf": 0,
-      "read_errors": [],
-      "github_run_id": "33125515830",
-      "verification_workflow": "LOC Persian Rescue Audit",
-      "verified_at": "2026-08-27T23:14:34Z",
-      "result_location": "gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/loc_persian_manuscripts/meta/RESCUE_STATUS_LATEST.json"
     }
-  ],
-  "last_verified_update": {
-    "source_id": "loc_persian_manuscripts",
-    "status": "PASS",
-    "github_run_id": "33125515830",
-    "verified_at": "2026-08-27T23:14:34Z"
-  }
+  ]
 }
