@@ -82,6 +82,35 @@ def get_json(s:requests.Session,url:str,params=None):
     r.raise_for_status()
     return r.json(),r.content
 
+def get_manifest_json(s:requests.Session,url:str):
+    candidates=[url]
+    if url.startswith('https://iiif.wellcomecollection.org/presentation/v2/'):
+        candidates += [
+            url.replace('/presentation/v2/','/presentation/v3/',1),
+            url.replace('/presentation/v2/','/presentation/',1),
+        ]
+    failures=[]
+    for candidate in dict.fromkeys(candidates):
+        for attempt in range(1,5):
+            r=s.get(candidate,timeout=(30,300),headers={
+                'Accept':'application/ld+json,application/json;q=0.9',
+                'Accept-Encoding':'identity',
+            })
+            if r.status_code==200:
+                return r.json(),r.content,candidate
+            failures.append({'url':candidate,'status':r.status_code,'attempt':attempt})
+            if r.status_code in (429,503):
+                raw=r.headers.get('Retry-After')
+                try: wait=max(1,min(300,int(raw))) if raw else min(120,10*(2**(attempt-1)))
+                except ValueError: wait=min(120,10*(2**(attempt-1)))
+                print(f'MANIFEST_RETRY status={r.status_code} sleep={wait}s url={candidate}',flush=True)
+                time.sleep(wait)
+                continue
+            if r.status_code in (403,404):
+                break
+            r.raise_for_status()
+    raise RuntimeError('official IIIF manifest unavailable without access bypass: '+json.dumps(failures,sort_keys=True))
+
 def download_image(s:requests.Session,entry:dict,out:Path):
     urls=[]
     if entry.get('service'):
@@ -128,7 +157,7 @@ def main():
         if loc.get('url')==row.get('manifest_url'): valid.append((item,loc))
     if not valid: raise RuntimeError('item lost exact PDM/open manifest location')
     item,loc=valid[0]
-    manifest,manifest_raw=get_json(s,row['manifest_url'])
+    manifest,manifest_raw,manifest_url_retrieved=get_manifest_json(s,row['manifest_url'])
     images=extract_images(manifest)
     if not images or len(images)!=int(row.get('page_count') or -1):
         raise RuntimeError(f'manifest page-count drift {len(images)} != {row.get("page_count")}')
@@ -164,7 +193,7 @@ def main():
     complete={
         'schema_version':'osr-wellcome-pre1700-complete-v1','status':'PASS','work_id':a.work_id,
         'title':work.get('title'),'referenceNumber':work.get('referenceNumber'),'page_count':len(images),
-        'image_bytes':total,'manifest_url':row['manifest_url'],'manifest_sha256':msha,'page_index_sha256':idx_sha,
+        'image_bytes':total,'manifest_url':row['manifest_url'],'manifest_url_retrieved':manifest_url_retrieved,'manifest_sha256':msha,'page_index_sha256':idx_sha,
         'rights_evidence':{'license':loc.get('license'),'accessConditions':loc.get('accessConditions'),'item_id':item.get('id')},
         'rights_gate':'item location license id=pdm; open access; anonymous official IIIF retrieval',
         'source_work_url':f'{API}/{a.work_id}','retrieval_mode':'official_iiif_pages','drive_readback_verified':True
