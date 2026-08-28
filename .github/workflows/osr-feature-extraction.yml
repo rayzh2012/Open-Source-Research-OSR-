@@ -23,6 +23,7 @@ jobs:
     outputs:
       partitions: ${{ steps.plan.outputs.partitions }}
       partition_count: ${{ steps.plan.outputs.partition_count }}
+      max_parallel: ${{ steps.plan.outputs.max_parallel }}
       limit_per_partition: ${{ steps.plan.outputs.limit_per_partition }}
       run_id: ${{ steps.plan.outputs.run_id }}
       expected_shards: ${{ steps.plan.outputs.expected_shards }}
@@ -119,6 +120,7 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:
               f.write('partitions='+json.dumps(partitions)+'\n')
               f.write(f'partition_count={partition_count}\n')
+              f.write(f'max_parallel={max_parallel}\n')
               f.write(f'limit_per_partition={limit}\n')
               f.write(f'run_id={run_id}\n')
               f.write(f'expected_shards={len(inventory)}\n')
@@ -147,7 +149,7 @@ jobs:
     timeout-minutes: 330
     strategy:
       fail-fast: false
-      max-parallel: 20
+      max-parallel: ${{ fromJson(needs.plan.outputs.max_parallel) }}
       matrix:
         partition: ${{ fromJson(needs.plan.outputs.partitions) }}
     steps:
@@ -289,7 +291,7 @@ jobs:
     timeout-minutes: 330
     strategy:
       fail-fast: false
-      max-parallel: 20
+      max-parallel: ${{ fromJson(needs.plan.outputs.max_parallel) }}
       matrix:
         partition: ${{ fromJson(needs.recovery_plan.outputs.recovery_partitions) }}
     steps:
