@@ -88,6 +88,19 @@ Treat 429, 403, Retry-After, and challenge pages as signals, not obstacles to de
 
 Human-facing portals may rate-limit or challenge automated runners while their official catalogue/IIIF services remain intentionally machine-readable. Build adapters around institutional machine interfaces when available rather than repeatedly hitting presentation pages.
 
+### Field lesson: official IIIF version fallback must stay identity-bounded
+
+An institution may publish the same manifest through documented Presentation v2, v3, and content-negotiated routes while one route temporarily returns 403 or 404. A preservation adapter may test only those official variants on the same institutional host and stable object identifier.
+
+Treat this as a bounded schema/availability fallback, not an access-control workaround:
+
+- recheck the exact catalogue item's rights and open-access location first
+- retain both the catalogue-declared manifest URL and the URL actually retrieved
+- require the retrieved manifest to reconcile to the expected item and page count
+- preserve and hash the manifest actually used
+- if every documented official variant is blocked, stop at `ACCESS_BLOCKED`
+
+
 ## IIIF lessons
 
 IIIF is often the most durable cross-institution abstraction, but implementations vary.
