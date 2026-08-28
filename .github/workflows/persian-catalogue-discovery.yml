@@ -1,0 +1,48 @@
+name: Persian Catalogue Public-Domain Discovery
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - '.github/workflows/persian-catalogue-discovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Query Internet Archive catalogue candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, urllib.parse, urllib.request
+          queries = [
+            'title:("Persian manuscripts") AND mediatype:texts',
+            'title:("Persian manuscript") AND mediatype:texts',
+            'title:("catalogue" AND "Persian") AND mediatype:texts',
+          ]
+          seen={}
+          for q in queries:
+            params=urllib.parse.urlencode({
+              'q':q,'fl[]':['identifier','title','date','creator','year'],'rows':100,'page':1,'output':'json',
+              'sort[]':'date asc'
+            },doseq=True)
+            req=urllib.request.Request('https://archive.org/advancedsearch.php?'+params,headers={'User-Agent':'OSR-Preservation/1.0'})
+            with urllib.request.urlopen(req,timeout=90) as r: obj=json.load(r)
+            for d in obj.get('response',{}).get('docs',[]):
+              ident=d.get('identifier')
+              if not ident: continue
+              raw_year=str(d.get('year') or d.get('date') or '')[:4]
+              try: year=int(raw_year)
+              except: year=None
+              if year is not None and year>1905: continue
+              seen[ident]={'identifier':ident,'title':d.get('title'),'date':d.get('date'),'year':year,'creator':d.get('creator')}
+          rows=sorted(seen.values(),key=lambda x:((x.get('year') or 9999),str(x.get('title') or '')))
+          print('CANDIDATE_COUNT='+str(len(rows)))
+          print('RESULT_JSON='+json.dumps(rows,ensure_ascii=False,sort_keys=True))
+          PY
