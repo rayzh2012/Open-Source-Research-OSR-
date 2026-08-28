@@ -210,6 +210,22 @@ Counting successful jobs is not enough, especially when an API or workflow listi
 
 Only the intersection of workflow success, item-level evidence, and destination reconciliation supports a batch `PASS`.
 
+### Machine-readable ledger writes must preserve exact bytes
+
+Human-oriented document exporters are not safe transports for JSON registries. Plain-text export may insert a UTF-8 byte-order mark, while Markdown export may escape underscores or other punctuation. Both can produce a file that looks readable but no longer parses as the intended schema.
+
+For every registry or ledger replacement:
+
+- move the payload through a byte-preserving transport, not a rich-text conversion path
+- preserve the existing canonical file identity when updating in place
+- fetch the destination bytes after the write
+- reject a leading BOM or any other unexpected prefix when the contract requires strict JSON
+- parse the complete destination payload and assert critical schema fields and counters
+- keep the prior revision recoverable until the readback parser succeeds
+
+A successful upload response is only `STORE`; parseable destination bytes plus invariant checks are `READBACK VERIFY`.
+
+
 ## Separation of preservation and research claims
 
 Preservation records should remain factual:
