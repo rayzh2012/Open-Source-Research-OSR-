@@ -1,12 +1,15 @@
 {
   "schema_version": "osr-gallica-persian-pd-pdf-request-v1",
+  "request_id": "gallica-persian-pd-pdf-smoke-002",
   "mode": "smoke",
-  "requested_at": "2026-08-27",
-  "purpose": "Bounded end-to-end preservation pilot for the existing 1,472-item explicit-public-domain BnF Gallica Persian manuscript worklist. Verify anonymous public PDF retrieval, PDF identity, SHA256, canonical Drive write, and Drive COMPLETE readback before any full expansion.",
+  "requested_at": "2026-08-27T21:16:00-04:00",
+  "expected_public_domain_items": 1472,
+  "purpose": "Run the 2-item end-to-end preservation smoke now that the long Gallica registry run has released request capacity. Verify anonymous public PDF retrieval, item-level public-domain rights recheck, SHA256, canonical Drive write, and Drive COMPLETE readback before full expansion.",
   "constraints": {
     "standard_github_hosted_runner_only": true,
     "no_paid_compute": true,
     "no_access_control_bypass": true,
+    "obey_http_429_retry_after": true,
     "drive_is_canonical_artifact_store": true
   }
 }
