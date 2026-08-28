@@ -1,0 +1,49 @@
+name: Persian Manuscript Rights Probe Batch 2
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/persian-manuscript-rights-probe-batch2.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Probe IA rights and original assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,urllib.request
+          ids=[
+            'KashmiriHinduPersianManuscriptInterspersedWithSharadaEGangotriDigitalTrust',
+            'Maslak-ul-akhyar-PersianManuscript',
+            'Kachkol-namah-ARarePersianManuscriptOfSufism',
+            'fawaid-ul-fuwad-of-khwaja-hasan-sajzi-1685-persian-manuscript',
+            'shamail-ul-atqiya-wa-fazail-e-auliya-shamail-ul-atqiya-wa-zail-ul-atqiya-persian',
+            'sdzn_aain-e-akbari-abul-fazl-allami-mughal-history-persian-manuscript-sarvanand-koul-premi',
+            'OmnamehAndOtherTextsManuscriptFromSrinagar1896PersianManuscript',
+            'diwanehafizshirazpersianmanuscriptfromresidenceofshrikashinathpanditajammu',
+            'BKDc_mujmua-tawareek-history-of-kashmir-persian-manuscript-pandit-birbal-kachroo-peer',
+            'GulistaanBySaadiNumberedWithPencilsPersianManuscript'
+          ]
+          rows=[]
+          for iid in ids:
+            req=urllib.request.Request('https://archive.org/metadata/'+iid,headers={'User-Agent':'OSR-Preservation/1.0'})
+            try:
+              with urllib.request.urlopen(req,timeout=90) as r:o=json.load(r)
+            except Exception as e:
+              rows.append({'id':iid,'status':'ERROR','error':str(e)});continue
+            m=o.get('metadata') or {}; fs=[]; total=0
+            for f in o.get('files',[]):
+              n=f.get('name',''); src=f.get('source'); size=int(f.get('size') or 0); fmt=f.get('format','')
+              if src=='original' and n.lower().endswith(('.pdf','.tif','.tiff','.jpg','.jpeg','.jp2.zip','.xml')):
+                fs.append({'name':n,'format':fmt,'size':size,'source':src}); total+=size
+            rows.append({'id':iid,'status':'PASS','title':m.get('title'),'date':m.get('date'),'creator':m.get('creator'),'collection':m.get('collection'),'licenseurl':m.get('licenseurl'),'rights':m.get('rights'),'access-restricted-item':m.get('access-restricted-item'),'original_bytes':total,'original_files':fs})
+          print('RESULT_JSON='+json.dumps(rows,ensure_ascii=False,sort_keys=True))
+          PY
