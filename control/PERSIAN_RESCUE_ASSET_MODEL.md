@@ -91,9 +91,20 @@ Invariants:
 - ARK must remain in the explicit-public-domain canonical worklist at runtime;
 - source rights predicate is revalidated before page download;
 - each JPEG is validated, hashed, uploaded, then deleted from the runner;
-- checkpoints are written periodically so retries resume from missing pages;
+- checkpoint is persisted after every successfully uploaded full-resolution page, so a runner failure loses at most one in-flight page;
 - a Gallica item counts as PASS only when `preserved_pages == page_count`;
 - the legacy direct-PDF path is not used after persistent HTTP 429 evidence from GitHub-hosted runners.
+
+## HTTP transfer integrity rule
+
+HTTP transport byte accounting must distinguish the encoded transfer representation from the decoded entity body.
+
+Invariants:
+- if `Content-Encoding` is absent, a declared `Content-Length` may be compared directly to the streamed byte count;
+- if `Content-Encoding` such as gzip/br is present and the HTTP client transparently decodes the response, do **not** compare the decoded byte count against the encoded `Content-Length`;
+- request `Accept-Encoding: identity` when practical, but still inspect the actual response headers because intermediaries/origins may return encoded bodies;
+- validate decoded JSON/XML by parsing it and binary assets by format signature/checksum rather than creating a false short-payload failure from mixed transfer layers;
+- incident precedent: Gallica IIIF manifests were valid but falsely rejected when gzip-layer `Content-Length` values (~3 KB) were compared with decoded JSON bodies (~70–82 KB). The fix preserved full-resolution delivery; no quality reduction was required.
 
 ## Cross-cutting rules
 
@@ -104,3 +115,4 @@ Invariants:
 5. **Do not duplicate resolution variants without a reason.** Preserve the best available source representation, plus separately useful derivatives when explicitly modeled.
 6. **Audit totals must be schema-aware.** Ordinary `files`, multi-witness bytes, and IIIF page bytes are different accounting paths and must all be included in the overall ledger without double counting.
 7. **Failures are object-local.** Retry only missing/failed objects or pages; never restart successful assets merely because another matrix member failed.
+8. **Checkpoint granularity follows recovery cost.** For large page/image assets, persist completion after each unit; coarser checkpoints are acceptable only when replay cost is demonstrably trivial.
