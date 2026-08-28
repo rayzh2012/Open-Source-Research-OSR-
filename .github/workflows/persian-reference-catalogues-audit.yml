@@ -1,0 +1,45 @@
+name: Persian Reference Catalogues Drive Audit
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - '.github/workflows/persian-reference-catalogues-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - name: Configure Drive and audit COMPLETE files
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          python - <<'PY'
+          import json,subprocess
+          root='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/reference_catalogues'
+          p=subprocess.run(['rclone','lsjson',root,'--recursive','--files-only'],text=True,capture_output=True,check=True)
+          files=json.loads(p.stdout or '[]')
+          cps=[x['Path'] for x in files if x.get('Path','').endswith('/COMPLETE.json')]
+          rows=[]
+          for path in cps:
+            q=subprocess.run(['rclone','cat',f'{root}/{path}'],text=True,capture_output=True)
+            if q.returncode: continue
+            try: rows.append(json.loads(q.stdout))
+            except: pass
+          pdf_bytes=sum(int((x.get('files') or {}).get('pdf',{}).get('bytes') or 0) for x in rows)
+          ocr_bytes=sum(int((x.get('files') or {}).get('ocr_text',{}).get('bytes') or 0) for x in rows)
+          passed=[x for x in rows if x.get('status')=='PASS']
+          out={'complete_files':len(cps),'parsed':len(rows),'pass':len(passed),'pdf_bytes':pdf_bytes,'ocr_bytes':ocr_bytes,'ids':sorted(x.get('id','') for x in passed)}
+          print('RESULT_JSON='+json.dumps(out,ensure_ascii=False,sort_keys=True))
+          PY
