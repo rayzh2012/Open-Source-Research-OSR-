@@ -1,0 +1,100 @@
+{
+  "format": "osr-feature-schema/v1",
+  "version": "v1.0.1",
+  "granularity": "sparse_row_signals_plus_shard_aggregates",
+  "evidence_contract": "Every row-level feature keeps corpus/repo/shard/row/row_sha256. Derived features are candidates until exact source-row recheck.",
+  "design": {
+    "all_rows": [
+      "row_count",
+      "nonempty_row_count",
+      "char_count",
+      "utf8_byte_count",
+      "cjk_char_count",
+      "ascii_char_count",
+      "digit_char_count",
+      "newline_count",
+      "sentence_terminal_count",
+      "within_shard_duplicate_row_count"
+    ],
+    "sparse_rows_only": [
+      "matched_feature_ids",
+      "per_feature_counts",
+      "first_positions",
+      "explicit_year_mentions",
+      "row_sha256",
+      "text_length",
+      "script_mix"
+    ],
+    "cooccurrence": "feature-pair row co-occurrence aggregated per shard",
+    "raw_text_persisted": false
+  },
+  "features": [
+    {"id":"ENTITY_NUWA","family":"mythic_entity","terms":["女娲","女媧"]},
+    {"id":"ENTITY_FUXI","family":"mythic_entity","terms":["伏羲","伏犧","庖牺","庖犧"]},
+    {"id":"ENTITY_GONGGONG","family":"mythic_entity","terms":["共工"]},
+    {"id":"ENTITY_SHENNONG","family":"mythic_entity","terms":["神农","神農"]},
+    {"id":"ENTITY_YANDI","family":"mythic_entity","terms":["炎帝"]},
+    {"id":"ENTITY_HUANGDI","family":"mythic_entity","terms":["黄帝","黃帝"]},
+    {"id":"ENTITY_CHIYOU","family":"mythic_entity","terms":["蚩尤"]},
+    {"id":"ENTITY_YINGLONG","family":"mythic_entity","terms":["应龙","應龍"]},
+    {"id":"ENTITY_ZHULONG","family":"mythic_entity","terms":["烛龙","燭龍"]},
+
+    {"id":"CREATURE_DRAGON","family":"creature","terms":["龙王","龍王","龙神","龍神","龙女","龍女","龙母","龍母","应龙","應龍","烛龙","燭龍"]},
+    {"id":"CREATURE_TIGER","family":"creature","terms":["虎祖","虎神","白虎"]},
+    {"id":"CREATURE_SNAKE","family":"creature","terms":["蛇神","蛇祖","蛇身"]},
+    {"id":"CREATURE_TURTLE","family":"creature","terms":["龟神","龜神","玄武","神龟","神龜"]},
+    {"id":"CREATURE_FOX","family":"creature","terms":["九尾狐","狐仙","狐神"]},
+    {"id":"CREATURE_PHOENIX","family":"creature","terms":["凤凰","鳳凰","凤鸟","鳳鳥"]},
+
+    {"id":"MOTIF_FLOOD","family":"motif","terms":["洪水","大洪水","洪灾","洪災"]},
+    {"id":"MOTIF_WATER_CONTROL","family":"motif","terms":["治水","导水","導水","疏洪","疏水"]},
+    {"id":"MOTIF_SKY_REPAIR","family":"motif","terms":["补天","補天","天柱","不周山"]},
+    {"id":"MOTIF_TRANSFORMATION","family":"motif","terms":["变形","變形","化为","化為","变成","變成","化作"]},
+    {"id":"MOTIF_RESURRECTION","family":"motif","terms":["复活","復活","还魂","還魂","再生","死而复生","死而復生"]},
+    {"id":"MOTIF_DECAPITATION","family":"motif","terms":["斩首","斬首","砍头","砍頭","断头","斷頭","割头","割頭","头落地","頭落地"]},
+    {"id":"MOTIF_HEAD_REPLACEMENT","family":"motif","terms":["换头","換頭","接头","接頭","安头","安頭","续头","續頭"]},
+    {"id":"MOTIF_DIVINE_MARRIAGE","family":"motif","terms":["神婚","人神婚","神女下嫁","神女婚"]},
+    {"id":"MOTIF_HUMAN_SACRIFICE","family":"motif","terms":["人祭","以人祭","活人祭","童男童女"]},
+
+    {"id":"RITUAL_SACRIFICE","family":"ritual","terms":["祭祀","献祭","獻祭","祭礼","祭禮","祭仪","祭儀"]},
+    {"id":"RITUAL_SHAMAN","family":"ritual","terms":["祭司","巫师","巫師","巫术","巫術","巫祝","巫觋","巫覡"]},
+    {"id":"RITUAL_DIVINATION","family":"ritual","terms":["占卜","卜筮","龟卜","龜卜","占筮"]},
+    {"id":"RITUAL_TABOO","family":"ritual","terms":["禁忌","忌讳","忌諱"]},
+    {"id":"ANCESTOR_SPIRIT","family":"religion","terms":["祖灵","祖靈","祖神","祖先神"]},
+    {"id":"LOCAL_DEITY","family":"religion","terms":["本主","地方神","乡土神","鄉土神"]},
+    {"id":"TOTEMISM","family":"religion","terms":["图腾","圖騰","图腾崇拜","圖騰崇拜"]},
+    {"id":"GHOST_SPIRIT","family":"religion","terms":["鬼神","神鬼","亡灵","亡靈","幽灵","幽靈"]},
+
+    {"id":"POLITY_REBELLION","family":"political_event","terms":["叛乱","叛亂","起兵","举兵","舉兵","兵变","兵變","造反"]},
+    {"id":"POLITY_SURRENDER","family":"political_event","terms":["投降","归降","歸降","请降","請降","纳降","納降"]},
+    {"id":"POLITY_ENTHRONEMENT","family":"political_event","terms":["称帝","稱帝","即位","登基","践祚","踐祚"]},
+    {"id":"POLITY_REGICIDE","family":"political_event","terms":["弑君","弒君","弑帝","弒帝","弑父","弒父"]},
+    {"id":"POLITY_CAPITAL_MOVE","family":"political_event","terms":["迁都","遷都","移都","徙都"]},
+    {"id":"POLITY_SUCCESSION","family":"political_event","terms":["太子","储君","儲君","继位","繼位","嗣位"]},
+    {"id":"POLITY_CLAN","family":"social_structure","terms":["氏族","宗族","部族","部落","世族","豪族"]},
+
+    {"id":"ECON_FAMINE","family":"economy_crisis","terms":["饥荒","飢荒","饥馑","饑饉","人相食"]},
+    {"id":"ECON_GRAIN","family":"economy","terms":["军粮","軍糧","漕运","漕運","和籴","和糴","粮运","糧運"]},
+    {"id":"ECON_TAX","family":"economy","terms":["征税","徵稅","赋税","賦稅","田赋","田賦","徭役"]},
+    {"id":"ECON_CURRENCY","family":"economy","terms":["货币","貨幣","钱币","錢幣","纸币","紙幣","交子"]},
+
+    {"id":"TIME_XIA","family":"dynasty","terms":["夏朝","夏代"]},
+    {"id":"TIME_SHANG","family":"dynasty","terms":["商朝","殷商","商代"]},
+    {"id":"TIME_ZHOU","family":"dynasty","terms":["西周","东周","東周","周代"]},
+    {"id":"TIME_QIN","family":"dynasty","terms":["秦朝","秦代"]},
+    {"id":"TIME_HAN","family":"dynasty","terms":["西汉","西漢","东汉","東漢","汉代","漢代"]},
+    {"id":"TIME_WEIJIN","family":"dynasty","terms":["魏晋","魏晉","西晋","西晉","东晋","東晉"]},
+    {"id":"TIME_NANBEICHAO","family":"dynasty","terms":["南北朝","北魏","北周","北齐","北齊","刘宋","劉宋"]},
+    {"id":"TIME_SUI","family":"dynasty","terms":["隋朝","隋代"]},
+    {"id":"TIME_TANG","family":"dynasty","terms":["唐朝","唐代"]},
+    {"id":"TIME_SONG","family":"dynasty","terms":["北宋","南宋","宋代"]},
+    {"id":"TIME_LIAOJIN","family":"dynasty","terms":["辽朝","遼朝","金朝","女真"]},
+    {"id":"TIME_YUAN","family":"dynasty","terms":["元朝","元代"]},
+    {"id":"TIME_MING","family":"dynasty","terms":["明朝","明代"]},
+    {"id":"TIME_QING","family":"dynasty","terms":["清朝","清代"]}
+  ],
+  "regex_features": [
+    {"id":"TEMPORAL_EXPLICIT_YEAR","family":"temporal_hint","pattern":"(?:(?:公元|西元)(?:前)?|前)?[12][0-9]{3}年|(?:公元前|西元前)[0-9]{1,4}年"},
+    {"id":"TEMPORAL_CENTURY","family":"temporal_hint","pattern":"(?:公元前)?(?:第)?[一二三四五六七八九十百0-9]{1,4}世纪"}
+  ]
+}

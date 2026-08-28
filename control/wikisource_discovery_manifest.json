@@ -1,0 +1,71 @@
+{
+  "schema_version": "osr-wikisource-discovery-v1",
+  "dataset": "mediawiki_content_current",
+  "completion_gate": "SHA256SUMS present",
+  "wikis": [
+    {
+      "wiki_id": "zhwikisource",
+      "label": "Chinese Wikisource",
+      "dump_date": "2026-08-01",
+      "base_url": "https://dumps.wikimedia.org/other/mediawiki_content_current/zhwikisource/2026-08-01/xml/bzip2/",
+      "sha256sums_url": "https://dumps.wikimedia.org/other/mediawiki_content_current/zhwikisource/2026-08-01/xml/bzip2/SHA256SUMS",
+      "shard_count": 3,
+      "known_total_bytes": 6941561349,
+      "all_sizes_known": true,
+      "shards": [
+        {
+          "index": 0,
+          "filename": "zhwikisource-2026-08-01-p1792387p3839225.xml.bz2",
+          "url": "https://dumps.wikimedia.org/other/mediawiki_content_current/zhwikisource/2026-08-01/xml/bzip2/zhwikisource-2026-08-01-p1792387p3839225.xml.bz2",
+          "sha256": "5119c5c397a52a319cf6bf4ed08161c69d420422c24e08a45327433f966bd8d3",
+          "bytes": 1943095364
+        },
+        {
+          "index": 1,
+          "filename": "zhwikisource-2026-08-01-p3839226p5798306.xml.bz2",
+          "url": "https://dumps.wikimedia.org/other/mediawiki_content_current/zhwikisource/2026-08-01/xml/bzip2/zhwikisource-2026-08-01-p3839226p5798306.xml.bz2",
+          "sha256": "9470e58e9a765c37015e9b3e28d72f4d9e27fae9eacceb58335d824d1d2d2d3f",
+          "bytes": 1870890187
+        },
+        {
+          "index": 2,
+          "filename": "zhwikisource-2026-08-01-p6p1792386.xml.bz2",
+          "url": "https://dumps.wikimedia.org/other/mediawiki_content_current/zhwikisource/2026-08-01/xml/bzip2/zhwikisource-2026-08-01-p6p1792386.xml.bz2",
+          "sha256": "daab2612884185f1a741eb91fc29a28499c5095e138c0bc15f2c0f601a3c39c5",
+          "bytes": 3127575798
+        }
+      ]
+    },
+    {
+      "wiki_id": "enwikisource",
+      "label": "English Wikisource",
+      "dump_date": "2026-08-01",
+      "base_url": "https://dumps.wikimedia.org/other/mediawiki_content_current/enwikisource/2026-08-01/xml/bzip2/",
+      "sha256sums_url": "https://dumps.wikimedia.org/other/mediawiki_content_current/enwikisource/2026-08-01/xml/bzip2/SHA256SUMS",
+      "shard_count": 2,
+      "known_total_bytes": 3487927118,
+      "all_sizes_known": true,
+      "shards": [
+        {
+          "index": 0,
+          "filename": "enwikisource-2026-08-01-p1p4917374.xml.bz2",
+          "url": "https://dumps.wikimedia.org/other/mediawiki_content_current/enwikisource/2026-08-01/xml/bzip2/enwikisource-2026-08-01-p1p4917374.xml.bz2",
+          "sha256": "98d57409e63be3d7818cddbcb0b289fedc5514abefda1501a82f68187528ff56",
+          "bytes": 3338050343
+        },
+        {
+          "index": 1,
+          "filename": "enwikisource-2026-08-01-p4917375p5195102.xml.bz2",
+          "url": "https://dumps.wikimedia.org/other/mediawiki_content_current/enwikisource/2026-08-01/xml/bzip2/enwikisource-2026-08-01-p4917375p5195102.xml.bz2",
+          "sha256": "dc1d7356d426d925c7fe91445192ff73a3cc3fc576d18e8e50a9b421dbd6fea6",
+          "bytes": 149876775
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "wikis": 2,
+    "shards": 5,
+    "known_bytes": 10429488467
+  }
+}

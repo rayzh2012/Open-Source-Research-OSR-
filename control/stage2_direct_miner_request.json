@@ -1,0 +1,8 @@
+{
+  "id": 3,
+  "action": "STAGE2_DIRECT_MINE",
+  "run_id": "stage2-query-index-backfill-v1-001",
+  "worker_count": 20,
+  "limit_per_worker": 0,
+  "purpose": "Full 1788-shard backfill of the 508GB public Hugging Face corpora into the compact OSR query index. Standard public GitHub-hosted runners only; Aho-Corasick one-pass query-pack scan; no paid/larger/GPU runner; no Mac/Drive raw-data path; reducer persists counts + shard/row/hash locators and query-pack identity."
+}

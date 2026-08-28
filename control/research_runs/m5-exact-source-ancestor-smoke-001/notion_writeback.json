@@ -1,0 +1,10 @@
+{
+  "format": "osr-notion-writeback/v1",
+  "run_id": "m5-exact-source-ancestor-smoke-001",
+  "status": "READY",
+  "component_mismatches": [],
+  "summary_text": "【OSR Research Run】m5-exact-source-ancestor-smoke-001 | exact=PASS | rows=311 | bytes=17212734025 | 3+local=304 | 4+local=206 | local_pairs=126 | graph_edges=126 | historical_fact_upgrade_allowed=False",
+  "notion_target_from_env": false,
+  "direct_sync_attempted": false,
+  "direct_sync_status": "PAYLOAD_ONLY_NO_SECRET"
+}

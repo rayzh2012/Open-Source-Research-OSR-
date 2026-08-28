@@ -1,0 +1,34 @@
+name: OSR M5 Source Chronology Audit
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/m5_exact_evidence_result.json
+      - tools/osr_m5_source_chronology_audit.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Audit source/genre/date cues
+        run: python tools/osr_m5_source_chronology_audit.py
+      - name: Commit chronology audit
+        run: |
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/m5_source_chronology_audit.json control/research_runs/
+          git diff --cached --quiet && exit 0
+          git commit -m 'm5: source chronology audit'
+          git pull --rebase origin stage2-direct-miner-v3-1
+          git push origin HEAD:stage2-direct-miner-v3-1

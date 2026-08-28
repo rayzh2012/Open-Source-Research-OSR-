@@ -1,0 +1,92 @@
+name: Gallica Persian Public Domain PDF Rescue
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - '.github/workflows/gallica-persian-pd-pdf-rescue.yml'
+      - 'control/gallica_persian_pd_pdf_worker.py'
+      - 'control/gallica_persian_pd_pdf_request.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.plan.outputs.mode }}
+      partitions: ${{ steps.plan.outputs.partitions }}
+      limit: ${{ steps.plan.outputs.limit }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - id: plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          p='control/gallica_persian_pd_pdf_request.json'
+          o=json.load(open(p,encoding='utf-8'))
+          mode=o.get('mode','smoke')
+          if mode not in {'smoke','full'}:
+              raise SystemExit('bad mode')
+          smoke = mode == 'smoke'
+          partitions = 1 if smoke else 4
+          limit = 2 if smoke else 0
+          matrix = {'include': [{'partition': i} for i in range(partitions)]}
+          print('mode='+mode)
+          print('partitions='+str(partitions))
+          print('limit='+str(limit))
+          print('matrix='+json.dumps(matrix,separators=(',',':')))
+          PY
+
+  rescue:
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure preservation environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Rescue public-domain PDFs
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p result
+          python control/gallica_persian_pd_pdf_worker.py \
+            --partition '${{ matrix.partition }}' \
+            --partitions '${{ needs.plan.outputs.partitions }}' \
+            --limit '${{ needs.plan.outputs.limit }}' \
+            --work-dir "/tmp/gallica-pd-${{ matrix.partition }}" \
+            2>&1 | tee "result/partition-${{ matrix.partition }}.log"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gallica-pd-${{ matrix.partition }}-${{ github.run_id }}
+          path: result/
+          retention-days: 30
+          if-no-files-found: warn

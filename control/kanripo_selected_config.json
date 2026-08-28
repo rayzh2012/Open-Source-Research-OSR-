@@ -1,0 +1,13 @@
+{
+  "schema_version": "osr-kanripo-selected-v1",
+  "destination_root": "龍族古籍源庫｜Dragon Source Corpus/OPEN_KANRIPO_SELECTED",
+  "catalog_repo": "kanripo/KR-Catalog",
+  "catalog_ref": "master",
+  "categories": [
+    {"id": "KR3l", "label": "小說家類／志怪筆記", "catalog_globs": ["KR/KR3l.txt"], "partitions": 4, "enabled": true},
+    {"id": "KR3g", "label": "術數類", "catalog_globs": ["KR/KR3g.txt"], "partitions": 2, "enabled": true},
+    {"id": "KR2k", "label": "地理類", "catalog_globs": ["KR/KR2k.txt"], "partitions": 2, "enabled": true},
+    {"id": "KR5", "label": "道部原始分庫", "catalog_globs": ["KR/KR5*.txt"], "partitions": 4, "enabled": true}
+  ],
+  "notes": "Selected Kanripo high-information corpus. Repository snapshots are commit-locked per book; bundle manifests preserve exact repo IDs and commits."
+}

@@ -1,0 +1,9 @@
+{
+  "id": 29,
+  "action": "RUN_REPO_TASK",
+  "task_path": "tools/remote_tasks/set_github_rclone_secret.py",
+  "sha256": "df6fb759a29337a14511c3df2d6d083b444c8af8e14f2f22f610e2dd39d55bb5",
+  "args": [],
+  "timeout_seconds": 180,
+  "note": "Configure GitHub Actions secret RCLONE_CONFIG_B64 from the Mac's already-working local rclone gdrive config. Secret contents must never be printed."
+}

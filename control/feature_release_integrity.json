@@ -1,0 +1,19 @@
+{
+  "format": "osr-feature-release-integrity/v1",
+  "status": "PASS",
+  "run_id": "feature-store-v1-resilient-001",
+  "trigger_workflow_run_id": "33138679543",
+  "trigger_workflow_conclusion": "success",
+  "partition_count_expected": 128,
+  "partition_summaries_found": 128,
+  "source_shards_expected": 1788,
+  "source_shards_found": 1788,
+  "feature_schema_sha256": "972e195a5455be1ae0d5969e73e22c5f14b53322193820e56cf1774309f4ef70",
+  "source_inventory_sha256": "9e79715325382ef680161621874e464f42f5d05f4605d1693bcd8b78e557c556",
+  "release_asset_count": 259,
+  "errors": [],
+  "missing_shard_examples": [],
+  "extra_shard_examples": [],
+  "sha_mismatch_examples": [],
+  "acceptance_rule": "128 valid COMPLETE markers + corresponding nonzero data asset(s) + contiguous split numbering + exact 1788-shard identity/SHA coverage"
+}

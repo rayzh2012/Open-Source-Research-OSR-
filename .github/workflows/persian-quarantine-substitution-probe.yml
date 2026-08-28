@@ -1,0 +1,41 @@
+name: Persian Quarantine Substitution Probe
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/persian-quarantine-substitution-probe.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Compare quarantined objects to licensed alternatives
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,urllib.request
+          groups={
+            'muniyat':['muniyat-ul-musalli-subutu-fareezat-is-salati-arabic-persian-manuscript-on-islami','tjpv_muniyat-ul-musalli-subutu-fareezat-is-salati-arabic-persian-manuscript-on-islami_202412'],
+            'shamail':['shamail-ul-atqiya-wa-fazail-e-auliya-shamail-ul-atqiya-wa-zail-ul-atqiya-persian','dzvy_shamail-e-atqiya-by-qazi-shaikh-imaduddin-chishtiya-sufism-related-persian-manus','txxx_shamail-e-atqiya-by-qazi-shaikh-imaduddin-chishtiya-sufism-related-persian-manus']
+          }
+          out={}
+          for g,ids in groups.items():
+            rows=[]
+            for iid in ids:
+              req=urllib.request.Request('https://archive.org/metadata/'+iid,headers={'User-Agent':'OSR-Preservation/1.0'})
+              with urllib.request.urlopen(req,timeout=90) as r:o=json.load(r)
+              m=o.get('metadata') or {}; fs=[]
+              for f in o.get('files',[]):
+                n=f.get('name','')
+                if f.get('source')=='original' and n.lower().endswith('.pdf'):
+                  fs.append({'name':n,'size':int(f.get('size') or 0),'md5':f.get('md5'),'sha1':f.get('sha1')})
+              rows.append({'id':iid,'title':m.get('title'),'licenseurl':m.get('licenseurl'),'pdfs':fs})
+            out[g]=rows
+          print('RESULT_JSON='+json.dumps(out,ensure_ascii=False,sort_keys=True))
+          PY

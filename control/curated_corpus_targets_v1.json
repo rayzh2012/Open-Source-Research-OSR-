@@ -1,0 +1,129 @@
+{
+  "schema_version": "osr-curated-corpus-targets-v1",
+  "destination_root": "龍族古籍源庫｜Dragon Source Corpus/OPEN_CURATED_CORPORA",
+  "targets": [
+    {
+      "id": "kr5-daoist-corpus",
+      "repo": "tokushige-koyasan/kr5-corpus",
+      "ref": "main",
+      "enabled": true,
+      "domain": "daoism",
+      "format": "plain-text+catalog",
+      "license": "CC-BY-SA-4.0",
+      "approx_text_mb": 102,
+      "priority": "P0",
+      "notes": "1,650 Daoist texts derived from Kanripo KR5; keep catalog and NOTICE for provenance."
+    },
+    {
+      "id": "cbeta-esoteric-corpus",
+      "repo": "tokushige-koyasan/kanseki-corpus",
+      "ref": "main",
+      "enabled": true,
+      "domain": "chinese-buddhist-esoteric",
+      "format": "plain-text+catalog",
+      "license": "CC-BY-NC-SA-4.0",
+      "approx_text_mb": 26,
+      "priority": "P0",
+      "notes": "681 Chinese Buddhist esoteric texts derived from CBETA TEI P5; non-commercial use only; preserve NOTICE_CBETA."
+    },
+    {
+      "id": "cbeta-xml-p5",
+      "repo": "cbeta-org/xml-p5",
+      "ref": "master",
+      "enabled": true,
+      "domain": "chinese-buddhist-canonical-source",
+      "format": "TEI-P5-XML",
+      "license": "per-file CBETA availability; generally non-commercial; preserve TEI headers",
+      "priority": "P0",
+      "notes": "Canonical CBETA XML source layer; preserve all TEI headers and per-file rights notices."
+    },
+    {
+      "id": "perseus-greek",
+      "repo": "PerseusDL/canonical-greekLit",
+      "ref": "master",
+      "enabled": true,
+      "domain": "ancient-greek",
+      "format": "TEI/XML",
+      "license": "CC-BY-SA-4.0 unless otherwise indicated",
+      "priority": "P1",
+      "notes": "Canonical Greek literary corpus; retain CTS metadata and per-work rights."
+    },
+    {
+      "id": "perseus-latin",
+      "repo": "PerseusDL/canonical-latinLit",
+      "ref": "master",
+      "enabled": true,
+      "domain": "latin",
+      "format": "TEI/XML",
+      "license": "CC-BY-SA-4.0 unless otherwise indicated",
+      "priority": "P1",
+      "notes": "Canonical Latin literary corpus; retain CTS metadata and per-work rights."
+    },
+    {
+      "id": "suttacentral-bilara",
+      "repo": "suttacentral/bilara-data",
+      "ref": "published",
+      "enabled": true,
+      "domain": "pali-buddhist-multilingual",
+      "format": "segmented-JSON",
+      "license": "repository/per-file licensing; supported Bilara translations commonly CC0; preserve licensing metadata",
+      "priority": "P1",
+      "notes": "Stable published Bilara segmentation layer; JSON segment IDs retained in raw snapshot."
+    },
+    {
+      "id": "sarit-indic",
+      "repo": "sarit/SARIT-corpus",
+      "ref": "master",
+      "enabled": true,
+      "domain": "sanskrit-indic",
+      "format": "TEI-P5-XML",
+      "license": "per-file CC-BY-SA / compatible notices",
+      "priority": "P1",
+      "notes": "Primary SARIT TEI source corpus."
+    },
+    {
+      "id": "gretil-sanskrit",
+      "repo": "tokushige-koyasan/gretil-corpus",
+      "ref": "main",
+      "enabled": true,
+      "domain": "sanskrit-indic",
+      "format": "plain-text+catalog",
+      "license": "CC-BY-NC-SA-4.0 derivative; preserve NOTICE_GRETIL and upstream attribution",
+      "priority": "P1",
+      "notes": "784 Sanskrit and related texts extracted from the GRETIL TEI corpus; feature-ready derivative."
+    },
+    {
+      "id": "pali-vri-corpus",
+      "repo": "tokushige-koyasan/pali-corpus",
+      "ref": "main",
+      "enabled": true,
+      "domain": "pali-buddhist",
+      "format": "plain-text+catalog",
+      "license": "VRI non-commercial/attribution terms for texts; repository metadata CC-BY-NC-4.0",
+      "priority": "P1",
+      "notes": "217 Pali texts from VRI Chattha Sangayana snapshot; research/non-commercial use."
+    },
+    {
+      "id": "dcs-sanskrit",
+      "repo": "tokushige-koyasan/dcs-corpus",
+      "ref": "main",
+      "enabled": true,
+      "domain": "sanskrit-lemmatized",
+      "format": "CoNLL-U+plain-text+catalog",
+      "license": "CC-BY-4.0 derivative; preserve DCS attribution and notices",
+      "priority": "P1",
+      "notes": "270 DCS texts with lemmatized CoNLL-U plus restored plain text; valuable for morphological features."
+    },
+    {
+      "id": "muktabodha-shaiva-tantra",
+      "repo": "tokushige-koyasan/muktabodha-corpus",
+      "ref": "main",
+      "enabled": true,
+      "domain": "shaiva-tantric-sanskrit",
+      "format": "plain-text+catalog",
+      "license": "CC-BY-NC-4.0",
+      "priority": "P1",
+      "notes": "499 Shaiva/tantric e-texts; preserve Muktabodha attribution and NOTICE."
+    }
+  ]
+}

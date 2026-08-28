@@ -1,0 +1,42 @@
+name: Persian Manuscript Batch 6 Probe
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/persian-manuscript-batch6-probe.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe high-value licensed manuscript candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,urllib.request
+          ids=[
+            'ljs278','ljs49','ljs407','ljs414','lewis_o_036','vat.pers.4',
+            'kitab-ajaib-al-makhluqat-manuscript-collection','cambridge-golestan_RASPersian258',
+            'ljs425','lewis_o_042','mscoll525','kcajs_rar_ms214'
+          ]
+          rows=[]
+          for iid in ids:
+              req=urllib.request.Request('https://archive.org/metadata/'+iid,headers={'User-Agent':'OSR-Preservation/1.0'})
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:o=json.load(r)
+              except Exception as e:
+                  rows.append({'id':iid,'status':'ERROR','error':repr(e)}); continue
+              m=o.get('metadata') or {}; originals=[]; total=0
+              for f in o.get('files',[]):
+                  n=f.get('name',''); src=f.get('source'); size=int(f.get('size') or 0)
+                  if src=='original' and n.lower().endswith(('.pdf','.tif','.tiff','.jpg','.jpeg','.jp2.zip')):
+                      originals.append({'name':n,'format':f.get('format'),'size':size,'md5':f.get('md5'),'sha1':f.get('sha1')}); total+=size
+              rows.append({'id':iid,'status':'PASS','title':m.get('title'),'date':m.get('date'),'creator':m.get('creator'),'licenseurl':m.get('licenseurl'),'rights':m.get('rights'),'original_bytes':total,'originals':originals})
+          print('RESULT_JSON='+json.dumps(rows,ensure_ascii=False,sort_keys=True))
+          PY

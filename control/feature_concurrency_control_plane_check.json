@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "check": "m3_max_parallel_control_plane",
+  "request_run_id": "feature-store-v1-resilient-001",
+  "requested_max_parallel": 12,
+  "validated_request_bounds": "1..20",
+  "plan_output_wired": true,
+  "extract_strategy_uses_plan_output": true,
+  "recover_strategy_uses_plan_output": true,
+  "hardcoded_max_parallel_20_remaining": 0,
+  "resolved_matrix_cap_for_current_request": 12,
+  "raw_corpus_accessed": false,
+  "feature_extraction_request_modified": false,
+  "heavy_m3_triggered_by_this_generation": false,
+  "patched_blob_path": "control/osr_feature_extraction_patched.yml",
+  "verified_unix": 1787884097.7730136
+}

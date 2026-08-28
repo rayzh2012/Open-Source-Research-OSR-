@@ -1,0 +1,54 @@
+name: Gallica Persian Partner Quarantine
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/gallica-persian-partner-quarantine.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  quarantine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - name: Configure Drive
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+      - name: Preserve five partner records
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/partner
+          python - <<'PY'
+          import urllib.parse,urllib.request,xml.etree.ElementTree as ET,json,hashlib
+          from pathlib import Path
+          q='((dc.language all "per") or (dc.language all "fas")) and (dc.type all "manuscrit") and (provenance adj "ecodice")'
+          p=urllib.parse.urlencode({'version':'1.2','operation':'searchRetrieve','query':q,'maximumRecords':20,'collapsing':'false'},quote_via=urllib.parse.quote)
+          req=urllib.request.Request('https://gallica.bnf.fr/SRU?'+p,headers={'User-Agent':'OSR-Preservation/1.0','Accept':'application/xml'})
+          with urllib.request.urlopen(req,timeout=120) as r: raw=r.read()
+          Path('/tmp/partner/sru.xml').write_bytes(raw);root=ET.fromstring(raw)
+          local=lambda t:t.rsplit('}',1)[-1]
+          nums=[x.text.strip() for x in root.iter() if local(x.tag)=='numberOfRecords' and x.text];reported=int(nums[0]) if nums else 0
+          rows=[]
+          for rec in [x for x in root.iter() if local(x.tag)=='record']:
+              fields={}
+              for x in rec.iter():
+                  n=local(x.tag)
+                  if n in {'title','creator','contributor','subject','description','publisher','date','type','format','identifier','source','language','relation','coverage','rights','recordIdentifier'} and x.text and x.text.strip(): fields.setdefault(n,[]).append(x.text.strip())
+              ids=fields.get('identifier',[])+fields.get('recordIdentifier',[])
+              key=hashlib.sha256(('\n'.join(ids)+json.dumps(fields,sort_keys=True,ensure_ascii=False)).encode()).hexdigest()[:20]
+              rows.append({'key':key,'identifiers':ids,'fields':fields,'provenance':'ecodice','policy':'PARTNER_QUARANTINE_METADATA_ONLY'})
+          Path('/tmp/partner/worklist.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          summary={'reported':reported,'records':len(rows),'status':'PASS' if reported==5 and len(rows)==5 else 'MISMATCH','policy':'Do not mirror partner bytes until e-codices item rights are separately audited.'}
+          Path('/tmp/partner/SUMMARY.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          print('RESULT_JSON='+json.dumps(summary,sort_keys=True))
+          if summary['status']!='PASS': raise SystemExit(2)
+          PY
+          rclone copy /tmp/partner "gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/gallica_persian_manuscripts/worklists/partner_ecodice" --drive-chunk-size 64M --retries 8 --low-level-retries 16 --timeout 10m --contimeout 30s

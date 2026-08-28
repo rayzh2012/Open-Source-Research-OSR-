@@ -1,0 +1,72 @@
+name: OSR Sketch Cache Pilot
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - 'control/sketch_cache_pilot_request.json'
+      - 'tools/osr_sketch_cache_pilot.py'
+      - '.github/workflows/osr-sketch-cache-pilot.yml'
+permissions:
+  contents: write
+concurrency:
+  group: osr-sketch-cache-pilot-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pyarrow requests huggingface_hub
+      - name: Build bounded 4-shard samples
+        run: |
+          python - <<'PY'
+          import json, requests, pyarrow.parquet as pq, pathlib, tempfile
+          from huggingface_hub import hf_hub_url
+          req=json.load(open('control/sketch_cache_pilot_request.json'))
+          out=[]
+          for item in req['shards']:
+              url=hf_hub_url(item['repo'], filename=item['file'], repo_type='dataset')
+              with requests.get(url, stream=True, timeout=(30,240)) as r:
+                  r.raise_for_status()
+                  p=tempfile.NamedTemporaryFile(suffix='.parquet',delete=False)
+                  for chunk in r.iter_content(8*1024*1024):
+                      if chunk: p.write(chunk)
+                  p.close()
+              pf=pq.ParquetFile(p.name)
+              col='text' if 'text' in pf.schema.names else pf.schema.names[0]
+              vals=[]; seen=0
+              for batch in pf.iter_batches(batch_size=128, columns=[col]):
+                  for x in batch[col].to_pylist():
+                      if x: vals.append(str(x)); seen+=1
+                      if seen >= req.get('rows_per_shard',120): break
+                  if seen >= req.get('rows_per_shard',120): break
+              text='\n'.join(vals)[:req.get('max_chars_per_shard',2000000)]
+              out.append({'file':item['file'],'text_sample':text})
+          pathlib.Path('control/sketch_cache_pilot_input.jsonl').write_text('\n'.join(json.dumps(x,ensure_ascii=False) for x in out)+'\n','utf-8')
+          PY
+      - name: Run sketch pilot
+        run: python tools/osr_sketch_cache_pilot.py --input-jsonl control/sketch_cache_pilot_input.jsonl --out control/sketch_cache_pilot_result.json
+      - name: Commit result
+        run: |
+          git config user.name osr-actions-bot
+          git config user.email actions@users.noreply.github.com
+          git add control/sketch_cache_pilot_result.json
+          if git diff --cached --quiet; then
+            echo 'Result already current'
+            exit 0
+          fi
+          git commit -m 'osr: record sketch cache pilot result'
+          for attempt in 1 2 3; do
+            git pull --rebase origin stage2-direct-miner-v3-1
+            if git push origin HEAD:stage2-direct-miner-v3-1; then
+              exit 0
+            fi
+            sleep $((attempt * 5))
+          done
+          exit 1

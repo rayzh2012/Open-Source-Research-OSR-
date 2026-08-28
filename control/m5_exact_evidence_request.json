@@ -1,0 +1,18 @@
+{
+  "id": 5,
+  "run_id": "m5-exact-ming-qing-myth-dense-smoke-001",
+  "router_result": "control/m5_router_result.json",
+  "expected_router_run_id": "m5-router-ming-qing-dense-001",
+  "research_profile": "control/research_profiles/myth_ming_qing_dense_v1.json",
+  "top_n_shards": 4,
+  "terms": [
+    "女娲", "共工", "炎帝", "神农", "黄帝", "后土", "句龙",
+    "不周山", "补天", "天柱", "洪水", "治水", "罔物", "网雾", "天降"
+  ],
+  "max_rows_per_shard": 30,
+  "context_chars": 600,
+  "document_head_chars": 1200,
+  "min_local_terms": 2,
+  "max_occurrences_per_term": 10,
+  "purpose": "Ming-Qing dense-source discovery smoke. Prefer late-imperial gazetteers, local records, notebooks, encyclopedic compilations, ritual/temple records, genealogies, and quotation chains. This is a discovery layer for variants and source leads, not a dating claim. Start with four shards only; expand only if evidence yield per downloaded GiB passes the research-profile gate."
+}

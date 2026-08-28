@@ -1,0 +1,79 @@
+name: Persian Reference Catalogues Drive Audit
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - '.github/workflows/persian-reference-catalogues-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - name: Configure Drive and audit COMPLETE files
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          python - <<'PY'
+          import collections,json,subprocess
+          expected=26
+          root='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/reference_catalogues'
+          p=subprocess.run(['rclone','lsjson',root,'--recursive','--files-only'],text=True,capture_output=True,check=True)
+          files=json.loads(p.stdout or '[]')
+          cps=[x['Path'] for x in files if x.get('Path','').endswith('/COMPLETE.json')]
+          rows=[]; parse_errors=[]; identity_mismatches=[]
+          for path in cps:
+            q=subprocess.run(['rclone','cat',f'{root}/{path}'],text=True,capture_output=True)
+            if q.returncode:
+              parse_errors.append({'path':path,'error':'rclone_cat_failed'}); continue
+            try: o=json.loads(q.stdout)
+            except Exception as e:
+              parse_errors.append({'path':path,'error':str(e)}); continue
+            folder=path.split('/',1)[0]
+            if o.get('id') != folder:
+              identity_mismatches.append({'folder':folder,'complete_id':o.get('id'),'ia_id':o.get('ia_id')})
+            rows.append(o)
+          passed=[x for x in rows if x.get('status')=='PASS']
+          standard_pdf_bytes=0; original_image_pdf_bytes=0; text_pdf_bytes=0; all_pdf_bytes=0; ocr_bytes=0; total_preserved_bytes=0; file_count=0
+          for x in passed:
+            f=x.get('files') or {}
+            standard_pdf_bytes += int((f.get('pdf') or {}).get('bytes') or 0)
+            original_image_pdf_bytes += int((f.get('original_image_pdf') or {}).get('bytes') or 0)
+            text_pdf_bytes += int((f.get('text_pdf') or {}).get('bytes') or 0)
+            ocr_bytes += int((f.get('ocr_text') or {}).get('bytes') or 0)
+            for kind,v in f.items():
+              b=int((v or {}).get('bytes') or 0); total_preserved_bytes += b; file_count += 1
+              kl=str(kind).lower()
+              if kl=='pdf' or kl.endswith('_pdf') or kl.endswith('.pdf'):
+                all_pdf_bytes += b
+          ia_counts=collections.Counter(x.get('ia_id') for x in passed if x.get('ia_id'))
+          duplicate_ia_ids=sorted(k for k,v in ia_counts.items() if v>1)
+          ids=[x.get('id','') for x in passed]
+          out={
+            'schema_version':'osr-persian-reference-audit-v3','expected':expected,
+            'complete_files':len(cps),'parsed':len(rows),'pass':len(passed),'file_count':file_count,
+            'standard_pdf_bytes':standard_pdf_bytes,
+            'original_image_pdf_bytes':original_image_pdf_bytes,
+            'text_pdf_bytes':text_pdf_bytes,
+            'all_pdf_bytes':all_pdf_bytes,'total_preserved_bytes':total_preserved_bytes,
+            'ocr_bytes':ocr_bytes,
+            'identity_mismatches':identity_mismatches,
+            'duplicate_ia_ids':duplicate_ia_ids,
+            'parse_errors':parse_errors,
+            'ids':sorted(ids),
+          }
+          out['status']='PASS' if len(cps)==expected and len(cps)==len(rows)==len(passed) and not identity_mismatches and not duplicate_ia_ids and not parse_errors else 'FAIL'
+          print('RESULT_JSON='+json.dumps(out,ensure_ascii=False,sort_keys=True))
+          if out['status']!='PASS': raise SystemExit(2)
+          PY

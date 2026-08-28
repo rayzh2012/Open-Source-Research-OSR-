@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "run_id": "m5-exact-evidence-fusion-chronology-001",
+  "router_run_id": "m5-router-fusion-chronology-001",
+  "query_term_count": 6,
+  "top_n_shards": 12,
+  "rows_found": 240,
+  "bytes_downloaded": 17212734025,
+  "all_query_term_rows": 14,
+  "four_plus_local_term_rows": 148,
+  "three_plus_local_term_rows": 216,
+  "min_local_terms": 2,
+  "selection_mode": "best_local_window_per_shard"
+}

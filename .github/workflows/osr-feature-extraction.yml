@@ -1,0 +1,590 @@
+name: OSR 508GB Feature Extraction
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/feature_extraction_request.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: osr-feature-extraction
+  cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      partitions: ${{ steps.plan.outputs.partitions }}
+      partition_count: ${{ steps.plan.outputs.partition_count }}
+      max_parallel: ${{ steps.plan.outputs.max_parallel }}
+      limit_per_partition: ${{ steps.plan.outputs.limit_per_partition }}
+      run_id: ${{ steps.plan.outputs.run_id }}
+      expected_shards: ${{ steps.plan.outputs.expected_shards }}
+      source_inventory_sha256: ${{ steps.plan.outputs.source_inventory_sha256 }}
+      source_inventory_content_sha256: ${{ steps.plan.outputs.source_inventory_content_sha256 }}
+      feature_schema_sha256: ${{ steps.plan.outputs.feature_schema_sha256 }}
+      already_complete: ${{ steps.plan.outputs.already_complete }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+
+      - name: Ensure durable checkpoint release exists
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUN_ID=$(python - <<'PY'
+          import json
+          req=json.load(open('control/feature_extraction_request.json',encoding='utf-8'))
+          print(req['run_id'])
+          PY
+          )
+          if ! gh release view "$RUN_ID" >/dev/null 2>&1; then
+            gh release create "$RUN_ID" \
+              --title "OSR Feature Store $RUN_ID" \
+              --notes "Durable partition checkpoints for the 508GB OSR Feature Store backfill. A partition summary asset is the completion marker; data assets are uploaded first."
+          fi
+          mkdir -p _resume_summaries
+          gh release download "$RUN_ID" -p 'partition-*-summary.json' -D _resume_summaries >/dev/null 2>&1 || true
+
+      - id: plan
+        shell: python
+        run: |
+          import gzip, hashlib, json, os, pathlib
+
+          req=json.load(open('control/feature_extraction_request.json',encoding='utf-8'))
+          assert req.get('action') == 'FEATURE_EXTRACT', req
+          run_id=str(req.get('run_id') or f"feature-{os.environ['GITHUB_RUN_ID']}")
+          if any(x in run_id for x in ('/','\\','..')):
+              raise ValueError('unsafe run_id')
+          partition_count=int(req.get('partition_count',128))
+          assert 1 <= partition_count <= 256
+          max_parallel=int(req.get('max_parallel',20))
+          assert 1 <= max_parallel <= 20
+          limit=int(req.get('limit_per_partition',0))
+          assert limit >= 0
+
+          schema_bytes=pathlib.Path('control/feature_schema_v1.json').read_bytes()
+          schema_sha=hashlib.sha256(schema_bytes).hexdigest()
+
+          with gzip.open('control/stage2_query_index.json.gz','rt',encoding='utf-8') as f:
+              m2=json.load(f)
+          inventory=sorted(
+              [
+                  {
+                      'corpus':x['source'],
+                      'repo':x['repo'],
+                      'shard':x['file'],
+                      'sha256':x.get('sha256'),
+                  }
+                  for x in m2['inventory']
+              ],
+              key=lambda x:(x['corpus'],x['repo'],x['shard'])
+          )
+          assert len(inventory) == 1788, len(inventory)
+          names_payload=json.dumps(
+              [{'corpus':x['corpus'],'repo':x['repo'],'shard':x['shard']} for x in inventory],
+              ensure_ascii=False,separators=(',',':'),sort_keys=True
+          ).encode('utf-8')
+          content_payload=json.dumps(inventory,ensure_ascii=False,separators=(',',':'),sort_keys=True).encode('utf-8')
+          inv_sha=hashlib.sha256(names_payload).hexdigest()
+          inv_content_sha=hashlib.sha256(content_payload).hexdigest()
+
+          completed=set()
+          for p in pathlib.Path('_resume_summaries').glob('partition-*-summary.json'):
+              try:
+                  s=json.loads(p.read_text('utf-8'))
+                  idx=int(s['partition_index'])
+                  if (
+                      s.get('status') == 'COMPLETE' and
+                      int(s.get('partition_count',-1)) == partition_count and
+                      s.get('feature_schema_sha256') == schema_sha and
+                      s.get('source_inventory_sha256') == inv_sha and
+                      int(s.get('assigned_shards',-1)) == int(s.get('completed_shards',-2)) and
+                      int(s.get('failed_shards',1)) == 0
+                  ):
+                      completed.add(idx)
+              except Exception as exc:
+                  print('Ignoring unusable resume summary',p,repr(exc))
+
+          partitions=[i for i in range(partition_count) if i not in completed]
+          already_complete=(len(partitions)==0)
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write('partitions='+json.dumps(partitions)+'\n')
+              f.write(f'partition_count={partition_count}\n')
+              f.write(f'max_parallel={max_parallel}\n')
+              f.write(f'limit_per_partition={limit}\n')
+              f.write(f'run_id={run_id}\n')
+              f.write(f'expected_shards={len(inventory)}\n')
+              f.write(f'source_inventory_sha256={inv_sha}\n')
+              f.write(f'source_inventory_content_sha256={inv_content_sha}\n')
+              f.write(f'feature_schema_sha256={schema_sha}\n')
+              f.write('already_complete='+('true' if already_complete else 'false')+'\n')
+          print(json.dumps({
+              'status':'PLAN_PASS',
+              'run_id':run_id,
+              'partition_count':partition_count,
+              'max_parallel':max_parallel,
+              'completed_from_release':len(completed),
+              'partitions_to_run':len(partitions),
+              'expected_shards':len(inventory),
+              'feature_schema_sha256':schema_sha,
+              'source_inventory_sha256':inv_sha,
+              'source_inventory_content_sha256':inv_content_sha,
+              'paid_runner':False,
+          },indent=2))
+
+  extract:
+    needs: plan
+    if: needs.plan.outputs.already_complete != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ fromJson(needs.plan.outputs.max_parallel) }}
+      matrix:
+        partition: ${{ fromJson(needs.plan.outputs.partitions) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install extraction dependencies
+        run: python -m pip install --disable-pip-version-check pyarrow==21.0.0 requests==2.32.4 huggingface_hub==0.34.4 pyahocorasick==2.2.0
+
+      - name: Extract durable feature partition
+        id: extract_partition
+        continue-on-error: true
+        run: |
+          python tools/osr_feature_partition_v2.py \
+            --partition-index '${{ matrix.partition }}' \
+            --partition-count '${{ needs.plan.outputs.partition_count }}' \
+            --limit-per-partition '${{ needs.plan.outputs.limit_per_partition }}' \
+            --expected-inventory-sha256 '${{ needs.plan.outputs.source_inventory_sha256 }}' \
+            --out-dir 'out/partition-${{ matrix.partition }}'
+
+      - name: Publish durable partition data then completion marker
+        if: always()
+        shell: bash
+        env:
+          RUN_ID: ${{ needs.plan.outputs.run_id }}
+          PARTITION: ${{ matrix.partition }}
+        run: |
+          set -euo pipefail
+          IDX=$(printf '%04d' "$PARTITION")
+          OUT="out/partition-$PARTITION"
+          test -f "$OUT/partition_summary.json"
+          cp "$OUT/partition_summary.json" "/tmp/partition-$IDX-summary.json"
+          tar -C "$OUT" -cf "/tmp/partition-$IDX-data.tar" .
+
+          upload_with_retry() {
+            local file="$1"
+            for attempt in 1 2 3 4 5; do
+              if gh release upload "$RUN_ID" "$file" --clobber; then return 0; fi
+              sleep $((attempt * 5))
+            done
+            return 1
+          }
+
+          SIZE=$(stat -c '%s' "/tmp/partition-$IDX-data.tar")
+          if [ "$SIZE" -le 1900000000 ]; then
+            upload_with_retry "/tmp/partition-$IDX-data.tar"
+          else
+            rm -f "/tmp/partition-$IDX-data.tar.part-"*
+            split -b 1800m -d -a 2 "/tmp/partition-$IDX-data.tar" "/tmp/partition-$IDX-data.tar.part-"
+            for f in /tmp/partition-$IDX-data.tar.part-*; do upload_with_retry "$f"; done
+          fi
+          # Summary is intentionally uploaded LAST. It is the durable commit marker.
+          upload_with_retry "/tmp/partition-$IDX-summary.json"
+
+      - name: Keep tiny diagnostic artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: osr-feature-diag-${{ needs.plan.outputs.run_id }}-${{ matrix.partition }}
+          path: |
+            out/partition-${{ matrix.partition }}/manifest.json
+            out/partition-${{ matrix.partition }}/manifest.partial.json
+            out/partition-${{ matrix.partition }}/partition_summary.json
+            out/partition-${{ matrix.partition }}/failures.jsonl
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Enforce partition completeness
+        if: always()
+        shell: python
+        env:
+          OUT: out/partition-${{ matrix.partition }}/partition_summary.json
+        run: |
+          import json,os
+          p=os.environ['OUT']
+          s=json.load(open(p,encoding='utf-8'))
+          assert s.get('status') == 'COMPLETE', s
+          assert int(s['assigned_shards']) == int(s['completed_shards'])
+          assert int(s['failed_shards']) == 0
+
+  recovery_plan:
+    needs: [plan, extract]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      recovery_partitions: ${{ steps.recovery.outputs.recovery_partitions }}
+      needs_recovery: ${{ steps.recovery.outputs.needs_recovery }}
+      completed_partitions: ${{ steps.recovery.outputs.completed_partitions }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - name: Download durable completion markers
+        shell: bash
+        env:
+          RUN_ID: ${{ needs.plan.outputs.run_id }}
+        run: |
+          mkdir -p _summaries
+          gh release download "$RUN_ID" -p 'partition-*-summary.json' -D _summaries >/dev/null 2>&1 || true
+      - id: recovery
+        shell: python
+        env:
+          PARTITION_COUNT: ${{ needs.plan.outputs.partition_count }}
+          FEATURE_SCHEMA_SHA256: ${{ needs.plan.outputs.feature_schema_sha256 }}
+          SOURCE_INVENTORY_SHA256: ${{ needs.plan.outputs.source_inventory_sha256 }}
+        run: |
+          import json,os,pathlib
+          n=int(os.environ['PARTITION_COUNT'])
+          good=set()
+          for p in pathlib.Path('_summaries').glob('partition-*-summary.json'):
+              try:
+                  s=json.loads(p.read_text('utf-8'))
+                  idx=int(s['partition_index'])
+                  if (
+                      s.get('status') == 'COMPLETE' and
+                      int(s.get('partition_count',-1)) == n and
+                      s.get('feature_schema_sha256') == os.environ['FEATURE_SCHEMA_SHA256'] and
+                      s.get('source_inventory_sha256') == os.environ['SOURCE_INVENTORY_SHA256'] and
+                      int(s.get('assigned_shards',-1)) == int(s.get('completed_shards',-2)) and
+                      int(s.get('failed_shards',1)) == 0
+                  ):
+                      good.add(idx)
+              except Exception as exc:
+                  print('bad summary',p,repr(exc))
+          missing=[i for i in range(n) if i not in good]
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write('recovery_partitions='+json.dumps(missing)+'\n')
+              f.write('needs_recovery='+('true' if missing else 'false')+'\n')
+              f.write(f'completed_partitions={len(good)}\n')
+          print(json.dumps({'complete_partitions':len(good),'recovery_partitions':missing},indent=2))
+
+  recover:
+    needs: [plan, recovery_plan]
+    if: needs.recovery_plan.outputs.needs_recovery == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ fromJson(needs.plan.outputs.max_parallel) }}
+      matrix:
+        partition: ${{ fromJson(needs.recovery_plan.outputs.recovery_partitions) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pyarrow==21.0.0 requests==2.32.4 huggingface_hub==0.34.4 pyahocorasick==2.2.0
+      - name: Recompute only incomplete partition
+        id: recovery_extract
+        continue-on-error: true
+        run: |
+          python tools/osr_feature_partition_v2.py \
+            --partition-index '${{ matrix.partition }}' \
+            --partition-count '${{ needs.plan.outputs.partition_count }}' \
+            --limit-per-partition '${{ needs.plan.outputs.limit_per_partition }}' \
+            --expected-inventory-sha256 '${{ needs.plan.outputs.source_inventory_sha256 }}' \
+            --out-dir 'out/partition-${{ matrix.partition }}'
+      - name: Replace durable partition checkpoint
+        if: always()
+        shell: bash
+        env:
+          RUN_ID: ${{ needs.plan.outputs.run_id }}
+          PARTITION: ${{ matrix.partition }}
+        run: |
+          set -euo pipefail
+          IDX=$(printf '%04d' "$PARTITION")
+          OUT="out/partition-$PARTITION"
+          test -f "$OUT/partition_summary.json"
+          cp "$OUT/partition_summary.json" "/tmp/partition-$IDX-summary.json"
+          tar -C "$OUT" -cf "/tmp/partition-$IDX-data.tar" .
+          upload_with_retry() {
+            local file="$1"
+            for attempt in 1 2 3 4 5; do
+              if gh release upload "$RUN_ID" "$file" --clobber; then return 0; fi
+              sleep $((attempt * 5))
+            done
+            return 1
+          }
+          SIZE=$(stat -c '%s' "/tmp/partition-$IDX-data.tar")
+          if [ "$SIZE" -le 1900000000 ]; then
+            upload_with_retry "/tmp/partition-$IDX-data.tar"
+          else
+            split -b 1800m -d -a 2 "/tmp/partition-$IDX-data.tar" "/tmp/partition-$IDX-data.tar.part-"
+            for f in /tmp/partition-$IDX-data.tar.part-*; do upload_with_retry "$f"; done
+          fi
+          upload_with_retry "/tmp/partition-$IDX-summary.json"
+      - name: Enforce recovered partition completeness
+        if: always()
+        shell: python
+        env:
+          OUT: out/partition-${{ matrix.partition }}/partition_summary.json
+        run: |
+          import json,os
+          s=json.load(open(os.environ['OUT'],encoding='utf-8'))
+          assert s.get('status') == 'COMPLETE', s
+          assert int(s['assigned_shards']) == int(s['completed_shards'])
+          assert int(s['failed_shards']) == 0
+
+  reduce:
+    needs: [plan, extract, recovery_plan, recover]
+    if: always() && needs.plan.result == 'success' && needs.recovery_plan.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - name: Download durable partition summaries only
+        shell: bash
+        env:
+          RUN_ID: ${{ needs.plan.outputs.run_id }}
+        run: |
+          rm -rf _summaries && mkdir _summaries
+          gh release download "$RUN_ID" -p 'partition-*-summary.json' -D _summaries >/dev/null 2>&1 || true
+
+      - name: Strict identity-aware reduce
+        shell: python
+        env:
+          RUN_ID: ${{ needs.plan.outputs.run_id }}
+          PARTITION_COUNT: ${{ needs.plan.outputs.partition_count }}
+          EXPECTED_SHARDS: ${{ needs.plan.outputs.expected_shards }}
+          FEATURE_SCHEMA_SHA256: ${{ needs.plan.outputs.feature_schema_sha256 }}
+          SOURCE_INVENTORY_SHA256: ${{ needs.plan.outputs.source_inventory_sha256 }}
+          SOURCE_INVENTORY_CONTENT_SHA256: ${{ needs.plan.outputs.source_inventory_content_sha256 }}
+          INITIAL_EXTRACT_RESULT: ${{ needs.extract.result }}
+          RECOVER_RESULT: ${{ needs.recover.result }}
+          RECOVERY_REQUESTED: ${{ needs.recovery_plan.outputs.needs_recovery }}
+        run: |
+          import collections,gzip,hashlib,json,os,pathlib,time
+
+          schema=json.load(open('control/feature_schema_v1.json',encoding='utf-8'))
+          schema_sha=hashlib.sha256(pathlib.Path('control/feature_schema_v1.json').read_bytes()).hexdigest()
+          assert schema_sha == os.environ['FEATURE_SCHEMA_SHA256']
+
+          with gzip.open('control/stage2_query_index.json.gz','rt',encoding='utf-8') as f:
+              m2=json.load(f)
+          expected={
+              (x['source'],x['repo'],x['file']):x.get('sha256')
+              for x in m2['inventory']
+          }
+          assert len(expected) == int(os.environ['EXPECTED_SHARDS'])
+
+          summaries={}
+          summary_errors=[]
+          for p in pathlib.Path('_summaries').glob('partition-*-summary.json'):
+              try:
+                  s=json.loads(p.read_text('utf-8'))
+                  idx=int(s['partition_index'])
+                  summaries[idx]=s
+              except Exception as exc:
+                  summary_errors.append(f'{p}:{exc!r}')
+
+          n=int(os.environ['PARTITION_COUNT'])
+          bad_partitions=[]
+          seen={}
+          duplicates=[]
+          sha_mismatches=[]
+          feature_occ=collections.Counter()
+          feature_rows=collections.Counter()
+          feature_family={x['id']:x['family'] for x in schema['features']}
+          pair_rows=collections.Counter()
+          corpus_stats=collections.defaultdict(lambda: collections.Counter())
+          bytes_downloaded=0
+          rows_scanned=0
+          signal_rows=0
+          max_elapsed=0.0
+
+          for idx in range(n):
+              s=summaries.get(idx)
+              if not s:
+                  bad_partitions.append({'partition':idx,'reason':'missing_summary'})
+                  continue
+              reasons=[]
+              if s.get('status') != 'COMPLETE': reasons.append('status_not_complete')
+              if int(s.get('partition_count',-1)) != n: reasons.append('partition_count_mismatch')
+              if s.get('feature_schema_sha256') != os.environ['FEATURE_SCHEMA_SHA256']: reasons.append('schema_mismatch')
+              if s.get('source_inventory_sha256') != os.environ['SOURCE_INVENTORY_SHA256']: reasons.append('inventory_mismatch')
+              if int(s.get('assigned_shards',-1)) != int(s.get('completed_shards',-2)): reasons.append('assigned_completed_mismatch')
+              if int(s.get('failed_shards',1)) != 0: reasons.append('failed_shards')
+              if reasons:
+                  bad_partitions.append({'partition':idx,'reason':','.join(reasons)})
+                  continue
+
+              bytes_downloaded += int(s.get('bytes_downloaded') or 0)
+              rows_scanned += int(s.get('rows_scanned') or 0)
+              signal_rows += int(s.get('signal_rows') or 0)
+              max_elapsed=max(max_elapsed,float(s.get('elapsed_seconds') or 0))
+              for f in s.get('features',[]):
+                  fid=f['feature_id']
+                  feature_occ[fid]+=int(f['occurrences'])
+                  feature_rows[fid]+=int(f['rows_with_feature'])
+                  if f.get('family'): feature_family[fid]=f['family']
+              for p in s.get('cooccurrence',[]):
+                  pair_rows[(p['feature_a'],p['feature_b'])]+=int(p['rows_cooccurring'])
+              for sh in s.get('shards',[]):
+                  key=(sh['corpus'],sh['repo'],sh['shard'])
+                  if key in seen:
+                      duplicates.append(key)
+                  seen[key]=sh
+                  exp_sha=expected.get(key)
+                  if exp_sha is None:
+                      continue
+                  if exp_sha and sh.get('shard_sha256') != exp_sha:
+                      sha_mismatches.append({'key':key,'expected':exp_sha,'got':sh.get('shard_sha256')})
+                  c=corpus_stats[sh['corpus']]
+                  c['shards_scanned']+=1
+                  for k in ['download_bytes','rows','rows_nonempty','signal_rows','chars','explicit_year_mentions','within_shard_duplicate_rows']:
+                      c[k]+=int(sh.get(k) or 0)
+
+          seen_keys=set(seen)
+          expected_keys=set(expected)
+          missing=sorted(expected_keys-seen_keys)
+          extra=sorted(seen_keys-expected_keys)
+          strict_complete=(
+              not bad_partitions and
+              not summary_errors and
+              not duplicates and
+              not sha_mismatches and
+              not missing and
+              not extra and
+              len(seen_keys) == int(os.environ['EXPECTED_SHARDS'])
+          )
+
+          status={
+              'status':'PASS' if strict_complete else ('PARTIAL' if seen else 'FAILED'),
+              'run_id':os.environ['RUN_ID'],
+              'format':'osr-feature-store-status/v2',
+              'feature_schema_version':schema.get('version'),
+              'feature_schema_sha256':schema_sha,
+              'source_inventory_sha256':os.environ['SOURCE_INVENTORY_SHA256'],
+              'source_inventory_content_sha256':os.environ['SOURCE_INVENTORY_CONTENT_SHA256'],
+              'm2_run_id':m2.get('run_id'),
+              'expected_partitions':n,
+              'complete_partitions':n-len(bad_partitions),
+              'bad_partitions':bad_partitions,
+              'expected_shards':len(expected_keys),
+              'shards_scanned':len(seen_keys & expected_keys),
+              'missing_shards_count':len(missing),
+              'missing_shards':[{'corpus':a,'repo':b,'shard':c} for a,b,c in missing[:200]],
+              'extra_shards_count':len(extra),
+              'sha_mismatches_count':len(sha_mismatches),
+              'sha_mismatches':sha_mismatches[:100],
+              'duplicate_shards_count':len(duplicates),
+              'summary_errors':summary_errors[:100],
+              'bytes_downloaded':bytes_downloaded,
+              'aggregate_download_GiB':round(bytes_downloaded/1024**3,3),
+              'rows_scanned':rows_scanned,
+              'signal_rows':signal_rows,
+              'max_partition_elapsed_seconds':max_elapsed,
+              'initial_extract_result':os.environ.get('INITIAL_EXTRACT_RESULT'),
+              'recovery_requested':os.environ.get('RECOVERY_REQUESTED'),
+              'recovery_result':os.environ.get('RECOVER_RESULT'),
+              'durable_store':{
+                  'type':'GitHub Release assets',
+                  'tag':os.environ['RUN_ID'],
+                  'partition_data_assets':'partition-XXXX-data.tar or split parts',
+                  'partition_commit_markers':'partition-XXXX-summary.json',
+                  'resume_rule':'same run_id skips COMPLETE identity-matching partitions and computes only gaps',
+              },
+              'strict_pass_rule':'all partitions COMPLETE + exact 1788-shard inventory set + every shard SHA matches M2 inventory + no duplicates/extras/schema/reducer errors',
+              'github_run_id':os.environ['GITHUB_RUN_ID'],
+              'github_sha':os.environ['GITHUB_SHA'],
+              'finished_unix':time.time(),
+          }
+          pathlib.Path('control/feature_extraction_status.json').write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n','utf-8')
+
+          catalog={
+              'format':'osr-feature-catalog/v2',
+              'status':status['status'],
+              'run_id':os.environ['RUN_ID'],
+              'feature_schema_version':schema.get('version'),
+              'feature_schema_sha256':schema_sha,
+              'source_inventory_content_sha256':os.environ['SOURCE_INVENTORY_CONTENT_SHA256'],
+              'shards_scanned':status['shards_scanned'],
+              'expected_shards':status['expected_shards'],
+              'signal_rows':signal_rows,
+              'rows_scanned':rows_scanned,
+              'corpus_stats':{k:dict(v) for k,v in sorted(corpus_stats.items())},
+              'features':[
+                  {'feature_id':fid,'family':feature_family.get(fid,'unknown'),'occurrences':int(feature_occ[fid]),'rows_with_feature':int(feature_rows[fid])}
+                  for fid in sorted(feature_occ,key=lambda f:(-feature_rows[f],f))
+              ],
+              'top_cooccurrence':[
+                  {'feature_a':a,'feature_b':b,'rows_cooccurring':int(v)}
+                  for (a,b),v in pair_rows.most_common(1000)
+              ],
+              'raw_text_persisted':False,
+              'durable_release_tag':os.environ['RUN_ID'],
+              'evidence_contract':'release partition data contains sparse row locators + row_sha256; exact source-row recheck required',
+              'created_unix':time.time(),
+          }
+          pathlib.Path('control/feature_catalog.json').write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n','utf-8')
+
+          recovery={
+              'format':'osr-feature-recovery-plan/v2',
+              'run_id':os.environ['RUN_ID'],
+              'status':status['status'],
+              'bad_partitions':bad_partitions,
+              'missing_shards_count':len(missing),
+              'missing_shards':[{'corpus':a,'repo':b,'shard':c} for a,b,c in missing],
+              'resume_instruction':'Re-trigger FEATURE_EXTRACT with the SAME run_id; plan reads release markers and runs only incomplete partitions.',
+          }
+          pathlib.Path('control/feature_recovery_plan.json').write_text(json.dumps(recovery,ensure_ascii=False,indent=2)+'\n','utf-8')
+          print(json.dumps(status,ensure_ascii=False,indent=2))
+
+      - name: Commit catalog, strict status, and recovery plan
+        if: always()
+        run: |
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/feature_extraction_status.json control/feature_catalog.json control/feature_recovery_plan.json
+          if ! git diff --cached --quiet; then
+            git commit -m "feature-store: durable status ${{ needs.plan.outputs.run_id }}"
+            git pull --rebase origin stage2-direct-miner-v3-1
+            git push origin HEAD:stage2-direct-miner-v3-1
+          fi
+
+      - name: Publish final catalog/status into durable release
+        if: always()
+        shell: bash
+        env:
+          RUN_ID: ${{ needs.plan.outputs.run_id }}
+        run: |
+          for f in control/feature_extraction_status.json control/feature_catalog.json control/feature_recovery_plan.json; do
+            test -f "$f" && gh release upload "$RUN_ID" "$f" --clobber || true
+          done
+
+      - name: Enforce strict full-corpus completion
+        if: always()
+        shell: python
+        run: |
+          import json
+          s=json.load(open('control/feature_extraction_status.json',encoding='utf-8'))
+          assert s.get('status') == 'PASS', s

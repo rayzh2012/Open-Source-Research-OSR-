@@ -1,0 +1,49 @@
+name: Persian Manuscript Alias Preservation Batch 3
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - 'control/persian_manuscript_rescue_targets_batch3.json'
+      - '.github/workflows/persian-manuscript-alias-preserve-batch3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  aliases:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preserve alias metadata without duplicate bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p "$HOME/.config/rclone" /tmp/aliases
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          python - <<'PY'
+          import json,subprocess,urllib.request
+          from pathlib import Path
+          reg=json.load(open('control/persian_manuscript_rescue_targets_batch3.json',encoding='utf-8'))
+          root='gdrive:'+reg['destination_root']
+          out=[]
+          for a in reg.get('aliases',[]):
+            iid=a['ia_id']; req=urllib.request.Request('https://archive.org/metadata/'+iid,headers={'User-Agent':'OSR-Preservation/1.0'})
+            with urllib.request.urlopen(req,timeout=90) as r:o=json.load(r)
+            m=o.get('metadata') or {}; originals=[]
+            for f in o.get('files',[]):
+              n=f.get('name','')
+              if f.get('source')=='original' and n.lower().endswith(('.pdf','.tif','.tiff','.jpg','.jpeg','.jp2.zip')):
+                originals.append({'name':n,'size':int(f.get('size') or 0),'md5':f.get('md5'),'sha1':f.get('sha1'),'format':f.get('format')})
+            record={'schema_version':'osr-persian-manuscript-alias-v1','status':'ALIAS_ONLY','ia_id':iid,'title':m.get('title'),'licenseurl':m.get('licenseurl'),'canonical_id':a['canonical_id'],'canonical_ia_id':a['canonical_ia_id'],'canonical_content_sha1':a['sha1'],'reason':a['reason'],'originals':originals}
+            if not any(x.get('sha1')==a['sha1'] for x in originals): raise RuntimeError('alias checksum mismatch for '+iid)
+            p=Path('/tmp/aliases')/(iid+'.ALIAS.json');p.write_text(json.dumps(record,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+            dst=f"{root}/_aliases/{iid}/ALIAS.json";subprocess.run(['rclone','copyto',str(p),dst,'--retries','8','--low-level-retries','16'],check=True);out.append(record)
+          print('RESULT_JSON='+json.dumps({'status':'PASS','aliases':len(out),'records':out},ensure_ascii=False,sort_keys=True))
+          PY

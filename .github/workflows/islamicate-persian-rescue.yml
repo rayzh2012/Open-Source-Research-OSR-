@@ -1,0 +1,171 @@
+name: Islamicate Persian Rescue
+
+on:
+  push:
+    branches:
+      - stage2-direct-miner-v3-1
+    paths:
+      - '.github/workflows/islamicate-persian-rescue.yml'
+      - 'control/islamicate_rescue_targets.json'
+      - 'control/islamicate_rescue_worker.py'
+      - 'control/islamicate_rescue_worker_v2.py'
+      - 'control/islamicate_rescue_worker_v3.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: islamicate-persian-rescue
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          r=json.load(open('control/islamicate_rescue_targets.json',encoding='utf-8'))
+          include=[]
+          for s in r['sources']:
+              if s.get('enabled') and s.get('kind') != 'existing_pipeline':
+                  include.append({'source_id':s['id'],'label':s['label'],'kind':s['kind']})
+          if not include:
+              raise SystemExit('No enabled rescue targets')
+          print(json.dumps(include,ensure_ascii=False,indent=2))
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write('matrix='+json.dumps({'include':include},ensure_ascii=False,separators=(',',':'))+'\n')
+          PY
+
+  auth:
+    runs-on: ubuntu-latest
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - name: Verify Drive credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${RCLONE_CONFIG_B64:-}" || { echo '::error::Missing RCLONE_CONFIG_B64'; exit 42; }
+
+  rescue:
+    needs: [plan, auth]
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install rescue dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests beautifulsoup4
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Preserve ${{ matrix.label }}
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p "rescue-result/${{ matrix.source_id }}"
+          python control/islamicate_rescue_worker_v3.py \
+            --source-id '${{ matrix.source_id }}' \
+            --registry control/islamicate_rescue_targets.json \
+            --work-dir "/tmp/osr-rescue-${{ matrix.source_id }}" \
+            2>&1 | tee "rescue-result/${{ matrix.source_id }}/worker.log"
+          grep '^RESULT_JSON=' "rescue-result/${{ matrix.source_id }}/worker.log" | tail -1 | sed 's/^RESULT_JSON=//' > "rescue-result/${{ matrix.source_id }}/result.json"
+          python - <<'PY'
+          import json
+          p='rescue-result/${{ matrix.source_id }}/result.json'
+          obj=json.load(open(p,encoding='utf-8'))
+          print(json.dumps(obj,ensure_ascii=False,indent=2))
+          if obj.get('status') not in {'PASS','SKIP_COMPLETE','PARTIAL'}:
+              raise SystemExit(2)
+          PY
+      - name: Save small recovery result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: islamicate-rescue-${{ matrix.source_id }}-${{ github.run_id }}
+          path: rescue-result/${{ matrix.source_id }}/
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 6
+
+  finalize:
+    if: always()
+    needs: [plan, auth, rescue]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+          fetch-depth: 0
+      - name: Download rescue results
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: islamicate-rescue-*-${{ github.run_id }}
+          path: rescue-results
+          merge-multiple: true
+      - name: Build status
+        env:
+          AUTH_RESULT: ${{ needs.auth.result }}
+          RESCUE_RESULT: ${{ needs.rescue.result }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import glob,json,os,pathlib
+          rows=[]
+          for p in glob.glob('rescue-results/**/result.json',recursive=True):
+              try: rows.append(json.load(open(p,encoding='utf-8')))
+              except Exception as e: rows.append({'status':'UNREADABLE','path':p,'error':repr(e)})
+          auth=os.environ.get('AUTH_RESULT','unknown')
+          rr=os.environ.get('RESCUE_RESULT','unknown')
+          if auth!='success': status='NEEDS_DRIVE_AUTH'
+          elif rr=='success' and rows and all(x.get('status') in {'PASS','SKIP_COMPLETE','PARTIAL'} for x in rows): status='PASS_WITH_POSSIBLE_PARTIALS' if any(x.get('status')=='PARTIAL' for x in rows) else 'PASS'
+          elif rr in {'failure','cancelled'}: status='PARTIAL_OR_FAILED'
+          else: status='INCOMPLETE'
+          obj={'schema_version':'osr-islamicate-rescue-status-v3','github_run_id':os.environ.get('RUN_ID'),'github_run_attempt':os.environ.get('RUN_ATTEMPT'),'auth_result':auth,'rescue_result':rr,'status':status,'sources':sorted(rows,key=lambda x:x.get('source_id',''))}
+          pathlib.Path('/tmp/islamicate_rescue_status.json').write_text(json.dumps(obj,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(obj,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit status
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'osr-rescue-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git fetch origin stage2-direct-miner-v3-1
+          git reset --hard origin/stage2-direct-miner-v3-1
+          cp /tmp/islamicate_rescue_status.json control/islamicate_rescue_status.json
+          git add control/islamicate_rescue_status.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'rescue: update Islamicate preservation status [skip ci]'
+          for n in 1 2 3 4 5; do
+            if git push origin HEAD:stage2-direct-miner-v3-1; then exit 0; fi
+            sleep $((n*3))
+            git fetch origin stage2-direct-miner-v3-1
+            git rebase origin/stage2-direct-miner-v3-1
+          done
+          exit 1

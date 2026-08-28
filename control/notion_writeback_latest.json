@@ -1,0 +1,10 @@
+{
+  "format": "osr-notion-writeback/v1",
+  "run_id": "m5-exact-ming-qing-myth-dense-smoke-001",
+  "status": "READY",
+  "component_mismatches": [],
+  "summary_text": "【OSR Research Run】m5-exact-ming-qing-myth-dense-smoke-001 | exact=PASS | rows=120 | bytes=7210395643 | 3+local=44 | 4+local=18 | local_pairs=55 | graph_edges=55 | historical_fact_upgrade_allowed=False",
+  "notion_target_from_env": false,
+  "direct_sync_attempted": false,
+  "direct_sync_status": "PAYLOAD_ONLY_NO_SECRET"
+}

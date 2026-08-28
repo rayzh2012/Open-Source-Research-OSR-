@@ -1,0 +1,9 @@
+{
+  "format": "osr-feature-recovery-plan/v2",
+  "run_id": "feature-store-v1-resilient-001",
+  "status": "PASS",
+  "bad_partitions": [],
+  "missing_shards_count": 0,
+  "missing_shards": [],
+  "resume_instruction": "Re-trigger FEATURE_EXTRACT with the SAME run_id; plan reads release markers and runs only incomplete partitions."
+}

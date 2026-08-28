@@ -1,0 +1,10 @@
+{
+  "schema_version":"osr-persian-catalogue-rescue-v3",
+  "destination_root":"龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/reference_catalogues",
+  "items":[
+    {"id":"bnf_blochet_persian_catalogue_v1","ia_id":"CatalogueDesManuscritsPersansDeLaBibliothqueNationaleByE.Blochet","title":"Catalogue des manuscrits persans de la Bibliothèque nationale, Vol. 1","date":null,"license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Internet Archive / Bibliothèque nationale de France catalogue scan"},
+    {"id":"bnf_blochet_persian_catalogue_v2","ia_id":"CatalogueDesManuscritsPersansDeLaBibliothequeNationaleByE.BlochetVol2","title":"Catalogue des manuscrits persans de la Bibliothèque nationale, Vol. 2","date":null,"license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Internet Archive / Bibliothèque nationale de France catalogue scan"},
+    {"id":"bnf_blochet_persian_catalogue_v3","ia_id":"CatalogueDesManuscritsPersansDeLaBibliothequeNationaleByE.BlochetVol3","title":"Catalogue des manuscrits persans de la Bibliothèque nationale, Vol. 3","date":null,"license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Internet Archive / Bibliothèque nationale de France catalogue scan"},
+    {"id":"bnf_blochet_persian_catalogue_v4","ia_id":"CatalogueDesManuscritsPersansDeLaBibliothequeNationaleByE.BlochetVol4","title":"Catalogue des manuscrits persans de la Bibliothèque nationale, Vol. 4","date":null,"license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Internet Archive / Bibliothèque nationale de France catalogue scan"}
+  ]
+}

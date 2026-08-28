@@ -1,0 +1,76 @@
+name: Specimens of Persian Manuscripts DLI Rescue
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/specimens-persian-manuscripts-dli-rescue.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rescue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Configure and preserve original plus searchable derivative
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p "$HOME/.config/rclone" /tmp/specimens
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          python - <<'PY'
+          import hashlib,json,os,subprocess
+          from pathlib import Path
+          import requests
+          from requests.adapters import HTTPAdapter
+          from urllib3.util.retry import Retry
+          iid='in.ernet.dli.2015.544287'
+          root='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/reference_catalogues/specimens_persian_manuscripts_1902'
+          cp=subprocess.run(['rclone','cat',root+'/COMPLETE.json'],text=True,capture_output=True)
+          if cp.returncode==0:
+            try:
+              old=json.loads(cp.stdout)
+              if old.get('status')=='PASS' and old.get('preservation_grade')=='ORIGINAL_PLUS_TEXT_PDF':
+                print('RESULT_JSON='+json.dumps({'status':'SKIP_COMPLETE','id':iid}));raise SystemExit(0)
+            except json.JSONDecodeError: pass
+          retry=Retry(total=12,connect=12,read=12,backoff_factor=2,status_forcelist=(429,500,502,503,504),allowed_methods=frozenset(['GET']),respect_retry_after_header=True)
+          s=requests.Session();s.headers['User-Agent']='OSR-Preservation/1.0';s.mount('https://',HTTPAdapter(max_retries=retry))
+          files={
+            'original_image_pdf':'2015.544287.Specimens-of.pdf',
+            'text_pdf':'2015.544287.Specimens-of_text.pdf',
+            'ocr_text':'2015.544287.Specimens-of_djvu.txt',
+            'djvu_xml':'2015.544287.Specimens-of_djvu.xml',
+            'scandata_xml':'2015.544287.Specimens-of_scandata.xml',
+            'meta_xml':'in.ernet.dli.2015.544287_meta.xml',
+            'files_xml':'in.ernet.dli.2015.544287_files.xml'
+          }
+          def sha(p):
+            h=hashlib.sha256()
+            with open(p,'rb') as f:
+              for b in iter(lambda:f.read(8*1024*1024),b''):h.update(b)
+            return h.hexdigest()
+          done={}
+          for kind,name in files.items():
+            url=f'https://archive.org/download/{iid}/{name}';out=Path('/tmp/specimens')/name;tmp=Path(str(out)+'.part')
+            print('DOWNLOAD',kind,url,flush=True)
+            with s.get(url,stream=True,timeout=(30,1800)) as r:
+              r.raise_for_status();expected=int(r.headers.get('Content-Length') or 0);n=0
+              with open(tmp,'wb') as f:
+                for chunk in r.iter_content(8*1024*1024):
+                  if chunk:f.write(chunk);n+=len(chunk)
+            if expected and n!=expected:raise IOError(f'short {kind}: {n}!={expected}')
+            os.replace(tmp,out);digest=sha(out)
+            subprocess.run(['rclone','copyto',str(out),f'{root}/raw/{name}','--drive-chunk-size','128M','--retries','8','--low-level-retries','16','--timeout','20m','--contimeout','30s','--stats','30s'],check=True)
+            done[kind]={'name':name,'bytes':n,'sha256':digest,'url':url,'status':'PASS'}
+            out.unlink(missing_ok=True)
+          meta={'schema_version':'osr-persian-catalogue-complete-v2','status':'PASS','id':'specimens_persian_manuscripts_1902','ia_id':iid,'title':'Specimens of Persian Manuscripts','year':1902,'preservation_grade':'ORIGINAL_PLUS_TEXT_PDF','files':done}
+          p=Path('/tmp/specimens/COMPLETE.json');p.write_text(json.dumps(meta,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          subprocess.run(['rclone','copyto',str(p),root+'/COMPLETE.json','--retries','8','--low-level-retries','16'],check=True)
+          print('RESULT_JSON='+json.dumps(meta,ensure_ascii=False,sort_keys=True))
+          PY

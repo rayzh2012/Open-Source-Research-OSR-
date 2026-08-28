@@ -1,0 +1,12 @@
+{
+  "run_id": "sketch-cache-pilot-001",
+  "rows_per_shard": 120,
+  "max_chars_per_shard": 2000000,
+  "shards": [
+    {"repo": "Geralt-Targaryen/Literature-zh", "file": "literature_zh-00142-of-00233.parquet"},
+    {"repo": "Geralt-Targaryen/Literature-zh", "file": "literature_zh-00149-of-00233.parquet"},
+    {"repo": "Geralt-Targaryen/Literature-zh", "file": "literature_zh-00148-of-00233.parquet"},
+    {"repo": "Geralt-Targaryen/Literature-zh", "file": "literature_zh-00144-of-00233.parquet"}
+  ],
+  "purpose": "Bounded pilot only. Estimate shard-level 2/3-gram sketch size before any full-corpus build. Do not scale from this run without held-out rejection-rate validation."
+}

@@ -1,0 +1,91 @@
+name: Wellcome Pre-1700 Registry and Full-Item Smoke
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - 'control/wellcome_pre1700_full_item_request.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wellcome-pre1700-full-item-smoke
+  cancel-in-progress: false
+
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure preservation environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Build rights-qualified registry
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p result
+          python control/wellcome_pre1700_registry.py /tmp/wellcome-registry 2>&1 | tee result/registry.log
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wellcome-registry-${{ github.run_id }}
+          path: result/
+          retention-days: 30
+          if-no-files-found: warn
+
+  full-item-smoke:
+    needs: registry
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure preservation environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Preserve bounded full item
+        shell: bash
+        run: |
+          set -euo pipefail
+          work_id="$(python -c "import json; print(json.load(open('control/wellcome_pre1700_full_item_request.json'))['smoke_work_id'])")"
+          mkdir -p result
+          set -o pipefail
+          python control/wellcome_pre1700_full_item_worker.py --work-id "$work_id" --work-dir /tmp/wellcome-full-item 2>&1 | tee result/full-item.log
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wellcome-full-item-${{ github.run_id }}
+          path: result/
+          retention-days: 30
+          if-no-files-found: warn

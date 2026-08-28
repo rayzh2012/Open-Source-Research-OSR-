@@ -1,0 +1,46 @@
+name: LOC Persian Rescue Audit
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - '.github/workflows/loc-persian-rescue-audit.yml'
+      - 'control/loc_persian_rescue_audit.py'
+      - 'control/loc_persian_rescue_audit_request.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Configure Drive
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Audit 173 checkpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p result
+          python control/loc_persian_rescue_audit.py --out result/status.json --workers 20 | tee result/audit.log
+          rclone copyto result/status.json "gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/loc_persian_manuscripts/meta/RESCUE_STATUS_LATEST.json" \
+            --drive-chunk-size 64M --retries 8 --low-level-retries 16 --timeout 10m --contimeout 30s
+      - uses: actions/upload-artifact@v4
+        with:
+          name: loc-persian-rescue-audit-${{ github.run_id }}
+          path: result/
+          retention-days: 30

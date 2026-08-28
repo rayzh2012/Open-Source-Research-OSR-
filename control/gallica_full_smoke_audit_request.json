@@ -1,0 +1,14 @@
+{
+  "schema_version": "osr-gallica-full-smoke-audit-request-v1",
+  "enabled": true,
+  "request_id": "gallica-iiif-full-smoke-audit-20260828-001",
+  "requested_at": "2026-08-28T04:14:00Z",
+  "source_run_id": 33138121489,
+  "expected_items": 2,
+  "expected_pages": 144,
+  "expected_arks": [
+    "btv1b10025022q",
+    "btv1b10025026h"
+  ],
+  "release_gate": "Both full-resolution IIIF smoke jobs completed successfully; execute exact Drive byte+SHA256 readback before any 1,472-item expansion."
+}

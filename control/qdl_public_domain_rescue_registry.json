@@ -1,0 +1,56 @@
+{
+  "schema_version": "osr-qdl-public-domain-rescue-registry-v1",
+  "created_at": "2026-08-27",
+  "source": "Qatar Digital Library",
+  "acquisition_status": "GITHUB_HOSTED_RUNNER_BLOCKED_403",
+  "policy": "Registry/provenance preservation only until a permitted non-GitHub acquisition plane is available. No access-control bypassing.",
+  "collections": [
+    {
+      "id": "or_5591",
+      "title": "Collection of Arabic astrological and divinatory texts, and a fragment of a Persian manuscript",
+      "reference": "British Library: Oriental Manuscripts, Or 5591",
+      "languages": ["Arabic", "Persian"],
+      "images": 440,
+      "rights": "Public Domain",
+      "manifest": "https://www.qdl.qa/en/iiif/81055/vdc_100099023112.0x000001/manifest",
+      "source_record": "https://www.qdl.qa/en/archive/81055/vdc_100151225647.0x000005",
+      "iiif_image_prefix": "https://iiif.qdl.qa/iiif/images/81055/vdc_100099023112.0x000001/",
+      "verified_page_examples": [
+        {
+          "page": 1,
+          "record": "https://www.qdl.qa/en/archive/81055/vdc_100151225647.0x000002",
+          "image": "https://iiif.qdl.qa/iiif/images/81055/vdc_100099023112.0x000001/Or 5591_0001.jp2/full/!280,240/0/default.jpg"
+        },
+        {
+          "page": 4,
+          "record": "https://www.qdl.qa/en/archive/81055/vdc_100151225647.0x000005",
+          "image": "https://iiif.qdl.qa/iiif/images/81055/vdc_100099023112.0x000001/Or 5591_0004.jp2/full/!280,240/0/default.jpg"
+        },
+        {
+          "page": 190,
+          "record": "https://www.qdl.qa/en/archive/81055/vdc_100151225647.0x0000bf",
+          "image": "https://iiif.qdl.qa/iiif/images/81055/vdc_100099023112.0x000001/Or 5591_0190.jp2/full/!280,240/0/default.jpg",
+          "content": "Instructions for talisman making"
+        },
+        {
+          "page": 239,
+          "record": "https://www.qdl.qa/en/archive/81055/vdc_100151225648.0x000028",
+          "image": "https://iiif.qdl.qa/iiif/images/81055/vdc_100099023112.0x000001/Or 5591_0239.jp2/full/!280,240/0/default.jpg",
+          "content": "Astrological geography / planetary regions and countries"
+        },
+        {
+          "page": 331,
+          "record": "https://www.qdl.qa/en/archive/81055/vdc_100151225648.0x000084",
+          "image": "https://iiif.qdl.qa/iiif/images/81055/vdc_100099023112.0x000001/Or 5591_0331.jp2/full/!280,240/0/default.jpg",
+          "content": "Faṣl fī al-qirānāt"
+        }
+      ]
+    },
+    {
+      "id": "qdl_seed_vdc_100000000046_0x0001c7",
+      "rights": "Public Domain (previously verified source record)",
+      "manifest": "https://www.qdl.qa/en/iiif/81055/vdc_100000000046.0x0001c7/manifest",
+      "status": "identity_preserved_manifest_bytes_pending_external_plane"
+    }
+  ]
+}

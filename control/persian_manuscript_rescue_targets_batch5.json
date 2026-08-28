@@ -1,0 +1,18 @@
+{
+  "schema_version":"osr-persian-manuscript-rescue-targets-v1",
+  "destination_root":"龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/manuscripts",
+  "items":[
+    {"id":"openn_ljs189_zakhira_khwarazmshahi_1300","ia_id":"ljs189","title":"Zakhira-i Khwarazmshahi","date":"1300","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_ljs404_jami_al_ulum_1200","ia_id":"ljs404","title":"Jami al-ulum","date":"1200","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_ljs295_kitab_adwar_1412","ia_id":"ljs295","title":"Kitab-i Adwar","date":"1412","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_ljs400_sharh_zij_gurgani_1494","ia_id":"ljs400","title":"Sharh-i Zij Gurgani","date":"1494","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_bv051_nizami_khamsah_1405","ia_id":"bv_051","title":"Nizami Khamsah","date":"1405","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_kcajs207_saadi_gulistan_1511","ia_id":"kcajs_rar_ms207","title":"Saadi Kitab-i Gulistan","date":"1511","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_lewis050_shahnamah_1575","ia_id":"lewis_o_050","title":"Firdawsi Shahnamah","date":"1575","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_lewis053_shahnamah_1592","ia_id":"lewis_o_053","title":"Firdawsi Shahnamah","date":"1592","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_lewis054_shahnamah_1600","ia_id":"lewis_o_054","title":"Firdawsi Shahnamah","date":"1600","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_lewis047_tarikh_kashmir_1700","ia_id":"lewis_o_047","title":"Tarikh-i Kashmir","date":"1700","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"maktubat_sirhindi_vol1_cc0","ia_id":"MaktubatSirhindi-Vol1-Manuscript","title":"Maktubat Sirhindi - vol 1 - Manuscript","date":null,"license":"CC0 1.0","licenseurl":"http://creativecommons.org/publicdomain/zero/1.0/","collection":"Internet Archive / booksbylanguage_persian"},
+    {"id":"panj_ganj_yaqoub_sarfi_cc0","ia_id":"PanjGanjByShaykhYaqoubSarfi-Manuscript","title":"Panj Ganj by Shaykh Yaqoub Sarfi - Manuscript","date":null,"license":"CC0 1.0","licenseurl":"http://creativecommons.org/publicdomain/zero/1.0/","collection":"Internet Archive"}
+  ]
+}

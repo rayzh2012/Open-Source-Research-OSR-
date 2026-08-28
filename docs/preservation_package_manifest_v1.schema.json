@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rayzh2012/Open-Source-Research-OSR-/blob/stage2-direct-miner-v3-1/docs/preservation_package_manifest_v1.schema.json",
+  "title": "Ancient Document Preservation Package Manifest v1",
+  "description": "Portable manifest for a verifiable ancient/historical digital-document preservation package. Designed to survive migration between storage providers, runners, repositories, and institutional adapters.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "package_id",
+    "source",
+    "rights",
+    "retrieval",
+    "payloads",
+    "verification",
+    "completion_state"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "package_id": {"type": "string", "minLength": 1},
+    "source": {
+      "type": "object",
+      "required": ["institution", "stable_id"],
+      "properties": {
+        "institution": {"type": "string"},
+        "stable_id": {"type": "string"},
+        "persistent_url": {"type": ["string", "null"]},
+        "catalogue_url": {"type": ["string", "null"]},
+        "iiif_manifest_url": {"type": ["string", "null"]},
+        "collection": {"type": ["string", "null"]},
+        "shelfmark": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "description": {
+      "type": "object",
+      "properties": {
+        "title": {"type": ["string", "null"]},
+        "date": {"type": ["string", "null"]},
+        "languages": {"type": "array", "items": {"type": "string"}},
+        "notes": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "rights": {
+      "type": "object",
+      "required": ["status", "evidence"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PUBLIC_DOMAIN", "PUBLIC_DOMAIN_MARK", "OPEN_LICENSE", "EXPLICIT_PERMISSION", "AMBIGUOUS", "RESTRICTED"]
+        },
+        "license": {"type": ["string", "null"]},
+        "evidence": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+        "checked_at": {"type": ["string", "null"], "format": "date-time"}
+      },
+      "additionalProperties": true
+    },
+    "retrieval": {
+      "type": "object",
+      "required": ["retrieved_at", "adapter"],
+      "properties": {
+        "retrieved_at": {"type": "string", "format": "date-time"},
+        "adapter": {"type": "string"},
+        "request_id": {"type": ["string", "null"]},
+        "runner": {"type": ["string", "null"]},
+        "source_endpoint_class": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "metadata_files": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/fileRecord"}
+    },
+    "payloads": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/fileRecord"},
+      "minItems": 1
+    },
+    "page_inventory": {
+      "type": ["object", "null"],
+      "properties": {
+        "expected_pages": {"type": ["integer", "null"], "minimum": 0},
+        "verified_pages": {"type": ["integer", "null"], "minimum": 0},
+        "missing_pages": {"type": "array", "items": {"type": "string"}},
+        "inventory_source": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "storage": {
+      "type": "object",
+      "properties": {
+        "canonical_location": {"type": ["string", "null"]},
+        "storage_provider": {"type": ["string", "null"]},
+        "object_ids": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "verification": {
+      "type": "object",
+      "required": ["readback_verified"],
+      "properties": {
+        "readback_verified": {"type": "boolean"},
+        "verified_at": {"type": ["string", "null"], "format": "date-time"},
+        "expected_payload_count": {"type": ["integer", "null"], "minimum": 0},
+        "verified_payload_count": {"type": ["integer", "null"], "minimum": 0},
+        "total_verified_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "duplicate_count": {"type": ["integer", "null"], "minimum": 0},
+        "errors": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "completion_state": {
+      "type": "string",
+      "enum": ["PASS", "PARTIAL", "BLOCKED", "FAILED", "METADATA_ONLY"]
+    },
+    "supersedes": {"type": ["string", "null"]},
+    "created_by": {"type": ["string", "null"]}
+  },
+  "$defs": {
+    "fileRecord": {
+      "type": "object",
+      "required": ["name", "sha256", "bytes"],
+      "properties": {
+        "name": {"type": "string"},
+        "role": {"type": ["string", "null"]},
+        "mime_type": {"type": ["string", "null"]},
+        "bytes": {"type": "integer", "minimum": 0},
+        "sha256": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"},
+        "source_url": {"type": ["string", "null"]},
+        "storage_object_id": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

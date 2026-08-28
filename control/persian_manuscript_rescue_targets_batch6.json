@@ -1,0 +1,16 @@
+{
+  "schema_version":"osr-persian-manuscript-rescue-targets-v1",
+  "destination_root":"龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/manuscripts",
+  "items":[
+    {"id":"openn_ljs278_dioscorides_hashayish_1595","ia_id":"ljs278","title":"Kitab-i Hashayish","date":"1595","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_ljs49_anatomy_1411","ia_id":"ljs49","title":"Rawdat al-adhhan fi marifat tashrih badan al-insan","date":"1411","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_ljs407_astronomical_texts_1500","ia_id":"ljs407","title":"Collection of astronomical texts","date":"1500","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_ljs414_astrological_compendium_1670","ia_id":"ljs414","title":"Astrological compendium","date":"1670","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_lewis036_astronomical_charts_1797","ia_id":"lewis_o_036","title":"Astronomical charts for Fath-Ali Shah Qajar","date":"1797","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"vatican_pers4_1312_pdm","ia_id":"vat.pers.4","title":"Manuscript Vat. pers. 4","date":"1312","license":"Public Domain Mark 1.0","licenseurl":"https://creativecommons.org/publicdomain/mark/1.0/","collection":"Internet Archive / Vatican manuscript mirror"},
+    {"id":"openn_ljs425_tawdih_al_alhan_1600","ia_id":"ljs425","title":"Risalah-i Tawdih al-alhan","date":"1600","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_lewis042_safavid_waqfnama_1706","ia_id":"lewis_o_042","title":"Waqfnama-i Shah Sultan Husayn Safavi","date":"1706","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_mscoll525_glassmaking_1820","ia_id":"mscoll525","title":"Kitab-i tasavir-i shishah garan","date":"1820","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"},
+    {"id":"openn_kcajs214_tibb_1656","ia_id":"kcajs_rar_ms214","title":"In kitab dar tibb","date":"1656","license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries / OPenn"}
+  ]
+}

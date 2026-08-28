@@ -1,0 +1,32 @@
+name: Persian Rescue Asset Model Sync
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - 'control/PERSIAN_RESCUE_ASSET_MODEL.md'
+      - '.github/workflows/persian-rescue-asset-model-sync.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync canonical asset model to Drive
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone copyto control/PERSIAN_RESCUE_ASSET_MODEL.md \
+            'gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/_meta/PERSIAN_RESCUE_ASSET_MODEL.md' \
+            --retries 8 --low-level-retries 16

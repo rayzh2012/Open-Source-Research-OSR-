@@ -1,0 +1,150 @@
+name: OSR Compute Fabric Template
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_id:
+        description: Stable task identifier
+        required: true
+        type: string
+      task_mode:
+        description: single or matrix
+        required: true
+        default: single
+        type: choice
+        options: [single, matrix]
+      worker_count:
+        description: Parallel worker count for matrix mode
+        required: false
+        default: '1'
+        type: string
+      task_script:
+        description: Repo-relative Python task under tasks/
+        required: true
+        type: string
+      task_args:
+        description: Optional JSON string passed to the task
+        required: false
+        default: '{}'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    outputs:
+      workers: ${{ steps.plan.outputs.workers }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          script='${{ inputs.task_script }}'
+          case "$script" in
+            tasks/*.py) ;;
+            *) echo "Refusing non-whitelisted task path: $script" >&2; exit 2 ;;
+          esac
+          test -f "$script"
+          if [[ '${{ inputs.task_mode }}' == 'matrix' ]]; then
+            n='${{ inputs.worker_count }}'
+            [[ "$n" =~ ^[0-9]+$ ]] || exit 2
+            (( n >= 1 && n <= 20 )) || exit 2
+          else
+            n=1
+          fi
+          python - "$n" >> "$GITHUB_OUTPUT" <<'PY'
+          import json,sys
+          n=int(sys.argv[1])
+          print('workers='+json.dumps(list(range(n))))
+          PY
+
+  run:
+    needs: guard
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        worker: ${{ fromJson(needs.guard.outputs.workers) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install task dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f requirements-osr.txt ]]; then pip install -r requirements-osr.txt; fi
+      - name: Run task
+        env:
+          OSR_TASK_ID: ${{ inputs.task_id }}
+          OSR_WORKER_INDEX: ${{ matrix.worker }}
+          OSR_WORKER_COUNT: ${{ inputs.worker_count }}
+          OSR_TASK_ARGS_JSON: ${{ inputs.task_args }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p results/${OSR_TASK_ID}
+          python '${{ inputs.task_script }}' \
+            --worker-index "$OSR_WORKER_INDEX" \
+            --worker-count "${OSR_WORKER_COUNT:-1}" \
+            --task-args-json "$OSR_TASK_ARGS_JSON" \
+            --out-dir "results/${OSR_TASK_ID}/worker-${OSR_WORKER_INDEX}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: osr-${{ inputs.task_id }}-worker-${{ matrix.worker }}
+          path: results/${{ inputs.task_id }}/worker-${{ matrix.worker }}
+          if-no-files-found: error
+          retention-days: 7
+
+  reduce:
+    needs: run
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: osr-${{ inputs.task_id }}-worker-*
+          path: _worker_results
+          merge-multiple: false
+      - name: Build manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p results/${{ inputs.task_id }}
+          python - <<'PY'
+          import hashlib,json,os,pathlib,time
+          root=pathlib.Path('_worker_results')
+          files=[]
+          for p in sorted(root.rglob('*')):
+              if p.is_file():
+                  b=p.read_bytes()
+                  files.append({'path':str(p),'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+          out={
+              'task_id':os.environ['TASK_ID'],
+              'github_run_id':os.environ['GITHUB_RUN_ID'],
+              'github_sha':os.environ['GITHUB_SHA'],
+              'created_unix':time.time(),
+              'files':files,
+          }
+          pathlib.Path(f"results/{os.environ['TASK_ID']}/manifest.json").write_text(json.dumps(out,indent=2)+'\n')
+          PY
+        env:
+          TASK_ID: ${{ inputs.task_id }}
+      - name: Commit compact manifest only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'osr-compute-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add "results/${{ inputs.task_id }}/manifest.json"
+          git diff --cached --quiet && exit 0
+          git commit -m "results: ${OSR_TASK_ID} manifest"
+          git push
+        env:
+          OSR_TASK_ID: ${{ inputs.task_id }}

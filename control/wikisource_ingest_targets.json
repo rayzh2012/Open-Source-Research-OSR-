@@ -1,0 +1,12 @@
+{
+  "schema_version": "wikisource-ingest-targets-v1",
+  "targets": [
+    {"wiki_id": "zhwikisource", "label": "Chinese Wikisource", "enabled": true},
+    {"wiki_id": "enwikisource", "label": "English Wikisource", "enabled": true},
+    {"wiki_id": "frwikisource", "label": "French Wikisource", "enabled": false},
+    {"wiki_id": "dewikisource", "label": "German Wikisource", "enabled": false},
+    {"wiki_id": "eswikisource", "label": "Spanish Wikisource", "enabled": false},
+    {"wiki_id": "lawikisource", "label": "Latin Wikisource", "enabled": false},
+    {"wiki_id": "jawikisource", "label": "Japanese Wikisource", "enabled": false}
+  ]
+}

@@ -1,0 +1,159 @@
+name: Curated Ancient Corpus to Drive
+
+on:
+  push:
+    branches:
+      - stage2-direct-miner-v3-1
+    paths:
+      - '.github/workflows/curated-corpus-drive-ingest.yml'
+      - 'control/curated_corpus_targets_v1.json'
+      - 'control/plain_text_repo_to_parquet.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: curated-ancient-corpus-drive-ingest
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      destination_root: ${{ steps.plan.outputs.destination_root }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          cfg=json.load(open('control/curated_corpus_targets_v1.json',encoding='utf-8'))
+          enabled=[x for x in cfg['targets'] if x.get('enabled')]
+          if not enabled:
+              raise SystemExit('no enabled targets')
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write('matrix='+json.dumps({'include':enabled},ensure_ascii=False,separators=(',',':'))+'\n')
+              f.write('destination_root='+cfg['destination_root']+'\n')
+          print(json.dumps(enabled,ensure_ascii=False,indent=2))
+          PY
+
+  auth:
+    runs-on: ubuntu-latest
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - name: Verify Drive credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${RCLONE_CONFIG_B64:-}" || { echo '::error::Missing RCLONE_CONFIG_B64'; exit 42; }
+
+  ingest:
+    needs: [plan, auth]
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+      DEST_ROOT: ${{ needs.plan.outputs.destination_root }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pyarrow
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Snapshot ${{ matrix.id }}
+        shell: bash
+        env:
+          SOURCE_ID: ${{ matrix.id }}
+          SOURCE_REPO: ${{ matrix.repo }}
+          SOURCE_REF: ${{ matrix.ref }}
+          SOURCE_LICENSE: ${{ matrix.license }}
+          SOURCE_DOMAIN: ${{ matrix.domain }}
+          SOURCE_FORMAT: ${{ matrix.format }}
+          SOURCE_NOTES: ${{ matrix.notes }}
+        run: |
+          set -euo pipefail
+          mkdir -p work out
+          git clone --depth 1 --branch "$SOURCE_REF" "https://github.com/$SOURCE_REPO.git" "work/$SOURCE_ID"
+          cd "work/$SOURCE_ID"
+          COMMIT_SHA="$(git rev-parse HEAD)"
+          cd ../..
+
+          REMOTE_BASE="gdrive:${DEST_ROOT}/${SOURCE_ID}/${COMMIT_SHA}"
+          if rclone cat "${REMOTE_BASE}/meta/SNAPSHOT.sha256" >/tmp/existing.sha 2>/dev/null; then
+            echo "Snapshot ${SOURCE_ID}@${COMMIT_SHA} already archived; skipping."
+            exit 0
+          fi
+
+          git -C "work/$SOURCE_ID" archive --format=tar.gz --output="../../out/${SOURCE_ID}.tar.gz" HEAD
+          python control/plain_text_repo_to_parquet.py \
+            --root "work/$SOURCE_ID" \
+            --output "out/${SOURCE_ID}.parquet" \
+            --source-id "$SOURCE_ID" \
+            --source-repo "$SOURCE_REPO" \
+            --source-commit "$COMMIT_SHA" \
+            --license "$SOURCE_LICENSE" \
+            > "out/${SOURCE_ID}.parquet.summary.json"
+
+          ARCHIVE_SHA="$(sha256sum "out/${SOURCE_ID}.tar.gz" | awk '{print $1}')"
+          PARQUET_SHA="$(sha256sum "out/${SOURCE_ID}.parquet" | awk '{print $1}')"
+          ARCHIVE_BYTES="$(stat -c%s "out/${SOURCE_ID}.tar.gz")"
+          PARQUET_BYTES="$(stat -c%s "out/${SOURCE_ID}.parquet")"
+
+          python - <<PY
+          import json, os
+          obj={
+            'schema_version':'osr-curated-corpus-snapshot-v1',
+            'source_id':os.environ['SOURCE_ID'],
+            'source_repo':os.environ['SOURCE_REPO'],
+            'source_ref':os.environ['SOURCE_REF'],
+            'source_commit':'${COMMIT_SHA}',
+            'domain':os.environ['SOURCE_DOMAIN'],
+            'format':os.environ['SOURCE_FORMAT'],
+            'license':os.environ['SOURCE_LICENSE'],
+            'notes':os.environ.get('SOURCE_NOTES',''),
+            'archive_sha256':'${ARCHIVE_SHA}',
+            'archive_bytes':int('${ARCHIVE_BYTES}'),
+            'parquet_sha256':'${PARQUET_SHA}',
+            'parquet_bytes':int('${PARQUET_BYTES}'),
+            'provenance_contract':'immutable source snapshot + derived Parquet; source commit and license preserved'
+          }
+          open('out/SOURCE.json','w',encoding='utf-8').write(json.dumps(obj,ensure_ascii=False,indent=2)+'\n')
+          PY
+          printf '%s  %s\n' "$ARCHIVE_SHA" "${SOURCE_ID}.tar.gz" > out/SNAPSHOT.sha256
+          printf '%s  %s\n' "$PARQUET_SHA" "${SOURCE_ID}.parquet" > out/PARQUET.sha256
+
+          rclone copyto "out/${SOURCE_ID}.tar.gz" "${REMOTE_BASE}/raw/${SOURCE_ID}.tar.gz" --drive-chunk-size 64M --retries 6 --low-level-retries 12 --stats 30s
+          rclone copyto "out/${SOURCE_ID}.parquet" "${REMOTE_BASE}/parquet/${SOURCE_ID}.parquet" --drive-chunk-size 64M --retries 6 --low-level-retries 12 --stats 30s
+          rclone copyto "out/${SOURCE_ID}.parquet.summary.json" "${REMOTE_BASE}/meta/parquet.summary.json"
+          rclone copyto out/SOURCE.json "${REMOTE_BASE}/meta/SOURCE.json"
+          rclone copyto out/PARQUET.sha256 "${REMOTE_BASE}/meta/PARQUET.sha256"
+          rclone copyto out/SNAPSHOT.sha256 "${REMOTE_BASE}/meta/SNAPSHOT.sha256"
+          echo "ARCHIVED ${SOURCE_ID}@${COMMIT_SHA}"
+      - name: Upload tiny recovery metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: curated-corpus-${{ matrix.id }}-${{ github.run_id }}
+          path: |
+            out/*.json
+            out/*.sha256
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 6

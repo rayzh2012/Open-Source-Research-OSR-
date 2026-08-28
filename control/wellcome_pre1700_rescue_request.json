@@ -1,0 +1,17 @@
+{
+  "schema_version": "osr-wellcome-pre1700-request-v1",
+  "request_id": "wellcome-pre1700-pdm-smoke-001",
+  "mode": "smoke",
+  "requested_at": "2026-08-27T22:10:00-04:00",
+  "purpose": "Discover pre-1700 Wellcome Collection works that are online, openly accessible, and explicitly Public Domain Mark at the item-location level; then prove anonymous IIIF byte retrieval on one manuscript-like candidate, checksum it, write the smoke evidence to canonical Google Drive, and leave full-item expansion gated on verified smoke success.",
+  "constraints": {
+    "public_domain_mark_only": true,
+    "open_access_only": true,
+    "anonymous_download_only": true,
+    "standard_github_hosted_runner_only": true,
+    "no_paid_compute": true,
+    "no_access_control_bypass": true,
+    "drive_is_canonical_artifact_store": true,
+    "smoke_is_not_full_archive_completion": true
+  }
+}

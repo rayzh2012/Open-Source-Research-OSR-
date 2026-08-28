@@ -1,0 +1,38 @@
+{
+  "schema_version": "osr-wellcome-pre1700-small-tranche-request-v1",
+  "request_id": "wellcome-pre1700-pages-98-100-001",
+  "mode": "small_tranche",
+  "requested_at": "2026-08-28T19:20:00Z",
+  "selection_rule": "Exact registry work IDs with declared page_count 98-100 inclusive; all 137 Drive-readback PASS COMPLETE item folders are excluded.",
+  "registry_sha256": "7a6d969e3b98b160db5a0f4cb19bbaaccaf3a3316ff716962ecdc18334f03a8b",
+  "previous_request_commit": "95577510909f225ad992c5e74899ee50e9014e7c",
+  "previous_workflow_run_id": 33184549910,
+  "previous_verified_items": 137,
+  "previous_verified_pages": 8065,
+  "previous_verified_image_bytes": 33471315954,
+  "expected_items": 11,
+  "expected_total_pages": 1090,
+  "page_count_min": 98,
+  "page_count_max": 100,
+  "work_ids": [
+    "jqa8q7cz",
+    "ked8zzq2",
+    "nxv2zqhb",
+    "rkwhwbaw",
+    "ckje6hby",
+    "gkhpjhpy",
+    "eqcgw4am",
+    "f7vth6wu",
+    "gz9gx8bu",
+    "sc7nqdjf",
+    "wdm2gvn7"
+  ],
+  "constraints": {
+    "rights": "Recheck exact item location PDM and open access before retrieval.",
+    "retrieval": "Anonymous official Wellcome API/IIIF only; same-identity documented routes and one bounded cooldown; no access-control bypass.",
+    "compute": "Standard GitHub-hosted ubuntu-latest only.",
+    "preservation": "Every page, raw work metadata and actual retrieved manifest, hashes, Drive fingerprint readback, checkpoint and COMPLETE.",
+    "capacity_gate": "Single bounded 11-item tranche / 1,090 declared pages; do not launch another tranche until terminal reconciliation.",
+    "dedupe": "Skip exact PASS COMPLETE records; resume verified checkpoints; never replace a verified package silently."
+  }
+}
