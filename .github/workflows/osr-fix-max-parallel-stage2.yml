@@ -33,8 +33,13 @@ jobs:
           requested = int(req.get('max_parallel', 20))
           assert 1 <= requested <= 20, requested
 
-          output_anchor = "      partition_count: ${{ steps.plan.outputs.partition_count }}\n      limit_per_partition: ${{ steps.plan.outputs.limit_per_partition }}"
-          output_repl = "      partition_count: ${{ steps.plan.outputs.partition_count }}\n      max_parallel: ${{ steps.plan.outputs.max_parallel }}\n      limit_per_partition: ${{ steps.plan.outputs.limit_per_partition }}"
+          expr = '$' + '{{'
+          partition_expr = expr + ' steps.plan.outputs.partition_count }}'
+          max_output_expr = expr + ' steps.plan.outputs.max_parallel }}'
+          matrix_expr = expr + ' fromJson(needs.plan.outputs.max_parallel) }}'
+
+          output_anchor = '      partition_count: ' + partition_expr + '\n      limit_per_partition:'
+          output_repl = '      partition_count: ' + partition_expr + '\n      max_parallel: ' + max_output_expr + '\n      limit_per_partition:'
           assert text.count(output_anchor) == 1, text.count(output_anchor)
           text = text.replace(output_anchor, output_repl, 1)
 
@@ -43,12 +48,12 @@ jobs:
           assert text.count(go_anchor) == 1, text.count(go_anchor)
           text = text.replace(go_anchor, go_repl, 1)
 
-          hardcoded = "      max-parallel: 20"
-          dynamic = "      max-parallel: ${{ fromJson(needs.plan.outputs.max_parallel) }}"
+          hardcoded = '      max-parallel: 20'
+          dynamic = '      max-parallel: ' + matrix_expr
           assert text.count(hardcoded) == 2, text.count(hardcoded)
           text = text.replace(hardcoded, dynamic)
 
-          assert text.count("max_parallel: ${{ steps.plan.outputs.max_parallel }}") == 1
+          assert text.count('max_parallel: ' + max_output_expr) == 1
           assert text.count("f.write(f'max_parallel={max_parallel}\\n')") == 1
           assert text.count(dynamic) == 2
           assert text.count(hardcoded) == 0
@@ -84,5 +89,3 @@ jobs:
           git commit -m 'fix: honor M3 request max_parallel in extract and recover'
           git pull --rebase origin stage2-direct-miner-v3-1
           git push origin HEAD:stage2-direct-miner-v3-1
-
-# trigger: 2026-08-27T22:10-04:00
