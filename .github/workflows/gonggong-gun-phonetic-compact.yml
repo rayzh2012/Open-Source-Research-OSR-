@@ -1,0 +1,149 @@
+name: Gonggong-Gun Phonetic Compact Scan
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'control/gonggong_gun_phonetic_request.json'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: pilot first; full only after pilot size gate passes
+        required: true
+        default: pilot
+        type: choice
+        options: [pilot, full]
+      worker_count:
+        description: Active workers
+        required: true
+        default: '4'
+        type: choice
+        options: ['4', '8']
+      pilot_files:
+        description: Shards per worker in pilot
+        required: true
+        default: '3'
+        type: choice
+        options: ['2', '3', '5']
+
+concurrency:
+  group: gonggong-gun-phonetic-compact-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: '1'
+  HF_HUB_DISABLE_TELEMETRY: '1'
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.plan.outputs.mode }}
+      worker_count: ${{ steps.plan.outputs.worker_count }}
+      pilot_files: ${{ steps.plan.outputs.pilot_files }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_WORKERS: ${{ inputs.worker_count }}
+          INPUT_PILOT_FILES: ${{ inputs.pilot_files }}
+        run: |
+          python - <<'PY'
+          import json, os
+          if os.environ['EVENT_NAME'] == 'push':
+              r=json.load(open('control/gonggong_gun_phonetic_request.json',encoding='utf-8'))
+              assert r.get('action') == 'RUN_GONGGONG_GUN_PHONETIC_COMPACT', r
+              mode=r.get('mode','pilot')
+              workers=int(r.get('worker_count',4))
+              pilot_files=int(r.get('pilot_files',3))
+          else:
+              mode=os.environ.get('INPUT_MODE') or 'pilot'
+              workers=int(os.environ.get('INPUT_WORKERS') or 4)
+              pilot_files=int(os.environ.get('INPUT_PILOT_FILES') or 3)
+          assert mode in {'pilot','full'}
+          assert workers in {4,8}
+          assert pilot_files in {2,3,5}
+          matrix=list(range(workers))
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write(f'mode={mode}\n')
+              f.write(f'worker_count={workers}\n')
+              f.write(f'pilot_files={pilot_files}\n')
+              f.write('matrix='+json.dumps(matrix,separators=(',',':'))+'\n')
+          print({'mode':mode,'workers':workers,'pilot_files':pilot_files,'matrix':matrix})
+          PY
+
+  scan:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        worker: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install streaming dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install 'huggingface_hub>=0.24' 'pyarrow>=16'
+      - name: Compact rare-variant scan
+        run: |
+          PYTHONPATH="$GITHUB_WORKSPACE/myth-engine" \
+          python myth-engine/tools/scan_compact_phonetic_variants.py \
+            --query-pack myth-engine/query-packs/gonggong_gun_phonetic_variants_v1.json \
+            --output-dir "out/worker-${{ matrix.worker }}" \
+            --worker-index "${{ matrix.worker }}" \
+            --worker-count "${{ needs.plan.outputs.worker_count }}" \
+            --mode "${{ needs.plan.outputs.mode }}" \
+            --pilot-files "${{ needs.plan.outputs.pilot_files }}"
+      - name: Show compact artifact size
+        run: du -h out/worker-${{ matrix.worker }}/* || true
+      - name: Upload compact worker result
+        uses: actions/upload-artifact@v4
+        with:
+          name: gonggong-gun-phonetic-worker-${{ matrix.worker }}
+          path: out/worker-${{ matrix.worker }}/
+          compression-level: 6
+          retention-days: 14
+
+  reduce:
+    needs: [plan, scan]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download compact workers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gonggong-gun-phonetic-worker-*
+          path: worker-artifacts
+          merge-multiple: true
+      - name: Reduce bounded evidence and enforce pilot size gate
+        run: |
+          python myth-engine/tools/reduce_compact_phonetic_variants.py \
+            --input-dir worker-artifacts \
+            --output-dir final \
+            --sample-limit 60 \
+            --max-pilot-artifact-mib 5
+          cat final/gonggong-gun-phonetic-status.json
+      - name: Upload compact final result
+        uses: actions/upload-artifact@v4
+        with:
+          name: gonggong-gun-phonetic-compact-final
+          path: final/
+          compression-level: 9
+          retention-days: 90
