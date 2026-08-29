@@ -1,5 +1,5 @@
 {
   "action": "CANCEL_STRAY_RUN",
-  "run_id": 32947601660,
-  "reason": "Queued Feature Store run still uses workflow snapshot with hard-coded max-parallel 20. Cancel before execution, patch workflow to honor request max_parallel=12, then re-trigger with the same durable run_id and fixed schema v1.0.1."
+  "run_id": 32948020417,
+  "reason": "Stop the Gonggong-Gun recovery reducer rerun: surviving worker artifacts are 12-16GB each (~200GB total), while the reducer downloads them all into one ubuntu-latest workspace. This is an architecture/disk failure mode, not missing research. Preserve all successful worker/recovery artifacts and replace the reducer with a streaming/compact evidence reduction path before any further full-corpus work."
 }
