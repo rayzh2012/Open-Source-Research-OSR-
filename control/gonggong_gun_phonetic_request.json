@@ -1,8 +1,8 @@
 {
   "action": "RUN_GONGGONG_GUN_PHONETIC_COMPACT",
-  "mode": "pilot",
-  "worker_count": 4,
+  "mode": "full",
+  "worker_count": 8,
   "pilot_files": 3,
-  "request_id": "gonggong-gun-phonetic-2026-08-28-v1",
-  "purpose": "Search rare intermediate spellings and sound-shell bridges (龔工/龏工/鮌/康回/浑沌/帝江/綸 etc.) without reproducing the old oversized evidence-artifact failure. Promote to full only after bounded artifact size gate passes."
+  "request_id": "gonggong-gun-phonetic-2026-08-28-v2-full",
+  "purpose": "Full 1,788-shard compact rare-variant census after pilot PASS. Search sound-shell and intermediate spellings (龔工/龏工/鮌/康回/浑沌/混沌/浑敦/帝江/鴻洞/綸/纶 etc.) with bounded counts, samples, and locators only; avoid the old oversized broad-evidence artifact architecture."
 }
