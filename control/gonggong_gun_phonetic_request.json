@@ -1,0 +1,8 @@
+{
+  "action": "RUN_GONGGONG_GUN_PHONETIC_COMPACT",
+  "mode": "pilot",
+  "worker_count": 4,
+  "pilot_files": 3,
+  "request_id": "gonggong-gun-phonetic-2026-08-28-v1",
+  "purpose": "Search rare intermediate spellings and sound-shell bridges (龔工/龏工/鮌/康回/浑沌/帝江/綸 etc.) without reproducing the old oversized evidence-artifact failure. Promote to full only after bounded artifact size gate passes."
+}
