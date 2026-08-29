@@ -1,0 +1,42 @@
+{
+  "pack_id": "gonggong-gun-phonetic-variants-v1.0",
+  "description": "Rare-variant sound-shell census for Gonggong/Gun. Primary seeds are deliberately narrow; common names are context anchors only. Retrieval evidence is not identity evidence.",
+  "context_radius": 260,
+  "max_samples_per_term_per_worker": 24,
+  "max_samples_per_pair_per_worker": 16,
+  "always_require_anchor_groups_for_terms": ["綸", "纶"],
+  "seed_groups": {
+    "GONG_GRAPH": ["龔工", "龔工氏", "龏工"],
+    "GONG_GLOSS": ["共音恭", "共工官称", "共工官稱", "共工，官称", "共工，官稱", "作共工", "为共工", "為共工", "垂作共工", "垂为共工", "垂為共工", "命垂为共工", "命垂為共工"],
+    "GUN_GRAPH": ["鮌", "𩩌", "𩨬", "𧣙"],
+    "HOLDER_NAME": ["康回"],
+    "HUNDUN_SHELL": ["浑沌", "渾沌", "混沌", "浑敦", "渾敦", "鸿洞", "鴻洞"],
+    "DIJIANG_SHELL": ["帝江"],
+    "LUN_GRAPH": ["綸", "纶"],
+    "EXPLICIT_JOIN": ["鲧即共工", "鯀即共工", "鮌即共工", "鲧与共工", "鯀與共工", "鲧與共工", "共工合音", "浑沌合音", "渾沌合音"]
+  },
+  "anchor_groups": {
+    "GONG_COMMON": ["共工", "共工氏", "共工国", "共工國"],
+    "GUN_COMMON": ["鲧", "鯀", "崇伯", "崇伯鲧", "崇伯鯀"],
+    "OFFICE": ["官称", "官稱", "水官", "工官", "司空", "垂"],
+    "HOUTU_JULONG": ["后土", "後土", "句龙", "句龍", "勾龙", "勾龍"],
+    "YU": ["大禹", "夏禹", "禹"],
+    "FOUR_YUE": ["四岳", "四嶽"],
+    "WATER": ["洪水", "治水", "堙洪水", "壅防百川", "水害", "平九土"],
+    "PHONOLOGY": ["古音", "音转", "音轉", "合音", "缓言", "緩言", "急言", "声转", "聲轉"],
+    "HUNDUN_COMMON": ["浑沌", "渾沌", "混沌", "浑敦", "渾敦"],
+    "DIJIANG_COMMON": ["帝江", "江神"]
+  },
+  "priority_pairs": [
+    ["GONG_GRAPH", "GUN_COMMON"],
+    ["GUN_GRAPH", "GONG_COMMON"],
+    ["HOLDER_NAME", "GONG_COMMON"],
+    ["HUNDUN_SHELL", "GUN_COMMON"],
+    ["HUNDUN_SHELL", "GONG_COMMON"],
+    ["DIJIANG_SHELL", "GONG_COMMON"],
+    ["LUN_GRAPH", "GUN_COMMON"],
+    ["LUN_GRAPH", "GONG_COMMON"],
+    ["EXPLICIT_JOIN", "PHONOLOGY"]
+  ],
+  "truth_gate": "Counts and co-occurrences are discovery only. Any identity claim must be rehydrated to the cited source, dated, and adjudicated by ontology and transmission family."
+}
