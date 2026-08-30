@@ -1,18 +1,42 @@
 {
   "action": "PROPHECY_TURFAN_CV_KIMI_HANDOFF",
-  "state": "REQUEST_ONLY_NOT_EXECUTED",
+  "state": "READY_TO_EXECUTE_NOT_YET_OBSERVED",
   "source_project": "rayzh2012/playground",
   "workflow": ".github/workflows/prophecy-turfan-cv.yml",
   "extractor": "research/prophecy_turfan/scripts/extract_candidates.py",
   "kimi_prompt": "research/prophecy_turfan/prompts/kimi_cv_review.md",
   "preferred_route": "OSR Watcher -> authenticated Kimi Code CLI",
-  "source_policy": "Use local/Drive-synced Turfan PDFs; do not claim source upload or execution unless observed.",
+  "verified_complete_scan": {
+    "title": "新获吐鲁番出土文献研究论集",
+    "pdf_pages": 561,
+    "bytes": 141978338,
+    "old_drive_copy_state": "SUPERSEDED_INCOMPLETE_150P",
+    "drive_split_parts": [
+      {"drive_id": "1H33z3AMGf8Nn2LA1jyh4BjiuJ5WRgEkH", "pdf_pages": "001-300"},
+      {"drive_id": "1kyJsBe5Ud2UBfmHlKrx4U5LPTqbpv95e", "pdf_pages": "301-561"}
+    ]
+  },
+  "priority_chunks": [
+    {"label": "Yanghai_M1_dating", "pdf_pages": "150-161", "printed_pages": "121-132"},
+    {"label": "Yi_Za_Zhan", "pdf_pages": "203-240", "printed_pages": "174-211"},
+    {"label": "Former_Qin_Northern_Liang_Kan_Gaochang", "mode": "directory_driven_followup"}
+  ],
+  "execution_defaults": {
+    "dpi": 140,
+    "workers": 4,
+    "lang": "auto",
+    "chunk_pages": 40,
+    "threshold": 3
+  },
+  "source_policy": "Use Drive-synced complete-scan split parts or the local original. Do not use the superseded 150-page copy as completeness evidence.",
   "research_goal": "Find independently datable divination / omen / future-information candidates and preserve ordinary documents as denominator baseline.",
   "required_outputs": [
     "manifest.csv",
     "summary.json",
     "reviewed_candidates.csv",
-    "review_notes.md"
+    "review_notes.md",
+    "pagination_map.csv",
+    "source_completeness_audit.json"
   ],
   "hard_rules": [
     "OCR/CV hit is a lead, not evidence",
@@ -20,6 +44,8 @@
     "search miss != absence",
     "separate future prediction from remote-present information",
     "verify manuscript date against predicted event date",
-    "retain ordinary documents for density denominator"
+    "retain ordinary documents for density denominator",
+    "record PDF-page and printed-page mapping separately",
+    "do not infer missing pages from OCR failure"
   ]
 }
