@@ -1,0 +1,25 @@
+{
+  "action": "PROPHECY_TURFAN_CV_KIMI_HANDOFF",
+  "state": "REQUEST_ONLY_NOT_EXECUTED",
+  "source_project": "rayzh2012/playground",
+  "workflow": ".github/workflows/prophecy-turfan-cv.yml",
+  "extractor": "research/prophecy_turfan/scripts/extract_candidates.py",
+  "kimi_prompt": "research/prophecy_turfan/prompts/kimi_cv_review.md",
+  "preferred_route": "OSR Watcher -> authenticated Kimi Code CLI",
+  "source_policy": "Use local/Drive-synced Turfan PDFs; do not claim source upload or execution unless observed.",
+  "research_goal": "Find independently datable divination / omen / future-information candidates and preserve ordinary documents as denominator baseline.",
+  "required_outputs": [
+    "manifest.csv",
+    "summary.json",
+    "reviewed_candidates.csv",
+    "review_notes.md"
+  ],
+  "hard_rules": [
+    "OCR/CV hit is a lead, not evidence",
+    "raw scan > OCR > modern reading",
+    "search miss != absence",
+    "separate future prediction from remote-present information",
+    "verify manuscript date against predicted event date",
+    "retain ordinary documents for density denominator"
+  ]
+}
