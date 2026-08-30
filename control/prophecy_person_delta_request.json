@@ -1,0 +1,52 @@
+{
+  "action": "PROPHECY_PERSON_DELTA_MINING",
+  "state": "READY_TO_EXECUTE_NOT_YET_OBSERVED",
+  "project": "Future Omen / Prophecy",
+  "purpose": "Data-mine named or inferable prophecy specialists and concrete future-information claims before abandoning the prophecy lane. Reuse existing corpora and indexes; do not redownload or rebuild the 508GB corpus.",
+  "execution_route": "OSR Watcher -> authenticated Kimi Code CLI on MacBook, using existing OSR/corpus mounts and durable indexes",
+  "scope_priority": [
+    "Western Jin -> Five Hu / Sixteen Kingdoms",
+    "Five Dynasties -> early Song comparator",
+    "Turfan/Hexi contemporaneous documents as archaeological control"
+  ],
+  "person_seed": [
+    "佛图澄", "王嘉", "僧涉", "姚襄", "姚苌", "苻坚", "石勒", "石虎", "冉闵", "慕容冲", "慕容垂", "张轨"
+  ],
+  "prophecy_term_families": {
+    "future_knowledge": ["前知", "预言", "預言", "未然", "言未然", "逆知", "悬验", "懸驗"],
+    "oracle": ["谶", "讖", "图谶", "圖讖", "谶言", "讖言", "谶记", "讖記", "歌谶", "歌讖", "童谣", "童謠"],
+    "divination": ["占", "占候", "卜", "筮", "铃音", "鈴音", "梦", "夢", "梦兆", "夢兆"],
+    "indexed_future": ["当王", "當王", "将亡", "將亡", "当灭", "當滅", "将灭", "將滅", "不出十日", "明旦", "明日", "来岁", "來歲", "今年", "某岁", "某歲"],
+    "political_use": ["以应图谶", "以應圖讖", "避谶", "避讖", "不祥之征", "王者兆", "霸者兆"]
+  },
+  "mining_logic": "PERSON/ENTITY x TERM FAMILY -> +/-100 char RAW HIT -> +/-500 char context -> exact claimed future proposition -> predicted event -> event date -> text/witness date -> action taken -> later fulfillment gloss -> earliest witness chain",
+  "hard_separations": [
+    "future prediction != remote-present information",
+    "contemporaneous interpretation != later fulfillment gloss",
+    "official-history report != pre-event witness",
+    "semantic omen != indexed prediction",
+    "OCR/CV hit != evidence"
+  ],
+  "negative_controls": [
+    "self-serving accession dream",
+    "birth omen without future proposition",
+    "ordinary disaster/portent",
+    "post-event wordplay",
+    "late literary reconstruction",
+    "remote knowledge reported after the fact"
+  ],
+  "required_outputs": [
+    "prophecy_person_hits.parquet",
+    "prophecy_person_cases.csv",
+    "prophecy_person_summary.json",
+    "prophecy_person_top_contexts.md",
+    "prophecy_person_negative_controls.csv",
+    "prophecy_person_run_manifest.json"
+  ],
+  "required_fields": [
+    "person", "alias", "polity", "source", "locator", "raw_text", "context", "modality", "future_proposition", "event_date", "witness_date", "text_before_event", "specificity", "actionability", "political_utility", "naturalistic_alternative", "evidence_grade", "state"
+  ],
+  "cost_guard": "Reuse P2A/26-history/OSR artifacts and existing local or Drive-synced corpora. Arbitrary-term 508GB work must be isolated DELTA and must not mutate or rescan unchanged source shards unnecessarily.",
+  "completion_gate": "Do not claim prophecy density or prediction accuracy until person-term lanes, negative controls, source-date audit, and search-miss accounting are complete.",
+  "created_at": "2026-08-30T15:03:00-04:00"
+}
