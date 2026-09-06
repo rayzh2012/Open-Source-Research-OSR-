@@ -1,4 +1,4 @@
-name: Baima Dictionary Fetch
+name: Baima Dictionary Fast OCR
 
 on:
   push:
@@ -10,37 +10,133 @@ permissions:
   contents: read
 
 jobs:
-  fetch:
+  ocr:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 360
+    env:
+      SOURCE_URL: "https://asuycdg6.org/d4/X/69af6XS/f2/1788682030/50000/g5/upload_files/upload_files_duxiu_main2_20250114/annas_archive_data__aacid__upload_files_duxiu_main2__20250114T233524Z--20250114T233525Z/aacid__upload_files_duxiu_main2__20250114T233524Z__kZPebqTSSriMwyTQgHGtgp~/uS2PW-kUmt_YmbwjbvOxUQ/%E7%99%BD%E9%A9%AC%E6%B1%89%E5%A4%A7%E8%AF%8D%E5%85%B8%20--%20%E5%AD%99%E5%AE%8F%E5%BC%80%2C%E9%AD%8F%E7%90%B3%2C%E5%BC%A0%E9%87%91%E7%94%9F%2C%E9%82%B1%E9%9B%B7%E7%94%9F%E4%B8%BB%E7%BC%96%20--%202017_12%20--%20%E5%85%B0%E5%B7%9E%3A%E7%94%98%E8%82%83%E4%BA%BA%E6%B0%91%E5%87%BA%E7%89%88%E7%A4%BE%20--%20isbn13%209787226052457%20--%20ab2c462d6efe7b66233165cc403f1902%20--%20Anna%E2%80%99s%20Archive.pdf"
+      PDF: "Baima_Han_Dacidian_9787226052457.pdf"
+
     steps:
-      - name: Download Baima-Chinese dictionary scan
+      - name: Install OCR stack
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            poppler-utils tesseract-ocr tesseract-ocr-chi-sim tesseract-ocr-eng \
+            parallel jq
+          tesseract --version | head -1
+          tesseract --list-langs
+
+      - name: Download source PDF
         shell: bash
-        env:
-          SOURCE_URL: "https://asuycdg6.org/d4/X/69af6XS/f2/1788682030/50000/g5/upload_files/upload_files_duxiu_main2_20250114/annas_archive_data__aacid__upload_files_duxiu_main2__20250114T233524Z--20250114T233525Z/aacid__upload_files_duxiu_main2__20250114T233524Z__kZPebqTSSriMwyTQgHGtgp~/uS2PW-kUmt_YmbwjbvOxUQ/%E7%99%BD%E9%A9%AC%E6%B1%89%E5%A4%A7%E8%AF%8D%E5%85%B8%20--%20%E5%AD%99%E5%AE%8F%E5%BC%80%2C%E9%AD%8F%E7%90%B3%2C%E5%BC%A0%E9%87%91%E7%94%9F%2C%E9%82%B1%E9%9B%B7%E7%94%9F%E4%B8%BB%E7%BC%96%20--%202017_12%20--%20%E5%85%B0%E5%B7%9E%3A%E7%94%98%E8%82%83%E4%BA%BA%E6%B0%91%E5%87%BA%E7%89%88%E7%A4%BE%20--%20isbn13%209787226052457%20--%20ab2c462d6efe7b66233165cc403f1902%20--%20Anna%E2%80%99s%20Archive.pdf"
-          OUT: "Baima_Han_Dacidian_9787226052457.pdf"
         run: |
           set -euo pipefail
           curl -fL \
-            --retry 8 \
-            --retry-all-errors \
-            --retry-delay 5 \
-            --connect-timeout 30 \
-            --max-time 3300 \
+            --retry 8 --retry-all-errors --retry-delay 5 \
+            --connect-timeout 30 --max-time 3300 \
             -A 'Mozilla/5.0' \
-            "$SOURCE_URL" -o "$OUT"
-          test "$(head -c 5 "$OUT")" = "%PDF-"
-          ls -lh "$OUT"
-          sha256sum "$OUT" | tee SHA256SUMS.txt
-          stat -c '%s bytes' "$OUT"
+            "$SOURCE_URL" -o "$PDF"
+          test "$(head -c 5 "$PDF")" = "%PDF-"
+          sha256sum "$PDF" | tee SOURCE_SHA256SUMS.txt
+          pdfinfo "$PDF" | tee PDFINFO.txt
+          pages=$(pdfinfo "$PDF" | awk '/^Pages:/ {print $2}')
+          test -n "$pages"
+          echo "PAGES=$pages" >> "$GITHUB_ENV"
+          echo "Detected $pages pages"
 
-      - name: Upload transient artifact
+      - name: Extract any existing text layer first
+        run: |
+          mkdir -p output
+          pdftotext -layout "$PDF" output/existing_text_layer.txt || true
+          wc -c output/existing_text_layer.txt || true
+
+      - name: Fast parallel page OCR
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ocr_pages tmp output
+          export PDF
+
+          ocr_one() {
+            p="$1"
+            stem=$(printf '%05d' "$p")
+            img="tmp/page_${stem}.jpg"
+            out="ocr_pages/page_${stem}"
+            pdftoppm -f "$p" -l "$p" -singlefile -r 180 \
+              -jpeg -jpegopt quality=72 "$PDF" "tmp/page_${stem}" >/dev/null 2>&1
+            tesseract "$img" "$out" -l chi_sim+eng --psm 3 \
+              preserve_interword_spaces=1 >/dev/null 2>&1 || true
+            rm -f "$img"
+          }
+          export -f ocr_one
+
+          seq 1 "$PAGES" | parallel --jobs 4 --line-buffer ocr_one {}
+
+          : > output/Baima_Han_Dacidian_OCR_full.txt
+          for f in $(find ocr_pages -name 'page_*.txt' | sort); do
+            stem=$(basename "$f" .txt)
+            p=$((10#${stem#page_}))
+            printf '\n===== PDF_PAGE_%d =====\n' "$p" >> output/Baima_Han_Dacidian_OCR_full.txt
+            cat "$f" >> output/Baima_Han_Dacidian_OCR_full.txt
+          done
+
+          wc -l output/Baima_Han_Dacidian_OCR_full.txt
+          wc -c output/Baima_Han_Dacidian_OCR_full.txt
+          find ocr_pages -name 'page_*.txt' | wc -l
+
+      - name: Build target-term scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import re, pathlib
+          p = pathlib.Path('output/Baima_Han_Dacidian_OCR_full.txt')
+          text = p.read_text('utf-8', errors='ignore')
+          terms = [
+              '罗·阿曼格麻','萨曼格英','曼格','阿曼','格麻','格英',
+              '青蛙','蛙','癞蛤蟆','蟾蜍','蟾','鱼骨','鱼','白马人','白马语'
+          ]
+          parts = re.split(r'(?=^===== PDF_PAGE_\d+ =====$)', text, flags=re.M)
+          with open('output/target_hits.txt','w',encoding='utf-8') as out:
+              for part in parts:
+                  if not part.strip(): continue
+                  header = part.splitlines()[0] if part.splitlines() else ''
+                  hits = [t for t in terms if t in part]
+                  if hits:
+                      out.write(f'{header}\nHITS: {", ".join(hits)}\n')
+                      lines = part.splitlines()[1:]
+                      for i,line in enumerate(lines):
+                          if any(t in line for t in hits):
+                              lo=max(0,i-2); hi=min(len(lines),i+3)
+                              out.write('\n'.join(lines[lo:hi])+'\n---\n')
+          PY
+          cat output/target_hits.txt || true
+
+      - name: Package page OCR and metadata
+        run: |
+          tar -czf output/Baima_Han_Dacidian_OCR_pages.tar.gz ocr_pages
+          cp SOURCE_SHA256SUMS.txt PDFINFO.txt output/
+          ls -lh output/
+
+      - name: Upload OCR text artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: baima-han-dacidian-9787226052457
+          name: baima-dictionary-ocr-text
           path: |
-            Baima_Han_Dacidian_9787226052457.pdf
-            SHA256SUMS.txt
+            output/Baima_Han_Dacidian_OCR_full.txt
+            output/existing_text_layer.txt
+            output/target_hits.txt
+            output/PDFINFO.txt
+            output/SOURCE_SHA256SUMS.txt
+          compression-level: 6
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Upload page-level OCR archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: baima-dictionary-ocr-pages
+          path: output/Baima_Han_Dacidian_OCR_pages.tar.gz
           compression-level: 0
-          retention-days: 1
+          retention-days: 7
           if-no-files-found: error
