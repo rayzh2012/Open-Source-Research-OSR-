@@ -1,0 +1,46 @@
+name: Baima Dictionary Fetch
+
+on:
+  push:
+    paths:
+      - '.github/workflows/baima-dictionary-fetch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Download Baima-Chinese dictionary scan
+        shell: bash
+        env:
+          SOURCE_URL: "https://asuycdg6.org/d4/X/69af6XS/f2/1788682030/50000/g5/upload_files/upload_files_duxiu_main2_20250114/annas_archive_data__aacid__upload_files_duxiu_main2__20250114T233524Z--20250114T233525Z/aacid__upload_files_duxiu_main2__20250114T233524Z__kZPebqTSSriMwyTQgHGtgp~/uS2PW-kUmt_YmbwjbvOxUQ/%E7%99%BD%E9%A9%AC%E6%B1%89%E5%A4%A7%E8%AF%8D%E5%85%B8%20--%20%E5%AD%99%E5%AE%8F%E5%BC%80%2C%E9%AD%8F%E7%90%B3%2C%E5%BC%A0%E9%87%91%E7%94%9F%2C%E9%82%B1%E9%9B%B7%E7%94%9F%E4%B8%BB%E7%BC%96%20--%202017_12%20--%20%E5%85%B0%E5%B7%9E%3A%E7%94%98%E8%82%83%E4%BA%BA%E6%B0%91%E5%87%BA%E7%89%88%E7%A4%BE%20--%20isbn13%209787226052457%20--%20ab2c462d6efe7b66233165cc403f1902%20--%20Anna%E2%80%99s%20Archive.pdf"
+          OUT: "Baima_Han_Dacidian_9787226052457.pdf"
+        run: |
+          set -euo pipefail
+          curl -fL \
+            --retry 8 \
+            --retry-all-errors \
+            --retry-delay 5 \
+            --connect-timeout 30 \
+            --max-time 3300 \
+            -A 'Mozilla/5.0' \
+            "$SOURCE_URL" -o "$OUT"
+          test "$(head -c 5 "$OUT")" = "%PDF-"
+          ls -lh "$OUT"
+          sha256sum "$OUT" | tee SHA256SUMS.txt
+          stat -c '%s bytes' "$OUT"
+
+      - name: Upload transient artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: baima-han-dacidian-9787226052457
+          path: |
+            Baima_Han_Dacidian_9787226052457.pdf
+            SHA256SUMS.txt
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
