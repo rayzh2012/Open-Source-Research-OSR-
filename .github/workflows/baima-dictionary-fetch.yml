@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
@@ -14,89 +15,66 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      SOURCE_URL: "https://asuycdg6.org/d4/X/69af6XS/f2/1788682030/50000/g5/upload_files/upload_files_duxiu_main2_20250114/annas_archive_data__aacid__upload_files_duxiu_main2__20250114T233524Z--20250114T233525Z/aacid__upload_files_duxiu_main2__20250114T233524Z__kZPebqTSSriMwyTQgHGtgp~/uS2PW-kUmt_YmbwjbvOxUQ/%E7%99%BD%E9%A9%AC%E6%B1%89%E5%A4%A7%E8%AF%8D%E5%85%B8%20--%20%E5%AD%99%E5%AE%8F%E5%BC%80%2C%E9%AD%8F%E7%90%B3%2C%E5%BC%A0%E9%87%91%E7%94%9F%2C%E9%82%B1%E9%9B%B7%E7%94%9F%E4%B8%BB%E7%BC%96%20--%202017_12%20--%20%E5%85%B0%E5%B7%9E%3A%E7%94%98%E8%82%B2%E4%BA%BA%E6%B0%91%E5%87%BA%E7%89%88%E7%A4%BE%20--%20isbn13%209787226052457%20--%20ab2c462d6efe7b66233165cc403f1902%20--%20Anna%E2%80%99s%20Archive.pdf"
-      PDF: "Baima_Han_Dacidian_9787226052457.pdf"
-
+      SOURCE_RUN: '34016579330'
+      SOURCE_ARTIFACT: 'baima-han-dacidian-9787226052457'
+      PDF: 'Baima_Han_Dacidian_9787226052457.pdf'
     steps:
       - name: Install poppler
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends poppler-utils >/dev/null
 
-      - name: Download source PDF
-        shell: bash
+      - name: Recover preserved original PDF artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          curl -fL --retry 8 --retry-all-errors --retry-delay 3 \
-            --connect-timeout 30 --max-time 900 -A 'Mozilla/5.0' \
-            "$SOURCE_URL" -o "$PDF"
+          mkdir -p source
+          gh run download "$SOURCE_RUN" -R "$GITHUB_REPOSITORY" -n "$SOURCE_ARTIFACT" -D source
+          mv "source/$PDF" "$PDF"
           test "$(head -c 5 "$PDF")" = "%PDF-"
           sha256sum "$PDF" | tee SOURCE_SHA256SUMS.txt
           pdfinfo "$PDF" | tee PDFINFO.txt
 
       - name: Extract page-preserving text layer
-        shell: bash
         run: |
-          set -euo pipefail
           mkdir -p output
           pdftotext -layout "$PDF" output/existing_text_layer.txt
-          python3 - <<'PY'
-          from pathlib import Path
-          raw = Path('output/existing_text_layer.txt').read_text('utf-8', errors='ignore')
-          pages = raw.split('\f')
-          with open('output/Baima_Han_Dacidian_page_text.txt','w',encoding='utf-8') as out:
-              for i,page in enumerate(pages,1):
-                  out.write(f'\n===== PDF_PAGE_{i} =====\n')
-                  out.write(page)
-          print('pages_from_text_layer=', len(pages))
-          print('text_bytes=', len(raw.encode('utf-8')))
-          PY
+          pdftotext -layout -nopgbrk "$PDF" output/existing_text_nopage.txt
+          wc -c output/existing_text_layer.txt
 
       - name: High-recall target scan
-        shell: bash
         run: |
-          set -euo pipefail
           python3 - <<'PY'
-          import re
           from pathlib import Path
-          text = Path('output/Baima_Han_Dacidian_page_text.txt').read_text('utf-8', errors='ignore')
-          parts = re.split(r'(?=^===== PDF_PAGE_\d+ =====$)', text, flags=re.M)
-          exact = ['罗·阿曼格麻','罗阿曼格麻','萨曼格英','曼格','阿曼','格麻','格英','青蛙','蛙','癞蛤蟆','癞蛤蟆','蟾蜍','蟾','鱼骨','鱼骨牌','年日郭托','业日','白马人','白马语','Pe','Pey']
-          fuzzy_patterns = {
-              'MANGE_FAMILY': r'曼\s*格|满\s*格|蛮\s*格|蔓\s*格',
-              'GEMA_FAMILY': r'格\s*[麻玛马]|[革各]麻',
-              'GEYING_FAMILY': r'格\s*[英鹰莺]|[革各]\s*英',
-              'ANMAN_FAMILY': r'阿\s*曼|阿\s*满',
-              'ANURA_FAMILY': r'青\s*蛙|蛙|癞\s*蛤\s*蟆|蟾\s*蜍|蟾',
-              'FISHBONE_FAMILY': r'鱼\s*骨|魚\s*骨|年\s*日\s*郭\s*托|业\s*日|業\s*日'
+          import re, unicodedata
+          text=Path('output/existing_text_layer.txt').read_text('utf-8',errors='ignore')
+          pages=text.split('\f')
+          groups={
+            'AIR_SIBLING_NAMES':['罗·阿曼格麻','罗阿曼格麻','萨曼格英','曼格','阿曼','格麻','格英','曼 格','阿 曼','格 麻','格 英','满格','蛮格','格玛','格马','格鹰'],
+            'ANURA':['青蛙','蛙','癞蛤蟆','癞蛤蟆','蟾蜍','蟾','蛤蟆','蝌蚪'],
+            'FISH_BONE':['鱼骨','魚骨','年日郭托','业日','業日'],
+            'IDENTITY':['白马人','白馬人','白马语','白馬語','Pe','Pey']
           }
+          out=[]
           summary=[]
-          with open('output/target_hits.txt','w',encoding='utf-8') as out:
-              for part in parts:
-                  if not part.strip(): continue
-                  lines = part.splitlines()
-                  header = lines[0] if lines else ''
-                  hits = [t for t in exact if t in part]
-                  fhits = [name for name,pat in fuzzy_patterns.items() if re.search(pat,part,re.I)]
-                  if hits or fhits:
-                      summary.append((header,hits,fhits))
-                      out.write(f'{header}\nEXACT: {", ".join(hits) if hits else "-"}\nFUZZY: {", ".join(fhits) if fhits else "-"}\n')
-                      for i,line in enumerate(lines[1:]):
-                          if any(t in line for t in hits) or any(re.search(pat,line,re.I) for pat in fuzzy_patterns.values()):
-                              lo=max(0,i-2); hi=min(len(lines)-1,i+3)
-                              out.write('\n'.join(lines[1:][lo:hi])+'\n---\n')
-          with open('output/hit_summary.tsv','w',encoding='utf-8') as s:
-              s.write('page\texact\tfuzzy\n')
-              for h,e,f in summary:
-                  s.write(f'{h}\t{"|".join(e)}\t{"|".join(f)}\n')
-          print('hit_pages=',len(summary))
+          for g,terms in groups.items():
+            found=[]
+            for pno,page in enumerate(pages,1):
+              hs=[t for t in terms if t in page]
+              if not hs: continue
+              found.append((pno,hs))
+              lines=page.splitlines()
+              for i,line in enumerate(lines):
+                if any(t in line for t in hs):
+                  lo=max(0,i-2); hi=min(len(lines),i+3)
+                  out.append(f'===== {g} | PDF_PAGE_{pno} | {hs} =====\n'+'\n'.join(lines[lo:hi])+'\n')
+            summary.append(f'{g}: {len(found)} pages; '+', '.join(f'p{p}:{"/".join(h)}' for p,h in found[:100]))
+          Path('output/target_hits.txt').write_text('\n'.join(out),encoding='utf-8')
+          Path('output/target_summary.txt').write_text('\n'.join(summary),encoding='utf-8')
+          print('\n'.join(summary))
           PY
-          wc -c output/existing_text_layer.txt output/Baima_Han_Dacidian_page_text.txt output/target_hits.txt output/hit_summary.tsv
-          head -200 output/target_hits.txt || true
-
-      - name: Package fast scan
-        run: |
-          cp PDFINFO.txt SOURCE_SHA256SUMS.txt output/
+          cp SOURCE_SHA256SUMS.txt PDFINFO.txt output/
 
       - name: Upload fast scan artifacts
         uses: actions/upload-artifact@v4
@@ -104,9 +82,9 @@ jobs:
           name: baima-dictionary-fast-scan
           path: |
             output/existing_text_layer.txt
-            output/Baima_Han_Dacidian_page_text.txt
+            output/existing_text_nopage.txt
             output/target_hits.txt
-            output/hit_summary.tsv
+            output/target_summary.txt
             output/PDFINFO.txt
             output/SOURCE_SHA256SUMS.txt
           compression-level: 6
