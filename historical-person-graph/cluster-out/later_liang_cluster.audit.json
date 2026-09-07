@@ -1,0 +1,270 @@
+{
+  "status": "PASS",
+  "grounding": {
+    "grounded_evidence": 1.0,
+    "checks": 87,
+    "failures": []
+  },
+  "coverage": {
+    "nodes": 10,
+    "edges": 31,
+    "events": 24,
+    "slices": 22,
+    "sources": 11,
+    "required_people_present": [
+      "吕光",
+      "吕弘",
+      "吕纂",
+      "吕绍",
+      "吕超",
+      "吕隆",
+      "沮渠罗仇",
+      "沮渠蒙逊"
+    ],
+    "required_people_missing": [],
+    "optional_people_present": [
+      "姚兴",
+      "苻坚"
+    ],
+    "optional_people_absent": [
+      "刘裕",
+      "姚泓"
+    ]
+  },
+  "relation_counts": {
+    "appoints": 5,
+    "father_of": 4,
+    "supports": 4,
+    "kills": 4,
+    "succeeds": 3,
+    "brother_of": 3,
+    "subordinate_to": 2,
+    "rebels_against": 2,
+    "enemy_of": 2,
+    "uncle_of": 1,
+    "sends_envoy_to": 1
+  },
+  "succession_chain": [
+    {
+      "source": "吕绍",
+      "target": "吕光",
+      "relation": "succeeds",
+      "evidence": "立其太子绍为天王"
+    },
+    {
+      "source": "吕纂",
+      "target": "吕绍",
+      "relation": "succeeds",
+      "evidence": "纂以隆安四年遂僭即天王位"
+    },
+    {
+      "source": "吕隆",
+      "target": "吕纂",
+      "relation": "succeeds",
+      "evidence": "隆以安帝元兴元年遂僭即天王位"
+    }
+  ],
+  "family_edges": [
+    {
+      "source": "吕光",
+      "target": "吕绍",
+      "relation": "father_of",
+      "evidence": "子绍为世子"
+    },
+    {
+      "source": "吕光",
+      "target": "吕纂",
+      "relation": "father_of",
+      "evidence": "遣其子左将军他、武贲中郎将纂讨北虏"
+    },
+    {
+      "source": "吕光",
+      "target": "吕绍",
+      "relation": "father_of",
+      "evidence": "立其太子绍为天王"
+    },
+    {
+      "source": "吕弘",
+      "target": "吕绍",
+      "relation": "brother_of",
+      "evidence": "自以绍弟也而承大统"
+    },
+    {
+      "source": "吕光",
+      "target": "吕弘",
+      "relation": "father_of",
+      "evidence": "光欲立弘为世子"
+    },
+    {
+      "source": "吕弘",
+      "target": "吕纂",
+      "relation": "brother_of",
+      "evidence": "弘妻，陛下之弟妇也"
+    },
+    {
+      "source": "吕隆",
+      "target": "吕超",
+      "relation": "brother_of",
+      "evidence": "以弟超有佐命之勋"
+    },
+    {
+      "source": "吕光",
+      "target": "吕隆",
+      "relation": "uncle_of",
+      "evidence": "光弟宝之子也"
+    }
+  ],
+  "rebellion_killing_edges": [
+    {
+      "source": "吕弘",
+      "target": "吕纂",
+      "relation": "rebels_against",
+      "evidence": "乃率兵攻纂"
+    },
+    {
+      "source": "吕纂",
+      "target": "吕弘",
+      "relation": "kills",
+      "evidence": "纂遣力士康龙拉杀之"
+    },
+    {
+      "source": "吕超",
+      "target": "吕纂",
+      "relation": "kills",
+      "evidence": "超刺纂洞胸"
+    },
+    {
+      "source": "姚兴",
+      "target": "吕隆",
+      "relation": "enemy_of",
+      "evidence": "硕德遂率众至姑臧"
+    },
+    {
+      "source": "沮渠蒙逊",
+      "target": "吕隆",
+      "relation": "enemy_of",
+      "evidence": "沮渠蒙逊又伐隆"
+    },
+    {
+      "source": "姚兴",
+      "target": "吕隆",
+      "relation": "kills",
+      "evidence": "其后隆坐与子弼谋反，为兴所诛"
+    },
+    {
+      "source": "吕光",
+      "target": "沮渠罗仇",
+      "relation": "kills",
+      "evidence": "杀尚书沮渠罗仇、三河太守沮渠麹粥"
+    },
+    {
+      "source": "沮渠蒙逊",
+      "target": "吕光",
+      "relation": "rebels_against",
+      "evidence": "罗仇弟子蒙逊叛光"
+    }
+  ],
+  "unsupported_relations": [],
+  "open_relations": [],
+  "sources_used": [
+    {
+      "record_id": "LL00",
+      "graph_source_id": 1,
+      "source_title": "晋书",
+      "source_locator": "载记第二十二·吕光载记·立世子绍与遣子纂",
+      "quoted_source": "https://www.zggdwx.com/jinshu/123.html",
+      "evidence_tier": "A",
+      "text_preview": "是时麟见金泽县，百兽从之，光以为已瑞，以孝武太元十四年僭即三河王位，置百官自丞郎已下，赦其境内，年号麟嘉。光妻石氏、子绍、弟德世至自仇池，光迎于城东，大飨群臣。遣其子左将军他、武贲中郎将纂讨北虏匹勤于三岩山，大破之。立妻石氏为王妃，子绍为世子。"
+    },
+    {
+      "record_id": "LL01",
+      "graph_source_id": 2,
+      "source_title": "晋书",
+      "source_locator": "载记第二十二·吕光载记·疾甚立太子绍",
+      "quoted_source": "https://www.zggdwx.com/jinshu/123.html",
+      "evidence_tier": "A",
+      "text_preview": "光疾甚，立其太子绍为天王，自号太上皇帝。以吕纂为太尉，吕弘为司徒。谓绍曰：“吾疾病唯增，恐将不济。三寇窥窬，迭伺国隙。吾终以后，使纂统六军，弘管朝政，汝恭己无为，委重二兄，庶可以济。若内相猜贰，衅起萧墙，则晋、赵之变旦夕至矣。”又谓纂、弘曰：“永业才非拨乱，直以正嫡有常，猥居元首。今外有强寇，人心未宁，汝兄弟缉穆，则贻..."
+    },
+    {
+      "record_id": "LL02",
+      "graph_source_id": 3,
+      "source_title": "晋书",
+      "source_locator": "载记第二十二·吕纂载记·绍让位与超谏",
+      "quoted_source": "https://www.zggdwx.com/jinshu/123.html",
+      "evidence_tier": "A",
+      "text_preview": "光死，吕绍秘不发丧，纂排阁入哭，尽哀而出。绍惧为纂所害，以位让之，曰：“兄功高年长，宜承大统，愿兄勿疑。”纂曰：“臣虽年长，陛下国家之冢嫡，不可以私爱而乱大伦。”绍固以让纂，纂不许之。及绍嗣伪位，吕超言于绍曰：“纂统戎积年，威震内外，临丧不哀，步高视远，观其举止乱常，恐成大变，宜早除之，以安社稷。”绍曰：“先帝顾命，音..."
+    },
+    {
+      "record_id": "LL03",
+      "graph_source_id": 4,
+      "source_title": "晋书",
+      "source_locator": "载记第二十二·吕纂载记·纂即位与弘辞位",
+      "quoted_source": "https://www.zggdwx.com/jinshu/123.html",
+      "evidence_tier": "A",
+      "text_preview": "纂于是夜率壮士数百，逾北城，攻广夏门，弘率东苑之众斫洪范门。左卫齐从守融明观，逆问之曰：“谁也？”众曰：“太原公。”从曰：“国有大故，主上新立，太原公行不由道，夜入禁城，将为乱邪？”因抽剑直前，斫纂中额。纂左右擒之，纂曰：“义士也，勿杀。”绍遣武贲中郎将吕开率其禁兵距战于端门，骁骑吕超率卒二千赴之。众素惮纂，悉皆溃散。..."
+    },
+    {
+      "record_id": "LL04",
+      "graph_source_id": 5,
+      "source_title": "晋书",
+      "source_locator": "载记第二十二·吕纂载记·弘起兵反叛",
+      "quoted_source": "https://www.zggdwx.com/jinshu/123.html",
+      "evidence_tier": "A",
+      "text_preview": "初，光欲立弘为世子，会闻绍在仇池，乃止，弘由是有憾于绍。吕弘自以功名崇重，恐不为纂所容，纂亦深忌之。弘遂起兵东苑，劫尹文、杨桓以为谋主，请宗燮俱行。燮曰：“老臣受先帝大恩，位为列棘，不能陨身授命，死有余罪，而复从殿下，亲为戎首者，岂天地所容乎！且智不能谋，众不足恃，将焉用之！”弘曰：“君为义士，我为乱臣！”乃率兵攻纂。..."
+    },
+    {
+      "record_id": "LL05",
+      "graph_source_id": 6,
+      "source_title": "晋书",
+      "source_locator": "载记第二十二·吕纂载记·吕超刺纂",
+      "quoted_source": "https://www.zggdwx.com/jinshu/123.html",
+      "evidence_tier": "A",
+      "text_preview": "纂番禾太守吕超擅伐鲜卑思盘，思盘遣弟乞珍诉超于纂，纂召超将盘入朝。超至姑臧，大惧，自结于殿中监杜尚，纂见超，怒曰：“卿恃兄弟桓桓，欲欺吾也，要当斩卿，然后天下可定。”超顿首不敢。纂因引超及其诸臣宴于内殿。吕隆屡劝纂酒，已至昏醉，乘步輓车将超等游于内。至琨华堂东閤，车不得过，纂亲将窦川、骆腾倚剑于壁，推车过閤。超取剑击纂..."
+    },
+    {
+      "record_id": "LL06",
+      "graph_source_id": 7,
+      "source_title": "晋书",
+      "source_locator": "载记第二十二·吕隆载记·隆即位",
+      "quoted_source": "https://www.zggdwx.com/jinshu/123.html",
+      "evidence_tier": "A",
+      "text_preview": "隆字永基，光弟宝之子也，美姿貌，善骑射。光末拜北部护军，稍历显位，有声称。超既杀纂，让位于隆，隆有难色。超曰：“今犹乘龙上天，岂可中下！”隆以安帝元兴元年遂僭即天王位。超先于番禾得小鼎，以为神瑞，大赦，改元为神鼎。追尊父宝为文皇帝，母卫氏为皇太后，妻杨氏为皇后，以弟超有佐命之勋，拜使持节、侍中、都督中外诸军事、辅国大将..."
+    },
+    {
+      "record_id": "LL07",
+      "graph_source_id": 8,
+      "source_title": "晋书",
+      "source_locator": "载记第二十二·吕隆载记·隆降姚兴",
+      "quoted_source": "https://www.zggdwx.com/jinshu/123.html",
+      "evidence_tier": "A",
+      "text_preview": "隆多杀豪望，以立威名，内外嚣然，人不自固。魏安人焦朗遣使说姚兴将姚硕德曰：“吕氏因秦之乱，制命此州。自武皇弃世，诸子兢寻干戈，德刑不恤，残暴是先，饥馑流亡，死者太半，唯泣诉昊天，而精诚无感。伏惟明公道迈前贤，任尊分陕，宜兼弱攻昧，经略此方，救生灵之沈溺，布徽政于玉门。篡夺之际，为功不难。”遣妻子为质。硕德遂率众至姑臧。..."
+    },
+    {
+      "record_id": "LL09",
+      "graph_source_id": 9,
+      "source_title": "晋书",
+      "source_locator": "载记第二十二·吕光载记·苻坚授光西讨",
+      "quoted_source": "https://www.zggdwx.com/jinshu/123.html",
+      "evidence_tier": "A",
+      "text_preview": "坚既平山东，士马强盛，遂有图西域之志，乃授光使持节、都督西讨诸军事，率将军姜飞、彭晃、杜进、康盛等总兵七万，铁骑五千，以讨西域，以陇西董方、冯翊郭抱、武威贾虔、弘农杨颖为四府佐将。"
+    },
+    {
+      "record_id": "LL10",
+      "graph_source_id": 10,
+      "source_title": "晋书",
+      "source_locator": "载记第二十二·吕光载记·苻坚评光忠孝",
+      "quoted_source": "https://www.zggdwx.com/jinshu/123.html",
+      "evidence_tier": "A",
+      "text_preview": "苻重之镇洛阳，以光为长史。及重谋反，苻坚闻之，曰：“吕光忠孝方正，必不同也。”驰使命光槛重送之。寻入为太子右率，甚见敬重。"
+    },
+    {
+      "record_id": "LL11",
+      "graph_source_id": 11,
+      "source_title": "晋书",
+      "source_locator": "载记第二十二·吕光载记·光杀罗仇蒙逊叛",
+      "quoted_source": "https://www.zggdwx.com/jinshu/123.html",
+      "evidence_tier": "A",
+      "text_preview": "光荒耄信谗，杀尚书沮渠罗仇、三河太守沮渠麹粥。罗仇弟子蒙逊叛光，杀中田护军马邃，攻陷临松郡，屯兵金山，大为百姓之患。"
+    }
+  ]
+}

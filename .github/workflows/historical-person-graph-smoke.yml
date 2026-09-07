@@ -1,0 +1,80 @@
+name: Historical Person Graph Smoke
+
+on:
+  push:
+    paths:
+      - 'tools/osr_historical_person_graph.py'
+      - 'tools/osr_historical_person_graph_smoke.py'
+      - 'tools/osr_historical_person_gold20_baseline.py'
+      - 'tools/osr_historical_person_graph_audit.py'
+      - 'historical-person-graph/**'
+      - '.github/workflows/historical-person-graph-smoke.yml'
+  pull_request:
+    paths:
+      - 'tools/osr_historical_person_graph.py'
+      - 'tools/osr_historical_person_graph_smoke.py'
+      - 'tools/osr_historical_person_gold20_baseline.py'
+      - 'tools/osr_historical_person_graph_audit.py'
+      - 'historical-person-graph/**'
+      - '.github/workflows/historical-person-graph-smoke.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests
+      - run: python -m py_compile tools/osr_historical_person_graph.py tools/osr_historical_person_gold20_baseline.py tools/osr_historical_person_graph_audit.py
+      - run: PYTHONPATH=tools python tools/osr_historical_person_graph_smoke.py
+      - name: Real-source Lv Guang gold-20 deterministic baseline
+        run: PYTHONPATH=tools python tools/osr_historical_person_gold20_baseline.py
+      - name: Audit baseline evidence grounding and report semantic score
+        run: |
+          python tools/osr_historical_person_graph_audit.py \
+            --db historical-person-graph/baseline-out/lvguang_gold_20.sqlite \
+            --graph-json historical-person-graph/baseline-out/lvguang_gold_20.graph.json \
+            --expectations historical-person-graph/fixtures/lvguang_gold_20_expectations.json \
+            | tee historical-person-graph/baseline-out/audit.json
+      - name: Prove strict gate rejects the weak deterministic baseline
+        shell: bash
+        run: |
+          set +e
+          python tools/osr_historical_person_graph_audit.py \
+            --db historical-person-graph/baseline-out/lvguang_gold_20.sqlite \
+            --graph-json historical-person-graph/baseline-out/lvguang_gold_20.graph.json \
+            --expectations historical-person-graph/fixtures/lvguang_gold_20_expectations.json \
+            --strict > historical-person-graph/baseline-out/strict-audit.json
+          rc=$?
+          set -e
+          test "$rc" -eq 2
+          python - <<'PY'
+          import json
+          p='historical-person-graph/baseline-out/strict-audit.json'
+          obj=json.load(open(p, encoding='utf-8'))
+          failures=' '.join(obj['failures'])
+          assert obj['status']=='FAIL', obj
+          assert 'slice_match<' in failures, failures
+          assert 'relation_match<' in failures, failures
+          assert obj['semantic']['metrics']['target_person_unity']==1.0, obj
+          print(json.dumps({'status':'EXPECTED_FAIL_PASS','failures':obj['failures']}, ensure_ascii=False))
+          PY
+      - name: Kimi Code gold-20 strict regression from pre-extracted fixture
+        env:
+          KIMI_CODE_PRE_EXTRACTED: historical-person-graph/fixtures/lvguang_gold_20_kimi_preextracted.jsonl
+          OUT_DIR: historical-person-graph/kimi-regression-out
+        run: bash historical-person-graph/run_kimi_gold20.sh
+      - name: Upload gold-20 baseline graph
+        uses: actions/upload-artifact@v4
+        with:
+          name: lvguang-gold20-baseline
+          path: historical-person-graph/baseline-out/
+          if-no-files-found: error
+      - name: Upload Kimi gold-20 regression graph
+        uses: actions/upload-artifact@v4
+        with:
+          name: lvguang-gold20-kimi-regression
+          path: historical-person-graph/kimi-regression-out/
+          if-no-files-found: error

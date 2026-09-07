@@ -1,0 +1,286 @@
+{
+  "status": "PASS",
+  "grounding": {
+    "grounded_evidence": 1.0,
+    "checks": 194,
+    "failures": []
+  },
+  "coverage": {
+    "nodes": 28,
+    "edges": 76,
+    "events": 46,
+    "slices": 44,
+    "sources": 21,
+    "required_people_present": [
+      "吕光",
+      "吕宝",
+      "吕弘",
+      "吕弼",
+      "吕纂",
+      "吕绍",
+      "吕超",
+      "吕隆",
+      "姚硕德",
+      "沮渠罗仇",
+      "沮渠蒙逊",
+      "魏益多"
+    ],
+    "required_people_missing": [],
+    "optional_people_present": [
+      "刘裕",
+      "吴忠",
+      "姚兴",
+      "姚泓",
+      "姚苌",
+      "姜飞",
+      "康盛",
+      "彭晃",
+      "杜进",
+      "杨颖",
+      "檀道济",
+      "王镇恶",
+      "苻坚",
+      "董方",
+      "贾虔",
+      "郭抱"
+    ],
+    "optional_people_absent": []
+  },
+  "relation_counts": {
+    "commands": 14,
+    "subordinate_to": 13,
+    "father_of": 8,
+    "appoints": 7,
+    "kills": 6,
+    "succeeds": 5,
+    "brother_of": 5,
+    "enemy_of": 5,
+    "supports": 4,
+    "rebels_against": 3,
+    "captured_by": 2,
+    "executed_by": 2,
+    "uncle_of": 1,
+    "sends_envoy_to": 1
+  },
+  "target_person_unity": {
+    "吕光_node_count": 1,
+    "ok": true
+  },
+  "later_liang_depth": {
+    "edges": {
+      "吕纂 brother_of 吕绍": {
+        "source": "吕纂",
+        "target": "吕绍",
+        "relation": "brother_of",
+        "evidence": "汝兄弟缉穆"
+      },
+      "吕光 brother_of 吕宝": {
+        "source": "吕光",
+        "target": "吕宝",
+        "relation": "brother_of",
+        "evidence": "光弟宝之子也"
+      },
+      "吕宝 father_of 吕隆": {
+        "source": "吕宝",
+        "target": "吕隆",
+        "relation": "father_of",
+        "evidence": "光弟宝之子也"
+      },
+      "吕纂 commands 吕超": {
+        "source": "吕纂",
+        "target": "吕超",
+        "relation": "commands",
+        "evidence": "纂番禾太守吕超"
+      },
+      "吕超 subordinate_to 吕纂": {
+        "source": "吕超",
+        "target": "吕纂",
+        "relation": "subordinate_to",
+        "evidence": "纂番禾太守吕超"
+      },
+      "吕隆 appoints 吕超": {
+        "source": "吕隆",
+        "target": "吕超",
+        "relation": "appoints",
+        "evidence": "以弟超有佐命之勋，拜使持节、侍中、都督中外诸军事、辅国大将军、司隶校尉、录尚书事，封安定公"
+      },
+      "吕隆 commands 吕超": {
+        "source": "吕隆",
+        "target": "吕超",
+        "relation": "commands",
+        "evidence": "遣超率骑二百，多赍珍宝，请迎于姚兴"
+      },
+      "魏益多 kills 吕纂": {
+        "source": "魏益多",
+        "target": "吕纂",
+        "relation": "kills",
+        "evidence": "将军魏益多入，斩纂首以徇"
+      },
+      "吕隆 father_of 吕弼": {
+        "source": "吕隆",
+        "target": "吕弼",
+        "relation": "father_of",
+        "evidence": "其后隆坐与子弼谋反，为兴所诛"
+      },
+      "姚兴 kills 吕弼": {
+        "source": "姚兴",
+        "target": "吕弼",
+        "relation": "kills",
+        "evidence": "其后隆坐与子弼谋反，为兴所诛"
+      },
+      "姚兴 commands 姚硕德": {
+        "source": "姚兴",
+        "target": "姚硕德",
+        "relation": "commands",
+        "evidence": "魏安人焦朗遣使说姚兴将姚硕德"
+      },
+      "姚硕德 enemy_of 吕隆": {
+        "source": "姚硕德",
+        "target": "吕隆",
+        "relation": "enemy_of",
+        "evidence": "硕德遂率众至姑臧"
+      }
+    },
+    "missing_edges": []
+  },
+  "bridge": {
+    "edges": {
+      "苻坚 appoints 吕光": {
+        "source": "苻坚",
+        "target": "吕光",
+        "relation": "appoints",
+        "evidence": "乃授光使持节、都督西讨诸军事"
+      },
+      "吕光 subordinate_to 苻坚": {
+        "source": "吕光",
+        "target": "苻坚",
+        "relation": "subordinate_to",
+        "evidence": "乃授光使持节、都督西讨诸军事"
+      },
+      "苻坚 supports 吕光": {
+        "source": "苻坚",
+        "target": "吕光",
+        "relation": "supports",
+        "evidence": "吕光忠孝方正，必不同也"
+      }
+    },
+    "missing_edges": []
+  },
+  "chain": {
+    "nodes": {
+      "吕光": 1,
+      "苻坚": 9,
+      "姚苌": 16,
+      "姚兴": 7,
+      "姚泓": 12,
+      "刘裕": 11
+    },
+    "missing_nodes": [],
+    "edges": {
+      "吕光 subordinate_to 苻坚": {
+        "source": "吕光",
+        "target": "苻坚",
+        "relation": "subordinate_to",
+        "evidence": "乃授光使持节、都督西讨诸军事"
+      },
+      "苻坚 executed_by 姚苌": {
+        "source": "苻坚",
+        "target": "姚苌",
+        "relation": "executed_by",
+        "evidence": "苌乃缢坚于新平佛寺中"
+      },
+      "姚苌 father_of 姚兴": {
+        "source": "姚苌",
+        "target": "姚兴",
+        "relation": "father_of",
+        "evidence": "苌之长子也"
+      },
+      "姚兴 succeeds 姚苌": {
+        "source": "姚兴",
+        "target": "姚苌",
+        "relation": "succeeds",
+        "evidence": "太元十九年，僭即帝位"
+      },
+      "姚兴 father_of 姚泓": {
+        "source": "姚兴",
+        "target": "姚泓",
+        "relation": "father_of",
+        "evidence": "兴之长子也"
+      },
+      "姚泓 succeeds 姚兴": {
+        "source": "姚泓",
+        "target": "姚兴",
+        "relation": "succeeds",
+        "evidence": "以义熙十二年僭即帝位"
+      },
+      "刘裕 enemy_of 姚泓": {
+        "source": "刘裕",
+        "target": "姚泓",
+        "relation": "enemy_of",
+        "evidence": "晋太尉刘裕总大军伐泓"
+      },
+      "姚泓 executed_by 刘裕": {
+        "source": "姚泓",
+        "target": "刘裕",
+        "relation": "executed_by",
+        "evidence": "执送姚泓，斩于建康市"
+      }
+    },
+    "missing_edges": []
+  },
+  "western_expedition": {
+    "subordinate_edges": [
+      {
+        "source": "吕光",
+        "target": "姜飞",
+        "relation": "commands",
+        "evidence": "率将军姜飞、彭晃、杜进、康盛等总兵七万，铁骑五千，以讨西域"
+      },
+      {
+        "source": "吕光",
+        "target": "彭晃",
+        "relation": "commands",
+        "evidence": "率将军姜飞、彭晃、杜进、康盛等总兵七万，铁骑五千，以讨西域"
+      },
+      {
+        "source": "吕光",
+        "target": "杜进",
+        "relation": "commands",
+        "evidence": "率将军姜飞、彭晃、杜进、康盛等总兵七万，铁骑五千，以讨西域"
+      },
+      {
+        "source": "吕光",
+        "target": "康盛",
+        "relation": "commands",
+        "evidence": "率将军姜飞、彭晃、杜进、康盛等总兵七万，铁骑五千，以讨西域"
+      },
+      {
+        "source": "吕光",
+        "target": "董方",
+        "relation": "commands",
+        "evidence": "以陇西董方、冯翊郭抱、武威贾虔、弘农杨颖为四府佐将"
+      },
+      {
+        "source": "吕光",
+        "target": "郭抱",
+        "relation": "commands",
+        "evidence": "以陇西董方、冯翊郭抱、武威贾虔、弘农杨颖为四府佐将"
+      },
+      {
+        "source": "吕光",
+        "target": "贾虔",
+        "relation": "commands",
+        "evidence": "以陇西董方、冯翊郭抱、武威贾虔、弘农杨颖为四府佐将"
+      },
+      {
+        "source": "吕光",
+        "target": "杨颖",
+        "relation": "commands",
+        "evidence": "以陇西董方、冯翊郭抱、武威贾虔、弘农杨颖为四府佐将"
+      }
+    ],
+    "subordinate_count": 8
+  },
+  "unsupported_relations": [],
+  "open_relations": []
+}

@@ -1,0 +1,97 @@
+{
+  "status": "PASS",
+  "grounding": {
+    "grounded_evidence": 1.0,
+    "checks": 114,
+    "failures": []
+  },
+  "coverage": {
+    "nodes": 14,
+    "edges": 38,
+    "events": 32,
+    "slices": 30,
+    "sources": 16,
+    "required_people_present": [
+      "刘裕",
+      "吕光",
+      "吕弘",
+      "吕纂",
+      "吕绍",
+      "吕超",
+      "吕隆",
+      "姚泓",
+      "沮渠罗仇",
+      "沮渠蒙逊"
+    ],
+    "required_people_missing": [],
+    "optional_people_present": [
+      "姚兴",
+      "檀道济",
+      "王镇恶",
+      "苻坚"
+    ],
+    "optional_people_absent": []
+  },
+  "relation_counts": {
+    "father_of": 5,
+    "appoints": 5,
+    "succeeds": 4,
+    "supports": 4,
+    "kills": 4,
+    "brother_of": 3,
+    "enemy_of": 3,
+    "subordinate_to": 2,
+    "rebels_against": 2,
+    "commands": 2,
+    "uncle_of": 1,
+    "sends_envoy_to": 1,
+    "captured_by": 1,
+    "executed_by": 1
+  },
+  "bridge_edges": [
+    {
+      "source": "姚兴",
+      "target": "姚泓",
+      "relation": "father_of",
+      "evidence": "兴之长子也"
+    },
+    {
+      "source": "姚泓",
+      "target": "姚兴",
+      "relation": "succeeds",
+      "evidence": "以义熙十二年僭即帝位"
+    },
+    {
+      "source": "刘裕",
+      "target": "姚泓",
+      "relation": "enemy_of",
+      "evidence": "晋太尉刘裕总大军伐泓"
+    },
+    {
+      "source": "刘裕",
+      "target": "檀道济",
+      "relation": "commands",
+      "evidence": "遣冠军将军檀道济"
+    },
+    {
+      "source": "刘裕",
+      "target": "王镇恶",
+      "relation": "commands",
+      "evidence": "龙骧将军王镇恶"
+    },
+    {
+      "source": "姚泓",
+      "target": "王镇恶",
+      "relation": "captured_by",
+      "evidence": "王镇恶克长安，生擒泓"
+    },
+    {
+      "source": "姚泓",
+      "target": "刘裕",
+      "relation": "executed_by",
+      "evidence": "执送姚泓，斩于建康市"
+    }
+  ],
+  "unsupported_relations": [],
+  "open_relations": []
+}
