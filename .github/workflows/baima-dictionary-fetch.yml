@@ -1,4 +1,4 @@
-name: Baima Dictionary Fast Text Scan
+name: Baima Dictionary Split for Drive
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  scan:
+  split:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -19,74 +19,55 @@ jobs:
       SOURCE_ARTIFACT: 'baima-han-dacidian-9787226052457'
       PDF: 'Baima_Han_Dacidian_9787226052457.pdf'
     steps:
-      - name: Install poppler
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends poppler-utils >/dev/null
-
-      - name: Recover preserved original PDF artifact
+      - name: Recover preserved original PDF
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p source
+          mkdir -p source transport
           gh run download "$SOURCE_RUN" -R "$GITHUB_REPOSITORY" -n "$SOURCE_ARTIFACT" -D source
           mv "source/$PDF" "$PDF"
           test "$(head -c 5 "$PDF")" = "%PDF-"
-          sha256sum "$PDF" | tee SOURCE_SHA256SUMS.txt
-          pdfinfo "$PDF" | tee PDFINFO.txt
+          sha256sum "$PDF" | tee transport/ORIGINAL_SHA256SUMS.txt
+          stat -c '%s %n' "$PDF" | tee transport/ORIGINAL_SIZE.txt
 
-      - name: Extract page-preserving text layer
+      - name: Split raw PDF into two byte-identical transport parts
         run: |
-          mkdir -p output
-          pdftotext -layout "$PDF" output/existing_text_layer.txt
-          pdftotext -layout -nopgbrk "$PDF" output/existing_text_nopage.txt
-          wc -c output/existing_text_layer.txt
+          set -euo pipefail
+          bytes=$(stat -c '%s' "$PDF")
+          half=$(( (bytes + 1) / 2 ))
+          head -c "$half" "$PDF" > transport/Baima_Han_Dacidian.part01
+          tail -c +$((half + 1)) "$PDF" > transport/Baima_Han_Dacidian.part02
+          sha256sum transport/Baima_Han_Dacidian.part01 transport/Baima_Han_Dacidian.part02 | tee transport/PART_SHA256SUMS.txt
+          cat transport/Baima_Han_Dacidian.part01 transport/Baima_Han_Dacidian.part02 > reconstructed.pdf
+          cmp "$PDF" reconstructed.pdf
+          sha256sum reconstructed.pdf | tee transport/RECONSTRUCTED_SHA256SUMS.txt
+          ls -lh transport/Baima_Han_Dacidian.part0*
 
-      - name: High-recall target scan
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re, unicodedata
-          text=Path('output/existing_text_layer.txt').read_text('utf-8',errors='ignore')
-          pages=text.split('\f')
-          groups={
-            'AIR_SIBLING_NAMES':['罗·阿曼格麻','罗阿曼格麻','萨曼格英','曼格','阿曼','格麻','格英','曼 格','阿 曼','格 麻','格 英','满格','蛮格','格玛','格马','格鹰'],
-            'ANURA':['青蛙','蛙','癞蛤蟆','癞蛤蟆','蟾蜍','蟾','蛤蟆','蝌蚪'],
-            'FISH_BONE':['鱼骨','魚骨','年日郭托','业日','業日'],
-            'IDENTITY':['白马人','白馬人','白马语','白馬語','Pe','Pey']
-          }
-          out=[]
-          summary=[]
-          for g,terms in groups.items():
-            found=[]
-            for pno,page in enumerate(pages,1):
-              hs=[t for t in terms if t in page]
-              if not hs: continue
-              found.append((pno,hs))
-              lines=page.splitlines()
-              for i,line in enumerate(lines):
-                if any(t in line for t in hs):
-                  lo=max(0,i-2); hi=min(len(lines),i+3)
-                  out.append(f'===== {g} | PDF_PAGE_{pno} | {hs} =====\n'+'\n'.join(lines[lo:hi])+'\n')
-            summary.append(f'{g}: {len(found)} pages; '+', '.join(f'p{p}:{"/".join(h)}' for p,h in found[:100]))
-          Path('output/target_hits.txt').write_text('\n'.join(out),encoding='utf-8')
-          Path('output/target_summary.txt').write_text('\n'.join(summary),encoding='utf-8')
-          print('\n'.join(summary))
-          PY
-          cp SOURCE_SHA256SUMS.txt PDFINFO.txt output/
-
-      - name: Upload fast scan artifacts
+      - name: Upload part 1
         uses: actions/upload-artifact@v4
         with:
-          name: baima-dictionary-fast-scan
+          name: baima-dictionary-part-01
           path: |
-            output/existing_text_layer.txt
-            output/existing_text_nopage.txt
-            output/target_hits.txt
-            output/target_summary.txt
-            output/PDFINFO.txt
-            output/SOURCE_SHA256SUMS.txt
-          compression-level: 6
-          retention-days: 7
+            transport/Baima_Han_Dacidian.part01
+            transport/ORIGINAL_SHA256SUMS.txt
+            transport/ORIGINAL_SIZE.txt
+            transport/PART_SHA256SUMS.txt
+            transport/RECONSTRUCTED_SHA256SUMS.txt
+          compression-level: 0
+          retention-days: 2
+          if-no-files-found: error
+
+      - name: Upload part 2
+        uses: actions/upload-artifact@v4
+        with:
+          name: baima-dictionary-part-02
+          path: |
+            transport/Baima_Han_Dacidian.part02
+            transport/ORIGINAL_SHA256SUMS.txt
+            transport/ORIGINAL_SIZE.txt
+            transport/PART_SHA256SUMS.txt
+            transport/RECONSTRUCTED_SHA256SUMS.txt
+          compression-level: 0
+          retention-days: 2
           if-no-files-found: error
