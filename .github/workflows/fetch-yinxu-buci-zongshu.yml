@@ -1,0 +1,42 @@
+name: Fetch Yin Xu Bu Ci Zong Shu PDF
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fetch-yinxu-buci-zongshu.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SOURCE_URL: 'https://wtgadtq.org/d4/X/69af6XS/f/1788756573/50000/g4/libgenrs_nonfiction/libgenrs_nonfiction/3214000/bf3cf59f3be1072c376303ea1c786240~/3rU0p4vXtyO6kSZLOropCw/%E6%AE%B7%E8%99%9B%E5%8D%9C%E8%BE%AD%E7%B6%9C%E8%BF%B0%20--%20%E9%99%B3%E5%A4%A2%E5%AE%B6%2C%201911-%20--%20reprint%2C%201988%20--%20%E4%B8%AD%E8%8F%AF%E6%9B%B8%E5%B1%80%20%3A%20%E6%96%B0%E8%8F%AF%E6%9B%B8%E5%BA%97%E5%8C%97%E4%BA%AC%E5%8F%91%E8%A1%8C%E6%89%80%E5%8F%91%E8%A1%8C%20--%20isbn13%209787101001631%20--%20bf3cf59f3be1072c376303ea1c786240%20--%20Anna%E2%80%99s%20Archive.pdf'
+      PDF: '殷虚卜辞综述_陈梦家_1988.pdf'
+    steps:
+      - name: Download source PDF
+        run: |
+          set -euo pipefail
+          curl -fL --retry 5 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 30 --max-time 1500 \
+            -A 'Mozilla/5.0' \
+            "$SOURCE_URL" -o "$PDF"
+          test "$(head -c 5 "$PDF")" = "%PDF-"
+          stat -c '%s %n' "$PDF" | tee SIZE.txt
+          sha256sum "$PDF" | tee SHA256SUMS.txt
+          ls -lh "$PDF"
+
+      - name: Upload original PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yinxu-buci-zongshu-chen-mengjia-1988
+          path: |
+            殷虚卜辞综述_陈梦家_1988.pdf
+            SIZE.txt
+            SHA256SUMS.txt
+          compression-level: 0
+          retention-days: 2
+          if-no-files-found: error
