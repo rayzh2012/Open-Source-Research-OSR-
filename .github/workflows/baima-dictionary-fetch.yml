@@ -1,4 +1,4 @@
-name: Baima Dictionary Fast OCR
+name: Baima Dictionary Fast Text Scan
 
 on:
   push:
@@ -10,133 +10,105 @@ permissions:
   contents: read
 
 jobs:
-  ocr:
+  scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 30
     env:
-      SOURCE_URL: "https://asuycdg6.org/d4/X/69af6XS/f2/1788682030/50000/g5/upload_files/upload_files_duxiu_main2_20250114/annas_archive_data__aacid__upload_files_duxiu_main2__20250114T233524Z--20250114T233525Z/aacid__upload_files_duxiu_main2__20250114T233524Z__kZPebqTSSriMwyTQgHGtgp~/uS2PW-kUmt_YmbwjbvOxUQ/%E7%99%BD%E9%A9%AC%E6%B1%89%E5%A4%A7%E8%AF%8D%E5%85%B8%20--%20%E5%AD%99%E5%AE%8F%E5%BC%80%2C%E9%AD%8F%E7%90%B3%2C%E5%BC%A0%E9%87%91%E7%94%9F%2C%E9%82%B1%E9%9B%B7%E7%94%9F%E4%B8%BB%E7%BC%96%20--%202017_12%20--%20%E5%85%B0%E5%B7%9E%3A%E7%94%98%E8%82%83%E4%BA%BA%E6%B0%91%E5%87%BA%E7%89%88%E7%A4%BE%20--%20isbn13%209787226052457%20--%20ab2c462d6efe7b66233165cc403f1902%20--%20Anna%E2%80%99s%20Archive.pdf"
+      SOURCE_URL: "https://asuycdg6.org/d4/X/69af6XS/f2/1788682030/50000/g5/upload_files/upload_files_duxiu_main2_20250114/annas_archive_data__aacid__upload_files_duxiu_main2__20250114T233524Z--20250114T233525Z/aacid__upload_files_duxiu_main2__20250114T233524Z__kZPebqTSSriMwyTQgHGtgp~/uS2PW-kUmt_YmbwjbvOxUQ/%E7%99%BD%E9%A9%AC%E6%B1%89%E5%A4%A7%E8%AF%8D%E5%85%B8%20--%20%E5%AD%99%E5%AE%8F%E5%BC%80%2C%E9%AD%8F%E7%90%B3%2C%E5%BC%A0%E9%87%91%E7%94%9F%2C%E9%82%B1%E9%9B%B7%E7%94%9F%E4%B8%BB%E7%BC%96%20--%202017_12%20--%20%E5%85%B0%E5%B7%9E%3A%E7%94%98%E8%82%B2%E4%BA%BA%E6%B0%91%E5%87%BA%E7%89%88%E7%A4%BE%20--%20isbn13%209787226052457%20--%20ab2c462d6efe7b66233165cc403f1902%20--%20Anna%E2%80%99s%20Archive.pdf"
       PDF: "Baima_Han_Dacidian_9787226052457.pdf"
 
     steps:
-      - name: Install OCR stack
+      - name: Install poppler
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            poppler-utils tesseract-ocr tesseract-ocr-chi-sim tesseract-ocr-eng \
-            parallel jq
-          tesseract --version | head -1
-          tesseract --list-langs
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends poppler-utils >/dev/null
 
       - name: Download source PDF
         shell: bash
         run: |
           set -euo pipefail
-          curl -fL \
-            --retry 8 --retry-all-errors --retry-delay 5 \
-            --connect-timeout 30 --max-time 3300 \
-            -A 'Mozilla/5.0' \
+          curl -fL --retry 8 --retry-all-errors --retry-delay 3 \
+            --connect-timeout 30 --max-time 900 -A 'Mozilla/5.0' \
             "$SOURCE_URL" -o "$PDF"
           test "$(head -c 5 "$PDF")" = "%PDF-"
           sha256sum "$PDF" | tee SOURCE_SHA256SUMS.txt
           pdfinfo "$PDF" | tee PDFINFO.txt
-          pages=$(pdfinfo "$PDF" | awk '/^Pages:/ {print $2}')
-          test -n "$pages"
-          echo "PAGES=$pages" >> "$GITHUB_ENV"
-          echo "Detected $pages pages"
 
-      - name: Extract any existing text layer first
-        run: |
-          mkdir -p output
-          pdftotext -layout "$PDF" output/existing_text_layer.txt || true
-          wc -c output/existing_text_layer.txt || true
-
-      - name: Fast parallel page OCR
+      - name: Extract page-preserving text layer
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p ocr_pages tmp output
-          export PDF
+          mkdir -p output
+          pdftotext -layout "$PDF" output/existing_text_layer.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          raw = Path('output/existing_text_layer.txt').read_text('utf-8', errors='ignore')
+          pages = raw.split('\f')
+          with open('output/Baima_Han_Dacidian_page_text.txt','w',encoding='utf-8') as out:
+              for i,page in enumerate(pages,1):
+                  out.write(f'\n===== PDF_PAGE_{i} =====\n')
+                  out.write(page)
+          print('pages_from_text_layer=', len(pages))
+          print('text_bytes=', len(raw.encode('utf-8')))
+          PY
 
-          ocr_one() {
-            p="$1"
-            stem=$(printf '%05d' "$p")
-            img="tmp/page_${stem}.jpg"
-            out="ocr_pages/page_${stem}"
-            pdftoppm -f "$p" -l "$p" -singlefile -r 180 \
-              -jpeg -jpegopt quality=72 "$PDF" "tmp/page_${stem}" >/dev/null 2>&1
-            tesseract "$img" "$out" -l chi_sim+eng --psm 3 \
-              preserve_interword_spaces=1 >/dev/null 2>&1 || true
-            rm -f "$img"
-          }
-          export -f ocr_one
-
-          seq 1 "$PAGES" | parallel --jobs 4 --line-buffer ocr_one {}
-
-          : > output/Baima_Han_Dacidian_OCR_full.txt
-          for f in $(find ocr_pages -name 'page_*.txt' | sort); do
-            stem=$(basename "$f" .txt)
-            p=$((10#${stem#page_}))
-            printf '\n===== PDF_PAGE_%d =====\n' "$p" >> output/Baima_Han_Dacidian_OCR_full.txt
-            cat "$f" >> output/Baima_Han_Dacidian_OCR_full.txt
-          done
-
-          wc -l output/Baima_Han_Dacidian_OCR_full.txt
-          wc -c output/Baima_Han_Dacidian_OCR_full.txt
-          find ocr_pages -name 'page_*.txt' | wc -l
-
-      - name: Build target-term scan
+      - name: High-recall target scan
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import re, pathlib
-          p = pathlib.Path('output/Baima_Han_Dacidian_OCR_full.txt')
-          text = p.read_text('utf-8', errors='ignore')
-          terms = [
-              '罗·阿曼格麻','萨曼格英','曼格','阿曼','格麻','格英',
-              '青蛙','蛙','癞蛤蟆','蟾蜍','蟾','鱼骨','鱼','白马人','白马语'
-          ]
+          import re
+          from pathlib import Path
+          text = Path('output/Baima_Han_Dacidian_page_text.txt').read_text('utf-8', errors='ignore')
           parts = re.split(r'(?=^===== PDF_PAGE_\d+ =====$)', text, flags=re.M)
+          exact = ['罗·阿曼格麻','罗阿曼格麻','萨曼格英','曼格','阿曼','格麻','格英','青蛙','蛙','癞蛤蟆','癞蛤蟆','蟾蜍','蟾','鱼骨','鱼骨牌','年日郭托','业日','白马人','白马语','Pe','Pey']
+          fuzzy_patterns = {
+              'MANGE_FAMILY': r'曼\s*格|满\s*格|蛮\s*格|蔓\s*格',
+              'GEMA_FAMILY': r'格\s*[麻玛马]|[革各]麻',
+              'GEYING_FAMILY': r'格\s*[英鹰莺]|[革各]\s*英',
+              'ANMAN_FAMILY': r'阿\s*曼|阿\s*满',
+              'ANURA_FAMILY': r'青\s*蛙|蛙|癞\s*蛤\s*蟆|蟾\s*蜍|蟾',
+              'FISHBONE_FAMILY': r'鱼\s*骨|魚\s*骨|年\s*日\s*郭\s*托|业\s*日|業\s*日'
+          }
+          summary=[]
           with open('output/target_hits.txt','w',encoding='utf-8') as out:
               for part in parts:
                   if not part.strip(): continue
-                  header = part.splitlines()[0] if part.splitlines() else ''
-                  hits = [t for t in terms if t in part]
-                  if hits:
-                      out.write(f'{header}\nHITS: {", ".join(hits)}\n')
-                      lines = part.splitlines()[1:]
-                      for i,line in enumerate(lines):
-                          if any(t in line for t in hits):
-                              lo=max(0,i-2); hi=min(len(lines),i+3)
-                              out.write('\n'.join(lines[lo:hi])+'\n---\n')
+                  lines = part.splitlines()
+                  header = lines[0] if lines else ''
+                  hits = [t for t in exact if t in part]
+                  fhits = [name for name,pat in fuzzy_patterns.items() if re.search(pat,part,re.I)]
+                  if hits or fhits:
+                      summary.append((header,hits,fhits))
+                      out.write(f'{header}\nEXACT: {", ".join(hits) if hits else "-"}\nFUZZY: {", ".join(fhits) if fhits else "-"}\n')
+                      for i,line in enumerate(lines[1:]):
+                          if any(t in line for t in hits) or any(re.search(pat,line,re.I) for pat in fuzzy_patterns.values()):
+                              lo=max(0,i-2); hi=min(len(lines)-1,i+3)
+                              out.write('\n'.join(lines[1:][lo:hi])+'\n---\n')
+          with open('output/hit_summary.tsv','w',encoding='utf-8') as s:
+              s.write('page\texact\tfuzzy\n')
+              for h,e,f in summary:
+                  s.write(f'{h}\t{"|".join(e)}\t{"|".join(f)}\n')
+          print('hit_pages=',len(summary))
           PY
-          cat output/target_hits.txt || true
+          wc -c output/existing_text_layer.txt output/Baima_Han_Dacidian_page_text.txt output/target_hits.txt output/hit_summary.tsv
+          head -200 output/target_hits.txt || true
 
-      - name: Package page OCR and metadata
+      - name: Package fast scan
         run: |
-          tar -czf output/Baima_Han_Dacidian_OCR_pages.tar.gz ocr_pages
-          cp SOURCE_SHA256SUMS.txt PDFINFO.txt output/
-          ls -lh output/
+          cp PDFINFO.txt SOURCE_SHA256SUMS.txt output/
 
-      - name: Upload OCR text artifacts
+      - name: Upload fast scan artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: baima-dictionary-ocr-text
+          name: baima-dictionary-fast-scan
           path: |
-            output/Baima_Han_Dacidian_OCR_full.txt
             output/existing_text_layer.txt
+            output/Baima_Han_Dacidian_page_text.txt
             output/target_hits.txt
+            output/hit_summary.tsv
             output/PDFINFO.txt
             output/SOURCE_SHA256SUMS.txt
           compression-level: 6
-          retention-days: 7
-          if-no-files-found: error
-
-      - name: Upload page-level OCR archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: baima-dictionary-ocr-pages
-          path: output/Baima_Han_Dacidian_OCR_pages.tar.gz
-          compression-level: 0
           retention-days: 7
           if-no-files-found: error
