@@ -1,0 +1,101 @@
+name: Baima Dictionary Drive Staging
+
+on:
+  push:
+    paths:
+      - '.github/workflows/baima-drive-staging.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SOURCE_URL: "https://asuycdg6.org/d4/X/69af6XS/f2/1788682030/50000/g5/upload_files/upload_files_duxiu_main2_20250114/annas_archive_data__aacid__upload_files_duxiu_main2__20250114T233524Z--20250114T233525Z/aacid__upload_files_duxiu_main2__20250114T233524Z__kZPebqTSSriMwyTQgHGtgp~/uS2PW-kUmt_YmbwjbvOxUQ/%E7%99%BD%E9%A9%AC%E6%B1%89%E5%A4%A7%E8%AF%8D%E5%85%B8%20--%20%E5%AD%99%E5%AE%8F%E5%BC%80%2C%E9%AD%8F%E7%90%B3%2C%E5%BC%A0%E9%87%91%E7%94%9F%2C%E9%82%B1%E9%9B%B7%E7%94%9F%E4%B8%BB%E7%BC%96%20--%202017_12%20--%20%E5%85%B0%E5%B7%9E%3A%E7%94%98%E8%82%83%E4%BA%BA%E6%B0%91%E5%87%BA%E7%89%88%E7%A4%BE%20--%20isbn13%209787226052457%20--%20ab2c462d6efe7b66233165cc403f1902%20--%20Anna%E2%80%99s%20Archive.pdf"
+      PDF: "Baima_Han_Dacidian_9787226052457.pdf"
+
+    steps:
+      - name: Install split tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends poppler-utils qpdf >/dev/null
+
+      - name: Download source PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 8 --retry-all-errors --retry-delay 3 \
+            --connect-timeout 30 --max-time 900 -A 'Mozilla/5.0' \
+            "$SOURCE_URL" -o "$PDF"
+          test "$(head -c 5 "$PDF")" = "%PDF-"
+          sha256sum "$PDF" | tee SOURCE_SHA256SUMS.txt
+          pdfinfo "$PDF" | tee PDFINFO.txt
+          test "$(pdfinfo "$PDF" | awk '/^Pages:/ {print $2}')" = "941"
+
+      - name: Extract embedded text layer
+        run: |
+          mkdir -p staging/text staging/pdf
+          pdftotext -layout "$PDF" staging/text/Baima_Han_Dacidian_embedded_text.txt
+          wc -c staging/text/Baima_Han_Dacidian_embedded_text.txt | tee staging/text/TEXT_BYTES.txt
+          cp PDFINFO.txt SOURCE_SHA256SUMS.txt staging/text/
+
+      - name: Split PDF into Drive-safe volumes
+        run: |
+          qpdf "$PDF" --pages "$PDF" 1-200 -- staging/pdf/Baima_Han_Dacidian_P001-200.pdf
+          qpdf "$PDF" --pages "$PDF" 201-400 -- staging/pdf/Baima_Han_Dacidian_P201-400.pdf
+          qpdf "$PDF" --pages "$PDF" 401-600 -- staging/pdf/Baima_Han_Dacidian_P401-600.pdf
+          qpdf "$PDF" --pages "$PDF" 601-800 -- staging/pdf/Baima_Han_Dacidian_P601-800.pdf
+          qpdf "$PDF" --pages "$PDF" 801-941 -- staging/pdf/Baima_Han_Dacidian_P801-941.pdf
+          sha256sum staging/pdf/*.pdf | tee staging/pdf/SPLIT_SHA256SUMS.txt
+          ls -lh staging/pdf/*.pdf
+
+      - name: Upload text layer
+        uses: actions/upload-artifact@v4
+        with:
+          name: baima-text-layer
+          path: staging/text/
+          compression-level: 6
+          retention-days: 7
+
+      - name: Upload volume 001-200
+        uses: actions/upload-artifact@v4
+        with:
+          name: baima-pdf-001-200
+          path: staging/pdf/Baima_Han_Dacidian_P001-200.pdf
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload volume 201-400
+        uses: actions/upload-artifact@v4
+        with:
+          name: baima-pdf-201-400
+          path: staging/pdf/Baima_Han_Dacidian_P201-400.pdf
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload volume 401-600
+        uses: actions/upload-artifact@v4
+        with:
+          name: baima-pdf-401-600
+          path: staging/pdf/Baima_Han_Dacidian_P401-600.pdf
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload volume 601-800
+        uses: actions/upload-artifact@v4
+        with:
+          name: baima-pdf-601-800
+          path: staging/pdf/Baima_Han_Dacidian_P601-800.pdf
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload volume 801-941
+        uses: actions/upload-artifact@v4
+        with:
+          name: baima-pdf-801-941
+          path: staging/pdf/Baima_Han_Dacidian_P801-941.pdf
+          compression-level: 0
+          retention-days: 7
