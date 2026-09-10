@@ -1,4 +1,4 @@
-name: Fetch Yin Xu Bu Ci Zong Shu PDF
+name: Fetch Yin Xu Bu Ci Zong Lei PDF
 
 on:
   push:
@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      SOURCE_URL: 'https://wtgadtq.org/d4/X/69af6XS/f/1788756573/50000/g4/libgenrs_nonfiction/libgenrs_nonfiction/3214000/bf3cf59f3be1072c376303ea1c786240~/3rU0p4vXtyO6kSZLOropCw/%E6%AE%B7%E8%99%9B%E5%8D%9C%E8%BE%AD%E7%B6%9C%E8%BF%B0%20--%20%E9%99%B3%E5%A4%A2%E5%AE%B6%2C%201911-%20--%20reprint%2C%201988%20--%20%E4%B8%AD%E8%8F%AF%E6%9B%B8%E5%B1%80%20%3A%20%E6%96%B0%E8%8F%AF%E6%9B%B8%E5%BA%97%E5%8C%97%E4%BA%AC%E5%8F%91%E8%A1%8C%E6%89%80%E5%8F%91%E8%A1%8C%20--%20isbn13%209787101001631%20--%20bf3cf59f3be1072c376303ea1c786240%20--%20Anna%E2%80%99s%20Archive.pdf'
-      PDF: '殷虚卜辞综述_陈梦家_1988.pdf'
+      SOURCE_URL: 'https://wtgadtq.org/d4/X/69af6XS/f/1789021442/50000/g4/libgenrs_nonfiction/libgenrs_nonfiction/3435000/6f0b2dd4c01b73cec8a6b0b2cc92602f~/LmvkAILTHl3KEjqj66xgRw/%E6%AE%B7%E5%A2%9F%E5%8D%9C%E8%BE%9E%E7%BB%BC%E7%B1%BB%20--%20%E5%B2%9B%E9%82%A6%E7%94%B7%20--%201977%20--%20%E6%B1%B2%E5%8F%A4%E4%B9%A6%E9%99%A2%20--%206f0b2dd4c01b73cec8a6b0b2cc92602f%20--%20Anna%E2%80%99s%20Archive.pdf'
+      PDF: '殷墟卜辞综类_岛邦男_1977.pdf'
     steps:
       - name: Download source PDF
         run: |
@@ -32,9 +32,9 @@ jobs:
       - name: Upload original PDF artifact
         uses: actions/upload-artifact@v4
         with:
-          name: yinxu-buci-zongshu-chen-mengjia-1988
+          name: yinxu-buci-zonglei-shima-kunio-1977
           path: |
-            殷虚卜辞综述_陈梦家_1988.pdf
+            殷墟卜辞综类_岛邦男_1977.pdf
             SIZE.txt
             SHA256SUMS.txt
           compression-level: 0
