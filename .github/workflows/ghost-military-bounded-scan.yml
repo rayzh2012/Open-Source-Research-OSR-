@@ -1,0 +1,143 @@
+name: Ghost-Military Corpus Sweep (Bounded)
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/ghost-military-bounded-scan.yml'
+  workflow_dispatch:
+    inputs:
+      worker_count:
+        description: Parallel workers (bounded sweep)
+        required: true
+        default: '10'
+        type: choice
+        options: ['4', '10']
+      max_seconds:
+        description: Soft scan deadline per worker
+        required: true
+        default: '600'
+        type: choice
+        options: ['300', '600']
+
+concurrency:
+  group: ghost-military-bounded-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: '1'
+  HF_HUB_DISABLE_TELEMETRY: '1'
+
+jobs:
+  scan:
+    name: ghost-military-${{ matrix.worker }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        worker: [0,1,2,3,4,5,6,7,8,9]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install streaming dependencies
+        run: python -m pip install -q 'huggingface_hub>=0.24' 'pyarrow>=16'
+      - name: Time-bounded sweep
+        env:
+          REQUESTED_WORKERS: ${{ github.event_name == 'workflow_dispatch' && inputs.worker_count || '10' }}
+          MAX_SECONDS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_seconds || '600' }}
+        run: |
+          if [ "${{ matrix.worker }}" -ge "$REQUESTED_WORKERS" ]; then
+            mkdir -p "out/worker-${{ matrix.worker }}"
+            printf '{"skipped":true,"worker_index":${{ matrix.worker }},"worker_count":%s}\n' "$REQUESTED_WORKERS" > "out/worker-${{ matrix.worker }}/worker-${{ matrix.worker }}-summary.json"
+            exit 0
+          fi
+          PYTHONPATH="$GITHUB_WORKSPACE/myth-engine" \
+          python myth-engine/tools/scan_ghost_military_corpus.py \
+            --query-pack myth-engine/query-packs/ghost_military_v1.json \
+            --output-dir "out/worker-${{ matrix.worker }}" \
+            --worker-index "${{ matrix.worker }}" \
+            --worker-count "$REQUESTED_WORKERS" \
+            --max-seconds "$MAX_SECONDS"
+      - name: Upload worker evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ghost-military-worker-${{ matrix.worker }}
+          path: out/worker-${{ matrix.worker }}/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14
+
+  reduce:
+    name: reduce-ghost-military-evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    needs: scan
+    if: always()
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ghost-military-worker-*
+          path: worker-artifacts
+          merge-multiple: true
+      - name: Merge summaries and ranked samples
+        run: |
+          python - <<'PY'
+          import collections, gzip, json, pathlib
+          root = pathlib.Path('worker-artifacts')
+          out = pathlib.Path('final'); out.mkdir(exist_ok=True)
+          summaries=[]; counts=collections.Counter(); groups=collections.Counter(); repos=collections.Counter(); samples=collections.defaultdict(list)
+          all_hits=[]
+          for p in sorted(root.rglob('*-summary.json')):
+              try: summaries.append(json.loads(p.read_text(encoding='utf-8')))
+              except Exception: pass
+          for p in sorted(root.rglob('*-hits.jsonl.gz')):
+              try:
+                  with gzip.open(p,'rt',encoding='utf-8') as f:
+                      for line in f:
+                          if not line.strip(): continue
+                          x=json.loads(line); all_hits.append(x)
+                          counts[x['term']]+=1; groups[x['term_group']]+=1; repos[x['repo_id']]+=1
+                          if len(samples[x['term']]) < 12: samples[x['term']].append(x)
+              except Exception: pass
+          seen=set()
+          with gzip.open(out/'ghost-military-hits-dedup.jsonl.gz','wt',encoding='utf-8') as f:
+              for x in all_hits:
+                  h=x.get('hit_sha256')
+                  if h in seen: continue
+                  seen.add(h); f.write(json.dumps(x,ensure_ascii=False,sort_keys=True)+'\n')
+          report={
+              'workers': summaries,
+              'raw_hits': len(all_hits),
+              'dedup_hits': len(seen),
+              'term_counts': counts.most_common(),
+              'group_counts': groups.most_common(),
+              'repo_counts': repos.most_common(),
+              'samples_by_term': dict(samples),
+              'coverage_note': 'TIME-BOUNDED SWEEP: coverage is evidenced by worker summaries; absence is not corpus-wide absence unless all assigned shards completed.'
+          }
+          (out/'ghost-military-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          md=['# Ghost-Military bounded corpus sweep','',f"Raw hits: {len(all_hits)}",f"Dedup hits: {len(seen)}",'', '## Term counts']
+          md += [f'- {term}: {n}' for term,n in counts.most_common(80)]
+          md += ['', '## Corpus source counts'] + [f'- {repo}: {n}' for repo,n in repos.most_common()]
+          md += ['', '## Worker coverage']
+          for s in summaries:
+              if s.get('skipped'): continue
+              st=s.get('stats',{})
+              md.append(f"- worker {s.get('worker_index')}: completed={st.get('completed_shards',0)}, partial={st.get('partial_shards',0)}, failed={st.get('failed_shards',0)}, elapsed={s.get('elapsed_seconds')}s, stop={s.get('stop_reason')}")
+          (out/'README.md').write_text('\n'.join(md)+'\n',encoding='utf-8')
+          PY
+      - name: Upload final evidence bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ghost-military-corpus-final
+          path: final/
+          compression-level: 6
+          retention-days: 30
