@@ -1,0 +1,77 @@
+name: Shile ANRE Model Pipeline
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/shile-anre-model.yml'
+      - 'myth-engine/query-packs/shile_anre_v1.json'
+      - 'myth-engine/tools/shile_anre_pipeline.py'
+      - 'myth-engine/tests/test_shile_anre_pipeline.py'
+      - 'research/shile-anre/**'
+  push:
+    branches: [master, shile-anre-workflow-v1]
+    paths:
+      - '.github/workflows/shile-anre-model.yml'
+      - 'myth-engine/query-packs/shile_anre_v1.json'
+      - 'myth-engine/tools/shile_anre_pipeline.py'
+      - 'myth-engine/tests/test_shile_anre_pipeline.py'
+      - 'research/shile-anre/**'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'seed = current high-IG model; full = same engine with expanded query pack later'
+        required: true
+        default: seed
+        type: choice
+        options: [seed, full]
+
+concurrency:
+  group: shile-anre-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: '1'
+
+jobs:
+  model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run smoke tests
+        run: python -m unittest myth-engine/tests/test_shile_anre_pipeline.py -v
+
+      - name: Run Shile ANRE seed model
+        run: |
+          python myth-engine/tools/shile_anre_pipeline.py \
+            --query-pack myth-engine/query-packs/shile_anre_v1.json \
+            --output-dir out/shile-anre
+
+      - name: Guard required artifacts and model disclaimers
+        run: |
+          test -s out/shile-anre/report.md
+          test -s out/shile-anre/hypothesis_matrix.csv
+          test -s out/shile-anre/variant_graph.json
+          test -s out/shile-anre/phonology_queue.csv
+          test -s out/shile-anre/next_search.json
+          grep -q 'not historical verdicts' out/shile-anre/run_manifest.json
+          grep -q '羯語' myth-engine/query-packs/shile_anre_v1.json
+
+      - name: Print run report
+        run: cat out/shile-anre/report.md
+
+      - name: Upload research artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shile-anre-model-${{ github.run_number }}
+          path: out/shile-anre/
+          retention-days: 90
+          compression-level: 9
+          if-no-files-found: error
