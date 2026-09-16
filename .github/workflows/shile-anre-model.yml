@@ -48,7 +48,7 @@ jobs:
       - name: Run smoke tests
         run: python -m unittest myth-engine/tests/test_shile_anre_pipeline.py -v
 
-      - name: Run Shile ANRE v1.1 model
+      - name: Run Shile ANRE v1.2 model
         run: |
           python myth-engine/tools/shile_anre_pipeline.py \
             --query-pack myth-engine/query-packs/shile_anre_v1.json \
@@ -65,8 +65,14 @@ jobs:
           test -s out/shile-anre/blind_ablation.csv
           test -s out/shile-anre/ablation_summary.json
           test -s out/shile-anre/evidence_ledger.csv
+          test -s out/shile-anre/gu_reading_audit.csv
           test -s out/shile-anre/next_search.json
           grep -q 'not historical verdicts' out/shile-anre/run_manifest.json
+          grep -q 'LATENT_READING_NOT_RESOLVED' out/shile-anre/run_manifest.json
+          grep -q 'GU_L' out/shile-anre/gu_reading_audit.csv
+          grep -q '谷蠡' out/shile-anre/gu_reading_audit.csv
+          grep -q '吐谷渾' out/shile-anre/gu_reading_audit.csv
+          grep -q 'IG_MORPH' out/shile-anre/next_search.json
           grep -q 'H_CONTACT' out/shile-anre/blind_ablation.csv
           grep -q 'MAJOR_DIVERGENCE' out/shile-anre/phonology_lattice_4c.csv
           grep -q '羯語' myth-engine/query-packs/shile_anre_v1.json
