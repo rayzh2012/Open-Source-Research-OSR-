@@ -1,32 +1,38 @@
 {
-  "version": "blind-fit-v1.3-werner-primary",
+  "version": "blind-fit-v1.4-morpheme-audit",
   "gloss_hidden": true,
-  "rule": "The blind pass scores transcription-channel fit, morphology, chronology, geography, free parameters and independent criticism without using the traditional Chinese word-by-word glosses. Semantics are added only in the reveal pass. Werner 2005 primary Arin morphology now overrides overcompressed secondary descriptions of -taŋ.",
+  "rule": "Blind scoring separates direct Arin attestations from family-level Yeniseian structural parallels and reconstruction-heavy gaps. Traditional Chinese glosses remain hidden until GLOSS_REVEAL. Werner 2005 primary data overrides compressed secondary characterizations.",
   "sources": [
     {"id":"SHIMUNEK2015","doi":"10.2143/JA.303.1.3085124","citation":"Shimunek et al. 2015, Journal Asiatique 303(1):143-151"},
     {"id":"VOVIN2016","doi":"10.2143/JA.304.1.3146838","citation":"Vovin, Vajda & de la Vaissiere 2016, Journal Asiatique 304(1):125-144"},
     {"id":"SAVELYEV_JEONG2020","doi":"10.1017/ehs.2020.18","citation":"Savelyev & Jeong 2020, Evolutionary Human Sciences 2:e20"},
     {"id":"BONMANN_FRIES","doi":"10.1111/1467-968X.12321","citation":"Bonmann & Fries, Transactions of the Philological Society"},
     {"id":"UNAL2026","doi":"10.1111/1467-968x.70039","citation":"Unal 2026, Transactions of the Philological Society"},
-    {"id":"WERNER2005_PRIMARY","citation":"Heinrich Werner, Die Jenissej-Sprachen des 18. Jahrhunderts (2005), primary scan pp. 149-155"}
+    {"id":"WERNER2005_PRIMARY","citation":"Heinrich Werner, Die Jenissej-Sprachen des 18. Jahrhunderts (2005), full primary grammar/lexicon OCR checked against scans"}
   ],
   "models": [
     {
       "id":"H_OLD_ARIN",
       "name":"Old Arin / Yeniseian",
       "published_analysis":["śuke","t-il-ek-aŋ","Bokkok","got-o-kt-aŋ"],
-      "analysis_source":"VOVIN2016; refined toward Arin by BONMANN_FRIES; morphology audited against WERNER2005_PRIMARY",
+      "analysis_source":"VOVIN2016; refined toward Arin by BONMANN_FRIES; decomposed against WERNER2005_PRIMARY in v1.4",
       "evidence":[
         {"id":"A_SURFACE","dimension":"surface_phonology","value":1,"blind":true,"source":"VOVIN2016","claim":"A published whole-phrase Yeniseian reconstruction can be mapped onto all four Chinese chunks without changing language family mid-phrase."},
-        {"id":"A_REPEAT_ANG","dimension":"morphology","value":2,"blind":true,"source":"BONMANN_FRIES","claim":"The two predicate-sized chunks independently end in an -aŋ-like sequence compatible with Yeniseian finite morphology."},
-        {"id":"A_ARIN_TANG_SURFACE","dimension":"morphology","value":1,"blind":true,"source":"WERNER2005_PRIMARY","claim":"Werner's independent 18th-century Arin material contains a 3PL surface form of 'stand' ending in -taŋ, so surface compatibility with the Ji second predicate is real."},
-        {"id":"A_ARIN_TANG_NONDIAGNOSTIC","dimension":"morphology","value":-1,"blind":true,"source":"WERNER2005_PRIMARY","claim":"Werner does not support -taŋ as a clean unique 3PL marker: his generalized table assigns -taŋ/*-toŋ to 1PL and -aŋ/-iaŋ to animate 3PL; the peculiar 'stand' paradigm has the same -taŋ surface form in both 1PL and 3PL."},
-        {"id":"A_WERNER_RECON_CAUTION","dimension":"source_quality","value":0,"blind":true,"source":"WERNER2005_PRIMARY","claim":"Werner explicitly states that not all persons are attested and the full suffix system is reconstructed partly by analogy with other Yeniseian languages; this is retained as a guard rather than a numeric penalty."},
-        {"id":"A_MISSING_LIQUID","dimension":"free_parameter","value":-1,"blind":true,"source":"BONMANN_FRIES","claim":"Connecting the stable Chinese ke syllable to Arin kel requires loss/non-representation of a liquid coda in Chinese transcription."},
-        {"id":"A_OLDER_CRITIQUE","dimension":"meta_literature","value":-1,"blind":true,"source":"SAVELYEV_JEONG2020","claim":"The earlier Pumpokol-style Yeniseian solution was criticized for unattested morphemes and unmatched units; the newer Arin refinement must clear this legacy objection rather than inherit a free pass."},
-        {"id":"A_CHRON","dimension":"chronology","value":1,"blind":true,"source":"BONMANN_FRIES","claim":"An Old Arin stage is chronologically compatible with the early fourth-century setting proposed for the Jie material."},
-        {"id":"A_GEO","dimension":"geography","value":1,"blind":true,"source":"UNAL2026","claim":"Independent contact research supports Yeniseian-Turkic interaction in Inner Asia and later Old Arin/Common Turkic contact as historically plausible."},
-        {"id":"A_SEM_KE","dimension":"semantics","value":1,"blind":false,"source":"BONMANN_FRIES","claim":"After gloss reveal, Arin kel is unusually close in both vowel shape and meaning to the syllable ke glossed as army."},
+        {"id":"A_TEMPLATE_PRIMARY","dimension":"morphology","value":1,"blind":true,"source":"WERNER2005_PRIMARY","claim":"Werner independently documents a rigid, multi-position Yeniseian verb template with actant, tense/aspect, directional/incorporative and root positions, making a multi-morpheme parse typologically real rather than ad hoc."},
+        {"id":"A_PAST_IL_IR_PRIMARY","dimension":"morphology","value":1,"blind":true,"source":"WERNER2005_PRIMARY","claim":"Independent Ket come-out paradigms use liquid material in past forms and Yugh paradigms independently show r/ir past material, supporting the family-level liquid past slot used in t-il-ek-aŋ."},
+        {"id":"A_OBJECT_SLOT_PRIMARY","dimension":"morphology","value":1,"blind":true,"source":"WERNER2005_PRIMARY","claim":"Werner independently documents fixed object-actant slots and 3SG masculine a/o-type material in transitive Yeniseian paradigms, supporting the structural type of the proposed o object slot."},
+        {"id":"A_REPEAT_ANG","dimension":"morphology","value":1,"blind":true,"source":"WERNER2005_PRIMARY; BONMANN_FRIES","claim":"Both predicate-sized chunks end in an -aŋ-like sequence compatible with widespread Yeniseian third-person/plural predicative or actant morphology; this is family-level support, not an Arin-specific diagnostic."},
+        {"id":"A_ARIN_TANG_SURFACE","dimension":"morphology","value":1,"blind":true,"source":"WERNER2005_PRIMARY","claim":"Werner's independent Arin material contains a 3PL surface form of 'stand' ending in -taŋ, so surface compatibility with the second predicate is real."},
+        {"id":"A_ARIN_TANG_NONDIAGNOSTIC","dimension":"morphology","value":-1,"blind":true,"source":"WERNER2005_PRIMARY","claim":"The same peculiar Arin 'stand' paradigm uses -taŋ for 1PL too; Werner's generalized reconstruction gives 1PL -taŋ/*-toŋ and animate 3PL -aŋ/-iaŋ, so -taŋ is not a clean person-specific diagnostic."},
+        {"id":"A_MISSING_LIQUID","dimension":"free_parameter","value":-1,"blind":true,"source":"BONMANN_FRIES","claim":"Connecting Chinese ke to Arin kel requires non-representation or loss of the final liquid /l/."},
+        {"id":"A_OLDER_CRITIQUE","dimension":"meta_literature","value":-1,"blind":true,"source":"SAVELYEV_JEONG2020","claim":"The earlier Pumpokol-style Yeniseian solution was criticized for unattested morphemes and unmatched units; an Arin refinement must explicitly clear those gaps rather than inherit a free pass."},
+        {"id":"A_PUMPOKOL_VERB_SCARCITY","dimension":"source_quality","value":-1,"blind":true,"source":"WERNER2005_PRIMARY","claim":"Werner states that only two or three secure Pumpokol B-affix verbal forms are attested and that no broad conclusions about Pumpokol verbal inflection can be drawn; detailed Pumpokol paradigmatic projections therefore carry real uncertainty."},
+        {"id":"A_EK_DIRECT_GAP","dimension":"free_parameter","value":-1,"blind":true,"source":"WERNER2005_PRIMARY","claim":"Werner directly records Arin go as unkut/baxatum and Pumpokol go as bulün/bulun; no direct Arin or secure Pumpokol ek = go form was found, so ek remains a deeper reconstruction."},
+        {"id":"A_SECOND_VERB_DIRECT_GAP","dimension":"free_parameter","value":-1,"blind":true,"source":"WERNER2005_PRIMARY; VOVIN2016","claim":"Werner's direct Arin foot is apil/pil and Arin take is menkamen, while secure Pumpokol evidence is sparse; proposed got 'foot(?)' and kt 'take' are reconstruction-heavy rather than direct Arin lexical matches."},
+        {"id":"A_SEGMENTATION_FORK","dimension":"source_quality","value":0,"blind":true,"source":"VOVIN2016; BONMANN_FRIES","claim":"Vovin segments the end as kt+aŋ, while the later Arin argument discusses surface <taŋ> as a 3PL ending. Until the boundary is explicitly reconciled, the surface t must not be counted independently for both root and suffix."},
+        {"id":"A_CHRON","dimension":"chronology","value":1,"blind":true,"source":"BONMANN_FRIES; UNAL2026","claim":"An Old Arin stage and Old Arin/Common Turkic contact are chronologically compatible with the early fourth-century setting, although the broader historical framework remains tentative."},
+        {"id":"A_GEO","dimension":"geography","value":1,"blind":true,"source":"UNAL2026","claim":"Independent work supports Yeniseian-Turkic interaction in Inner Asia and makes an Arin-related contact setting geographically plausible."},
+        {"id":"A_SEM_KE","dimension":"semantics","value":2,"blind":false,"source":"WERNER2005_PRIMARY; BONMANN_FRIES","claim":"After gloss reveal, Werner directly attests Arin kel = army, kelbaxal'a = I make war and keln'a keko = warrior. This is the strongest direct primary Arin lexical anchor in the couplet, though Chinese ke lacks final /l/."},
         {"id":"A_SEM_WHOLE","dimension":"semantics","value":1,"blind":false,"source":"VOVIN2016","claim":"After gloss reveal, the proposed Yeniseian predicate analyses reproduce the transmitted event-level interpretation."}
       ]
     },
@@ -39,9 +45,9 @@
         {"id":"T_SURFACE","dimension":"surface_phonology","value":1,"blind":true,"source":"SHIMUNEK2015","claim":"A published Turkic reconstruction covers the entire phrase and supplies an internally Turkic morphosyntactic parse."},
         {"id":"T_IMP_NG","dimension":"morphology","value":1,"blind":true,"source":"SHIMUNEK2015","claim":"Final -ŋ has a plausible Turkic imperative comparison and is not by itself diagnostic for Yeniseian."},
         {"id":"T_ERKAN_HARMONY","dimension":"free_parameter","value":-1,"blind":true,"source":"SHIMUNEK2015","claim":"The authors explicitly note that reconstructed erkan does not conform to the Old Turkic vowel-harmony system they posit."},
-        {"id":"T_ACC_RECON","dimension":"free_parameter","value":-1,"blind":true,"source":"SHIMUNEK2015","claim":"The boklug-gu accusative analysis requires reconstructive assumptions about a pre-Old-Turkic accusative history not directly attested in the phrase."},
-        {"id":"T_ZERO_CHAR","dimension":"transcription_cost","value":-1,"blind":true,"source":"SHIMUNEK2015","claim":"The published parse maps 支 to a zero nominative in su-Ø, leaving one written syllabic character without an audible lexical segment."},
-        {"id":"T_CRITIQUE","dimension":"meta_literature","value":-2,"blind":true,"source":"VOVIN2016; BONMANN_FRIES; SAVELYEV_JEONG2020","claim":"Later historical-linguistic critiques argue that the modern Turkic readings are difficult to reconcile with the Chinese transcription and current Turkic historical phonology."},
+        {"id":"T_ACC_RECON","dimension":"free_parameter","value":-1,"blind":true,"source":"SHIMUNEK2015","claim":"The boklug-gu accusative analysis requires assumptions about a pre-Old-Turkic accusative history not directly attested in the phrase."},
+        {"id":"T_ZERO_CHAR","dimension":"transcription_cost","value":-1,"blind":true,"source":"SHIMUNEK2015","claim":"The parse maps 支 to a zero nominative in su-Ø, leaving one written syllabic character without an audible lexical segment."},
+        {"id":"T_CRITIQUE","dimension":"meta_literature","value":-2,"blind":true,"source":"VOVIN2016; BONMANN_FRIES; SAVELYEV_JEONG2020","claim":"Later historical-linguistic critiques argue that the Turkic readings are difficult to reconcile with the Chinese transcription and current Turkic historical phonology."},
         {"id":"T_CHRON","dimension":"chronology","value":1,"blind":true,"source":"SHIMUNEK2015","claim":"An archaic Turkic variety is not excluded on chronology alone."},
         {"id":"T_GEO","dimension":"geography","value":1,"blind":true,"source":"UNAL2026","claim":"Turkic-Yeniseian contact and Turkic-speaking groups in the broader Inner Asian zone are independently plausible."},
         {"id":"T_SEM_SU","dimension":"semantics","value":1,"blind":false,"source":"SHIMUNEK2015","claim":"After gloss reveal, Turkic sü provides a direct army comparison."},
@@ -71,7 +77,7 @@
       "evidence":[
         {"id":"N_VARIANTS","dimension":"textual_noise","value":1,"blind":true,"source":"TRANSMISSION","claim":"Later witnesses show real corruption at the 劬/助/句又 locus and digital OCR can corrupt 羯/褐/羌-like labels."},
         {"id":"N_STABLE_CORE","dimension":"textual_noise","value":-1,"blind":true,"source":"TRANSMISSION","claim":"The main witness family preserves a highly stable ten-character core and the label 此羯語也, so total unrecoverability is too strong as a default."},
-        {"id":"N_REPEAT_STRUCTURE","dimension":"morphology","value":-1,"blind":true,"source":"BONMANN_FRIES","claim":"Repeated final nasal structure in predicate-sized chunks is non-random evidence that the string may retain recoverable morphology."}
+        {"id":"N_REPEAT_STRUCTURE","dimension":"morphology","value":-1,"blind":true,"source":"WERNER2005_PRIMARY; BONMANN_FRIES","claim":"Repeated final nasal structure in predicate-sized chunks and independent Yeniseian templatic morphology are non-random evidence that the string may retain recoverable grammatical structure."}
       ]
     },
     {
@@ -80,7 +86,7 @@
       "published_analysis":[],
       "analysis_source":"Book-author style composite control",
       "evidence":[
-        {"id":"S_MULTI_FAMILY","dimension":"free_parameter","value":-2,"blind":true,"source":"MODEL_GUARD","claim":"The analysis freely switches among unrelated language families to maximize local resemblance."},
+        {"id":"S_MULTI_FAMILY","dimension":"free_parameter","value":-2,"blind":true,"source":"MODEL_GUARD","claim":"The analysis switches among unrelated language families to maximize local resemblance."},
         {"id":"S_CHRON","dimension":"chronology","value":-1,"blind":true,"source":"MODEL_GUARD","claim":"Several comparisons rely on much later forms without a demonstrated fourth-century chain."},
         {"id":"S_MORPH","dimension":"morphology","value":-1,"blind":true,"source":"MODEL_GUARD","claim":"No single-language whole-phrase morphology is recovered."}
       ]
@@ -94,9 +100,10 @@
   ],
   "guardrails": [
     "Evidence-balance totals are not probabilities.",
+    "Direct branch-specific attestation must be distinguished from family-level typological plausibility and proto-language reconstruction.",
     "A model may lead only because one dimension is carrying it; ablation stability must be reported.",
     "Contact plausibility cannot be used as permission for arbitrary phrase-level code-switching.",
     "Semantic matches are forbidden in BLIND_ALL and are added only in GLOSS_REVEAL.",
-    "Secondary claims about a diagnostic morpheme must be checked against the primary grammar/lexicon when available."
+    "A surface consonant cannot be double-counted as both part of a root and part of a suffix until the segmentation fork is resolved."
   ]
 }
