@@ -1,12 +1,13 @@
 {
-  "model_version": "shile-anre-v1.4-morpheme-audit",
-  "research_question": "Which historical-language model best explains the Jie couplet and the book's wider lexical claims after chronology, geography, source-dependence, transcription-channel uncertainty, polyphonic-character latent states, primary-source morpheme auditing, blind morphology, ablation and patch-cost controls?",
+  "model_version": "shile-anre-v1.5-book-controls",
+  "research_question": "Which historical-language model best explains the Jie couplet and the book's wider lexical claims after chronology, geography, source-dependence, transcription-channel uncertainty, primary-source morpheme auditing, blind ablation, and a book-wide uniqueness stress test against independently documented comparison languages?",
   "status_policy": ["FACT", "INFERENCE", "STRONG_HYPOTHESIS", "OPEN_HYPOTHESIS", "CANON"],
   "phase2_files": {
     "phonology_lattice": "research/shile-anre/phonology_lattice_4c_v1.json",
     "blind_candidates": "research/shile-anre/blind_candidates_v13.json",
     "gu_reading_audit": "research/shile-anre/gu_reading_audit_v12.json",
-    "couplet_morpheme_audit": "research/shile-anre/couplet_morpheme_audit_v14.json"
+    "couplet_morpheme_audit": "research/shile-anre/couplet_morpheme_audit_v14.json",
+    "book_lexical_controls": "research/shile-anre/book_lexical_controls_v15.json"
   },
   "witnesses": [
     {"id":"GSZ","title":"高僧傳·佛圖澄傳","compiled":"6th c.","text":"秀支替戾岡，僕谷劬禿當","label":"此羯語也","source_class":"early_literary_witness","dependency_group":"fotucheng-tradition"},
@@ -49,8 +50,9 @@
     {"id":"C_SEGMENTATION_FORK","claim":"Vovin's parse uses kt+aŋ at the end of the second predicate, while the later Arin argument discusses surface <taŋ> as a 3PL ending.","action":"Do not double-count the same t as evidence for both root and suffix until the segmentation boundary is explicitly reconciled."},
     {"id":"C_PUMPOKOL_SCARCITY","claim":"Werner reports only two or three secure Pumpokol B-affix verbal forms and warns against broad inflectional conclusions; later sources also contain Yugh forms mislabelled as Pumpokol.","action":"Penalize detailed Pumpokol-specific paradigmatic reconstruction unless supported by independent primary evidence."},
     {"id":"C_YENISEIAN_CRITIQUE","claim":"Savelyev & Jeong 2020 criticized the older Pumpokol-style Yeniseian solution for unattested morphemes and unmatched units.","action":"Require the Arin refinement to clear those gaps item by item."},
+    {"id":"C_AUTHOR_UNIQUENESS","claim":"The book often treats sound+meaning resemblance to Hebrew as evidence that coincidence is implausible or the match is unique. Werner provides independent Yeniseian controls such as Pumpokol ab = father, turd/tura = village, Pumpokol hixem = sun, and family-wide kit/ket = person.","action":"A sound+meaning match may enter evidence only after a uniqueness/null test. Competing matches reduce diagnostic weight but do not prove the competitor is the donor language."},
     {"id":"C_CONTACT_MIX","claim":"Independent evidence supports Turkic-Yeniseian contact, but contact alone does not prove phrase-level code-switching.","action":"Apply a switch cost unless a boundary or borrowing diagnostic is independently demonstrated."}
   ],
   "score_weights": {"phonetic_fit":0.24,"semantic_fit":0.10,"chronology_fit":0.14,"geography_fit":0.12,"morphology_fit":0.22,"source_independence":0.10,"holdout_bonus":0.08,"patch_cost_penalty":0.22},
-  "legacy_score_note": "Weighted priors remain backward-comparison only. v1.4 primary morpheme audit distinguishes direct Arin evidence (kel), family-level Yeniseian structure (template, liquid past, actant slots, -aŋ) and reconstruction-heavy gaps (śu, t=out, ek=go, got=foot, kt=take)."
+  "legacy_score_note": "Weighted priors remain backward-comparison only. v1.5 adds a book-wide uniqueness stress test: a competing sound+meaning match weakens diagnostic uniqueness but is never treated as proof of Yeniseian origin."
 }
