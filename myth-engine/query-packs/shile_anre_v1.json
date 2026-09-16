@@ -1,10 +1,11 @@
 {
-  "model_version": "shile-anre-v1.1-4c-blind",
-  "research_question": "Which historical-language model best explains the Jie couplet and the book's wider lexical claims after chronology, geography, source-dependence, transcription-channel uncertainty, blind morphology, ablation and patch-cost controls?",
+  "model_version": "shile-anre-v1.2-gu-latent",
+  "research_question": "Which historical-language model best explains the Jie couplet and the book's wider lexical claims after chronology, geography, source-dependence, transcription-channel uncertainty, polyphonic-character latent states, blind morphology, ablation and patch-cost controls?",
   "status_policy": ["FACT", "INFERENCE", "STRONG_HYPOTHESIS", "OPEN_HYPOTHESIS", "CANON"],
   "phase2_files": {
     "phonology_lattice": "research/shile-anre/phonology_lattice_4c_v1.json",
-    "blind_candidates": "research/shile-anre/blind_candidates_v1.json"
+    "blind_candidates": "research/shile-anre/blind_candidates_v1.json",
+    "gu_reading_audit": "research/shile-anre/gu_reading_audit_v12.json"
   },
   "witnesses": [
     {"id":"GSZ","title":"高僧傳·佛圖澄傳","compiled":"6th c.","text":"秀支替戾岡，僕谷劬禿當","label":"此羯語也","source_class":"early_literary_witness","dependency_group":"fotucheng-tradition"},
@@ -41,9 +42,10 @@
     {"id":"C_LABEL","claim":"Major transmitted witnesses inspected here read 此羯語也, while OCR/digital derivatives can corrupt 羯 into other graphically similar strings.","action":"Do not promote 羌語/褐語 to a historical variant without a concrete edition image or manuscript witness."},
     {"id":"C_SOURCE_DEP","claim":"高僧傳 and 晉書 are not independent witnesses to the event tradition.","action":"Collapse dependency groups before counting support."},
     {"id":"C_4C_EXACT","claim":"There is no single directly observed exact pronunciation for the 328 CE Chinese transcription channel.","action":"Keep a lattice of published reconstructions and score robustness across them instead of selecting one convenient reading."},
+    {"id":"C_GU_POLYPHONY","claim":"谷 has historically attested k-, l-, and y/j-initial reading families, with l- and y/j-readings themselves occurring in Inner-Asian title/name contexts.","action":"Treat 谷 as latent {K,L,Y}; do not use default lexical frequency as a decisive foreign-transcription prior and do not let a candidate choose its preferred reading for free."},
     {"id":"C_YENISEIAN_CRITIQUE","claim":"Savelyev & Jeong 2020 criticized the older Pumpokol-style Yeniseian solution for unattested morphemes and unmatched units.","action":"Treat the newer Old Arin refinement as a new testable model that must explicitly clear, not erase, the older critique."},
     {"id":"C_CONTACT_MIX","claim":"Independent evidence supports Turkic-Yeniseian contact, but contact alone does not prove phrase-level code-switching.","action":"Apply a switch cost unless a boundary or borrowing diagnostic is independently demonstrated."}
   ],
   "score_weights": {"phonetic_fit":0.24,"semantic_fit":0.10,"chronology_fit":0.14,"geography_fit":0.12,"morphology_fit":0.22,"source_independence":0.10,"holdout_bonus":0.08,"patch_cost_penalty":0.22},
-  "legacy_score_note": "The weighted hypothesis priors are retained only for backward-comparison with v1.0. v1.1 decisions must report evidence-led blind and ablation outputs first."
+  "legacy_score_note": "Weighted priors remain only for backward-comparison. v1.2 decisions must report blind/ablation outputs first and marginalize unresolved polyphonic transcription states such as 谷 rather than hard-picking them."
 }
