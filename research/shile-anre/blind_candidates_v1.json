@@ -1,0 +1,98 @@
+{
+  "version": "blind-fit-v1.0",
+  "gloss_hidden": true,
+  "rule": "The blind pass scores transcription-channel fit, morphology, chronology, geography, free parameters and independent criticism without using the traditional Chinese word-by-word glosses. Semantics are added only in the reveal pass.",
+  "sources": [
+    {"id":"SHIMUNEK2015","doi":"10.2143/JA.303.1.3085124","citation":"Shimunek et al. 2015, Journal Asiatique 303(1):143-151"},
+    {"id":"VOVIN2016","doi":"10.2143/JA.304.1.3146838","citation":"Vovin, Vajda & de la Vaissiere 2016, Journal Asiatique 304(1):125-144"},
+    {"id":"SAVELYEV_JEONG2020","doi":"10.1017/ehs.2020.18","citation":"Savelyev & Jeong 2020, Evolutionary Human Sciences 2:e20"},
+    {"id":"BONMANN_FRIES","doi":"10.1111/1467-968X.12321","citation":"Bonmann & Fries, Transactions of the Philological Society"},
+    {"id":"UNAL2026","doi":"10.1111/1467-968x.70039","citation":"Unal 2026, Transactions of the Philological Society"}
+  ],
+  "models": [
+    {
+      "id":"H_OLD_ARIN",
+      "name":"Old Arin / Yeniseian",
+      "published_analysis":["śuke","t-il-ek-aŋ","Bokkok","got-o-kt-aŋ"],
+      "analysis_source":"VOVIN2016; refined toward Arin by BONMANN_FRIES",
+      "evidence":[
+        {"id":"A_SURFACE","dimension":"surface_phonology","value":1,"blind":true,"source":"VOVIN2016","claim":"A published whole-phrase Yeniseian reconstruction can be mapped onto all four Chinese chunks without changing language family mid-phrase."},
+        {"id":"A_REPEAT_ANG","dimension":"morphology","value":2,"blind":true,"source":"BONMANN_FRIES","claim":"The two predicate-sized chunks independently end in an -aŋ-like sequence compatible with Yeniseian finite morphology."},
+        {"id":"A_ARIN_TANG","dimension":"morphology","value":2,"blind":true,"source":"BONMANN_FRIES","claim":"The second predicate's -taŋ sequence has a specifically Arin parallel as a third-person plural ending."},
+        {"id":"A_MISSING_LIQUID","dimension":"free_parameter","value":-1,"blind":true,"source":"BONMANN_FRIES","claim":"Connecting the stable Chinese ke syllable to Arin kel requires loss/non-representation of a liquid coda in Chinese transcription."},
+        {"id":"A_OLDER_CRITIQUE","dimension":"meta_literature","value":-1,"blind":true,"source":"SAVELYEV_JEONG2020","claim":"The earlier Pumpokol-style Yeniseian solution was criticized for unattested morphemes and unmatched units; the newer Arin refinement must clear this legacy objection rather than inherit a free pass."},
+        {"id":"A_CHRON","dimension":"chronology","value":1,"blind":true,"source":"BONMANN_FRIES","claim":"An Old Arin stage is chronologically compatible with the early fourth-century setting proposed for the Jie material."},
+        {"id":"A_GEO","dimension":"geography","value":1,"blind":true,"source":"UNAL2026","claim":"Independent contact research supports Yeniseian-Turkic interaction in Inner Asia and later Old Arin/Common Turkic contact as historically plausible."},
+        {"id":"A_SEM_KE","dimension":"semantics","value":1,"blind":false,"source":"BONMANN_FRIES","claim":"After gloss reveal, Arin kel is unusually close in both vowel shape and meaning to the syllable ke glossed as army."},
+        {"id":"A_SEM_WHOLE","dimension":"semantics","value":1,"blind":false,"source":"VOVIN2016","claim":"After gloss reveal, the proposed Yeniseian predicate analyses reproduce the transmitted event-level interpretation."}
+      ]
+    },
+    {
+      "id":"H_TURKIC",
+      "name":"Early Turkic",
+      "published_analysis":["su-Ø","kete-r erkan","boklug-gu","tukta-ŋ"],
+      "analysis_source":"SHIMUNEK2015",
+      "evidence":[
+        {"id":"T_SURFACE","dimension":"surface_phonology","value":1,"blind":true,"source":"SHIMUNEK2015","claim":"A published Turkic reconstruction covers the entire phrase and supplies an internally Turkic morphosyntactic parse."},
+        {"id":"T_IMP_NG","dimension":"morphology","value":1,"blind":true,"source":"SHIMUNEK2015","claim":"Final -ŋ has a plausible Turkic imperative comparison and is not by itself diagnostic for Yeniseian."},
+        {"id":"T_ERKAN_HARMONY","dimension":"free_parameter","value":-1,"blind":true,"source":"SHIMUNEK2015","claim":"The authors explicitly note that reconstructed erkan does not conform to the Old Turkic vowel-harmony system they posit."},
+        {"id":"T_ACC_RECON","dimension":"free_parameter","value":-1,"blind":true,"source":"SHIMUNEK2015","claim":"The boklug-gu accusative analysis requires reconstructive assumptions about a pre-Old-Turkic accusative history not directly attested in the phrase."},
+        {"id":"T_ZERO_CHAR","dimension":"transcription_cost","value":-1,"blind":true,"source":"SHIMUNEK2015","claim":"The published parse maps 支 to a zero nominative in su-Ø, leaving one written syllabic character without an audible lexical segment."},
+        {"id":"T_CRITIQUE","dimension":"meta_literature","value":-2,"blind":true,"source":"VOVIN2016; BONMANN_FRIES; SAVELYEV_JEONG2020","claim":"Later historical-linguistic critiques argue that the modern Turkic readings are difficult to reconcile with the Chinese transcription and current Turkic historical phonology."},
+        {"id":"T_CHRON","dimension":"chronology","value":1,"blind":true,"source":"SHIMUNEK2015","claim":"An archaic Turkic variety is not excluded on chronology alone."},
+        {"id":"T_GEO","dimension":"geography","value":1,"blind":true,"source":"UNAL2026","claim":"Turkic-Yeniseian contact and Turkic-speaking groups in the broader Inner Asian zone are independently plausible."},
+        {"id":"T_SEM_SU","dimension":"semantics","value":1,"blind":false,"source":"SHIMUNEK2015","claim":"After gloss reveal, Turkic sü provides a direct army comparison."},
+        {"id":"T_SEM_KET","dimension":"semantics","value":1,"blind":false,"source":"SHIMUNEK2015","claim":"After gloss reveal, Turkic ket- provides a direct leave/depart comparison."},
+        {"id":"T_SEM_WHOLE","dimension":"semantics","value":1,"blind":false,"source":"SHIMUNEK2015","claim":"After gloss reveal, the full proposed Turkic sentence tracks the transmitted event-level meaning."}
+      ]
+    },
+    {
+      "id":"H_CONTACT",
+      "name":"Yeniseian-Turkic contact model",
+      "published_analysis":[],
+      "analysis_source":"No published mixed-language parse of this exact phrase is treated as established here.",
+      "evidence":[
+        {"id":"C_CONTACT_REAL","dimension":"contact","value":2,"blind":true,"source":"UNAL2026","claim":"Bidirectional early Turkic-Yeniseian lexical contact is independently supported by controlled loanword analysis."},
+        {"id":"C_LATE_ARIN_CONTACT","dimension":"chronology","value":1,"blind":true,"source":"UNAL2026","claim":"Old Arin/Common Turkic contact in roughly the third-fourth century CE is historically defensible."},
+        {"id":"C_NO_MIXED_PARSE","dimension":"free_parameter","value":-1,"blind":true,"source":"MODEL_GUARD","claim":"Contact does not itself demonstrate that this ten-character sentence switches language families internally."},
+        {"id":"C_SWITCH_COST","dimension":"transcription_cost","value":-2,"blind":true,"source":"MODEL_GUARD","claim":"Within-phrase family switching is penalized unless an independent boundary or borrowing diagnostic is supplied."},
+        {"id":"C_GEO","dimension":"geography","value":1,"blind":true,"source":"UNAL2026","claim":"The broader contact geography is plausible."},
+        {"id":"C_CHRON","dimension":"chronology","value":1,"blind":true,"source":"UNAL2026","claim":"The broader contact chronology is plausible."}
+      ]
+    },
+    {
+      "id":"H_NULL",
+      "name":"Textual distortion / no recoverable language",
+      "published_analysis":[],
+      "analysis_source":"Null control",
+      "evidence":[
+        {"id":"N_VARIANTS","dimension":"textual_noise","value":1,"blind":true,"source":"TRANSMISSION","claim":"Later witnesses show real corruption at the 劬/助/句又 locus and digital OCR can corrupt 羯/褐/羌-like labels."},
+        {"id":"N_STABLE_CORE","dimension":"textual_noise","value":-1,"blind":true,"source":"TRANSMISSION","claim":"The main witness family preserves a highly stable ten-character core and the label 此羯語也, so total unrecoverability is too strong as a default."},
+        {"id":"N_REPEAT_STRUCTURE","dimension":"morphology","value":-1,"blind":true,"source":"BONMANN_FRIES","claim":"Repeated final nasal structure in predicate-sized chunks is non-random evidence that the string may retain recoverable morphology."}
+      ]
+    },
+    {
+      "id":"H_AUTHOR_STITCHED",
+      "name":"Hungarian+Persian+Finnish stitched fit",
+      "published_analysis":[],
+      "analysis_source":"Book-author style composite control",
+      "evidence":[
+        {"id":"S_MULTI_FAMILY","dimension":"free_parameter","value":-2,"blind":true,"source":"MODEL_GUARD","claim":"The analysis freely switches among unrelated language families to maximize local resemblance."},
+        {"id":"S_CHRON","dimension":"chronology","value":-1,"blind":true,"source":"MODEL_GUARD","claim":"Several comparisons rely on much later forms without a demonstrated fourth-century chain."},
+        {"id":"S_MORPH","dimension":"morphology","value":-1,"blind":true,"source":"MODEL_GUARD","claim":"No single-language whole-phrase morphology is recovered."}
+      ]
+    }
+  ],
+  "ablations": [
+    {"id":"BLIND_ALL","description":"All gloss-hidden evidence only","exclude_dimensions":[],"include_semantics":false},
+    {"id":"NO_MORPHOLOGY","description":"Blind evidence with morphology removed","exclude_dimensions":["morphology"],"include_semantics":false},
+    {"id":"NO_META_LITERATURE","description":"Blind evidence with later scholarly verdict/critique removed","exclude_dimensions":["meta_literature"],"include_semantics":false},
+    {"id":"GLOSS_REVEAL","description":"Second pass after revealing transmitted Chinese glosses","exclude_dimensions":[],"include_semantics":true}
+  ],
+  "guardrails": [
+    "Evidence-balance totals are not probabilities.",
+    "A model may lead only because one dimension is carrying it; ablation stability must be reported.",
+    "Contact plausibility cannot be used as permission for arbitrary phrase-level code-switching.",
+    "Semantic matches are forbidden in BLIND_ALL and are added only in GLOSS_REVEAL."
+  ]
+}

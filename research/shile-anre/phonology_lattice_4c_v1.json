@@ -1,0 +1,38 @@
+{
+  "version": "4c-lattice-v1.0",
+  "purpose": "Bracket the Chinese transcription channel with two published reconstructions instead of pretending there is one exact 328 CE pronunciation.",
+  "date_target": "ca. 328 CE event; transmitted in later witnesses",
+  "status": "WORKING_LATTICE_NOT_EXACT_328_RECONSTRUCTION",
+  "sources": [
+    {
+      "id": "SHIMUNEK2015",
+      "citation": "Shimunek, Beckwith, Washington, Kontovas & Niyaz 2015, Journal Asiatique 303(1):143-151",
+      "doi": "10.2143/JA.303.1.3085124",
+      "system": "authors' Northern Early Middle Chinese transcription layer"
+    },
+    {
+      "id": "VOVIN2016_BF_TABLE5",
+      "citation": "Vovin, Vajda & de la Vaissiere 2016; reconstruction reproduced in Bonmann & Fries, Transactions of the Philological Society",
+      "doi": "10.2143/JA.304.1.3146838",
+      "secondary_doi": "10.1111/1467-968X.12321",
+      "system": "published reconstruction used for Yeniseian analysis"
+    }
+  ],
+  "rows": [
+    {"position":1,"char":"秀","shimunek2015":"suw","vovin2016":"sjuwH","agreement":"BROAD_MATCH","note":"Both retain s- and a high/back rounded nucleus; medial/tone notation differs."},
+    {"position":2,"char":"支","shimunek2015":"ke","vovin2016":"ke","agreement":"EXACT_NORMALIZED_MATCH","note":"High-value stable anchor across the two published analyses."},
+    {"position":3,"char":"替","shimunek2015":"they","vovin2016":"tʰejH","agreement":"BROAD_MATCH","note":"Aspirated dental + front diphthong broadly agrees; notation differs."},
+    {"position":4,"char":"戾","shimunek2015":"leyr","vovin2016":"lejH","agreement":"BROAD_MATCH","note":"Both center on l- + front rhyme; coda/tone treatment differs."},
+    {"position":5,"char":"岡","shimunek2015":"kaN","vovin2016":"kaŋ","agreement":"EXACT_NORMALIZED_MATCH","note":"N is normalized as velar nasal /ŋ/ for comparison."},
+    {"position":6,"char":"僕","shimunek2015":"bok","vovin2016":"bok","agreement":"EXACT_NORMALIZED_MATCH","note":"Stable closed syllable anchor."},
+    {"position":7,"char":"谷","shimunek2015":"luk","vovin2016":"kok","agreement":"MAJOR_DIVERGENCE","note":"Critical discriminator: the two published analyses reconstruct different onset/nucleus values here."},
+    {"position":8,"char":"劬","shimunek2015":"gu","vovin2016":"guo","agreement":"BROAD_MATCH","note":"Main witnesses use 劬; later transmission also shows 助/句又-type corruption in this position."},
+    {"position":9,"char":"禿","shimunek2015":"tukh","vovin2016":"tʰok","agreement":"BROAD_MATCH","note":"Aspirated dental + velar stop coda broadly agrees."},
+    {"position":10,"char":"當","shimunek2015":"taN","vovin2016":"taŋ","agreement":"EXACT_NORMALIZED_MATCH","note":"N is normalized as /ŋ/; stable final nasal anchor."}
+  ],
+  "guardrails": [
+    "This is a lattice of published analyses, not a claim that either system is the exact spoken pronunciation in 328 CE.",
+    "Blind-fit scoring must not use the traditional Chinese glosses until the reveal pass.",
+    "谷 and the 劬/助 transmission locus must remain explicit uncertainty, not silently normalized away."
+  ]
+}

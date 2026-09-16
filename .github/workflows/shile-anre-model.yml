@@ -9,7 +9,7 @@ on:
       - 'myth-engine/tests/test_shile_anre_pipeline.py'
       - 'research/shile-anre/**'
   push:
-    branches: [master, shile-anre-workflow-v1]
+    branches: [master]
     paths:
       - '.github/workflows/shile-anre-model.yml'
       - 'myth-engine/query-packs/shile_anre_v1.json'
@@ -48,7 +48,7 @@ jobs:
       - name: Run smoke tests
         run: python -m unittest myth-engine/tests/test_shile_anre_pipeline.py -v
 
-      - name: Run Shile ANRE seed model
+      - name: Run Shile ANRE v1.1 model
         run: |
           python myth-engine/tools/shile_anre_pipeline.py \
             --query-pack myth-engine/query-packs/shile_anre_v1.json \
@@ -60,8 +60,15 @@ jobs:
           test -s out/shile-anre/hypothesis_matrix.csv
           test -s out/shile-anre/variant_graph.json
           test -s out/shile-anre/phonology_queue.csv
+          test -s out/shile-anre/phonology_lattice_4c.csv
+          test -s out/shile-anre/blind_fit_matrix.csv
+          test -s out/shile-anre/blind_ablation.csv
+          test -s out/shile-anre/ablation_summary.json
+          test -s out/shile-anre/evidence_ledger.csv
           test -s out/shile-anre/next_search.json
           grep -q 'not historical verdicts' out/shile-anre/run_manifest.json
+          grep -q 'H_CONTACT' out/shile-anre/blind_ablation.csv
+          grep -q 'MAJOR_DIVERGENCE' out/shile-anre/phonology_lattice_4c.csv
           grep -q '羯語' myth-engine/query-packs/shile_anre_v1.json
 
       - name: Print run report
