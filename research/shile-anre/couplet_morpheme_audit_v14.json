@@ -1,0 +1,67 @@
+{
+  "version": "morpheme-audit-v1.4",
+  "target": "秀支替戾岡，僕谷劬禿當",
+  "purpose": "Audit every proposed Yeniseian morpheme against Werner 2005 and recent scholarship, separating direct Arin attestations, family-level structural parallels, reconstructions, and unresolved gaps.",
+  "sources": [
+    {"id":"WERNER2005","type":"primary_grammar_lexicon","citation":"Heinrich Werner, Die Jenissej-Sprachen des 18. Jahrhunderts (2005)"},
+    {"id":"VOVIN2016","type":"couplet_analysis","doi":"10.2143/JA.304.1.3146838","citation":"Vovin, Vajda & de la Vaissiere 2016"},
+    {"id":"BONMANN_FRIES2025","type":"arin_refinement","doi":"10.1111/1467-968X.12321","citation":"Bonmann & Fries 2025/2026"},
+    {"id":"SAVELYEV_JEONG2020","type":"critical_review","doi":"10.1017/ehs.2020.18","citation":"Savelyev & Jeong 2020"}
+  ],
+  "chunks": [
+    {
+      "surface":"秀支",
+      "published_yeniseian":"śuke",
+      "traditional_gloss":"軍",
+      "morphemes":[
+        {"unit":"ke","claim":"army","status":"DIRECT_ARIN_LEXICAL_AFTER_GLOSS_REVEAL","strength":"strong","primary_evidence":"Werner 2005: Arin H kel = Heer/army; kelbaxal'a = I make war; keln'a keko = warrior.","cost":"Chinese transcription lacks final Arin /l/."},
+        {"unit":"śu","claim":"part of army form / unresolved","status":"UNEXPLAINED","strength":"weak","primary_evidence":"No independent Werner Arin lexical element identified that explains the initial syllable of the reconstructed śuke.","cost":"One Chinese syllabic position remains without a securely independently attested Arin morpheme."}
+      ]
+    },
+    {
+      "surface":"替戾岡",
+      "published_yeniseian":"t-il-ek-aŋ",
+      "traditional_gloss":"出",
+      "morphemes":[
+        {"unit":"t","claim":"out / directional element","status":"FAMILY_STRUCTURAL_RECONSTRUCTION","strength":"weak_to_moderate","primary_evidence":"Werner independently documents rich Yeniseian directional/version morphology and Ket paradigms meaning come out/go away, but this audit has not identified a direct Arin t- = out morpheme.","cost":"Semantic slot is plausible in the family template, exact segment-to-function identity remains reconstructed."},
+        {"unit":"il","claim":"past","status":"FAMILY_LEVEL_PRIMARY_SUPPORT","strength":"moderate","primary_evidence":"Werner's Ket come-out paradigm inserts l in past forms; Yugh paradigms independently show ir/r in past forms. This verifies a family-level liquid past slot independent of the couplet.","cost":"Direct Old Arin past morphology is poorly attested, so branch-specific identity is not established."},
+        {"unit":"ek","claim":"go","status":"DIRECT_ARIN_GAP","strength":"weak","primary_evidence":"Werner directly records Arin go forms unkut / baxatum, Pumpokol bulün/bulun, and Ket/Yugh forms of the boyat/bodde type; no direct Arin or secure Pumpokol ek = go entry was identified.","cost":"Requires deeper Proto-Yeniseian/root reconstruction rather than direct Arin lexical confirmation."},
+        {"unit":"aŋ","claim":"3 animate plural subject","status":"FAMILY_LEVEL_PRIMARY_SUPPORT","strength":"moderate","primary_evidence":"Werner reconstructs Arin animate 3PL predicative -an/-ian and documents -an-like plural subject material across Ket/Yugh paradigms.","cost":"Person-number realization differs across branches and Werner warns Arin paradigm coverage is sparse."}
+      ]
+    },
+    {
+      "surface":"僕谷",
+      "published_yeniseian":"Bokkok",
+      "traditional_gloss":"劉曜胡位 / title",
+      "morphemes":[
+        {"unit":"Bokkok","claim":"barbarian title","status":"UNANALYZED_TITLE_SLOT","strength":"open","primary_evidence":"The Yeniseian analysis largely preserves this as an opaque title/name slot rather than deriving it from independently attested Yeniseian morphology.","cost":"谷 is additionally polyphonic and remains a latent K/L/Y transcription state."}
+      ]
+    },
+    {
+      "surface":"劬禿當",
+      "published_yeniseian":"got-o-kt-aŋ",
+      "traditional_gloss":"捉",
+      "morphemes":[
+        {"unit":"got","claim":"foot(?) incorporated element","status":"DIRECT_LEXICAL_MISMATCH_OPEN","strength":"weak","primary_evidence":"Werner's direct Arin foot forms are apil/pil; Pumpokol foot is anin; Ket/Yugh foot forms are bul-type. No direct got = foot entry is independently attested in Werner 2005.","cost":"The analysis depends on deeper comparative reconstruction and/or a Ket incorporated body-part lineage rather than direct Arin evidence."},
+        {"unit":"o","claim":"3 masculine singular object","status":"FAMILY_STRUCTURAL_SUPPORT","strength":"moderate","primary_evidence":"Werner independently documents rigid Yeniseian actant slots and 3SG masculine a/o-type actant forms in Ket; transitive paradigms distinguish object person/class in fixed positions.","cost":"This verifies the structural type, not the exact Old Arin surface o in this verb."},
+        {"unit":"kt","claim":"take","status":"DIRECT_ARIN_GAP","strength":"weak","primary_evidence":"Werner's direct Arin take is menkamen (and bulabmenkamen = take away); Ket/Imbak take uses kaj-/kam- type material. Vovin's kt is therefore reconstructive, not a direct Arin dictionary match.","cost":"No independently attested Old Arin kt = take form has been established in the primary dictionary."},
+        {"unit":"aŋ","claim":"3 animate plural subject","status":"FAMILY_LEVEL_PRIMARY_SUPPORT","strength":"moderate","primary_evidence":"Same family-level -an/-ian support as in the first predicate.","cost":"Not Arin-specific by itself."},
+        {"unit":"surface taŋ","claim":"Arin-specific 3PL diagnostic","status":"DOWNGRADED_SEGMENTATION_FORK","strength":"weak_to_moderate","primary_evidence":"Werner has a peculiar Arin stand paradigm with 3PL -tan, but the same surface -tan is also 1PL and Werner's general animate 3PL is -an/-ian. Vovin's segmentation assigns t to root kt plus -aŋ, while Bonmann & Fries discuss surface <taŋ> as an Arin 3PL ending.","cost":"The same surface t cannot simultaneously be counted as independent support for both root kt and suffix -taŋ without an explicit segmentation model."}
+      ]
+    }
+  ],
+  "global_findings": [
+    {"id":"GF_TEMPLATE","status":"FACT_FAMILY_LEVEL","finding":"Complex templatic verb morphology with fixed actant, tense/aspect, directional/incorporative and root positions is independently documented in Werner; this strongly supports the typological plausibility of a multi-morpheme Yeniseian parse."},
+    {"id":"GF_ARIN_SPARSE","status":"FACT","finding":"Werner repeatedly warns that Arin grammatical data are sparse and complete paradigms often require analogy with better-attested Yeniseian languages."},
+    {"id":"GF_PUMPOKOL_SPARSE","status":"FACT","finding":"Werner says only two or three secure Pumpokol verbal forms with B-affixes are attested and no broad conclusions about Pumpokol verbal inflection can be drawn."},
+    {"id":"GF_PUMPOKOL_CONTAMINATION","status":"FACT","finding":"Werner explicitly separates genuine Pumpokol Müller material from later Yugh forms mislabelled as Pumpokol; kasna 'take' belongs to the contaminated/mislabelled side and cannot be used as secure Pumpokol evidence."},
+    {"id":"GF_STRONGEST","status":"INFERENCE","finding":"Within the couplet itself the strongest primary Arin anchor is kel 'army' after gloss reveal; the strongest blind support is the family-level templatic morphology, not any single uniquely Arin suffix."},
+    {"id":"GF_SECOND_VERB","status":"INFERENCE","finding":"The second predicate remains the weakest lexical portion: got 'foot(?)' and kt 'take' are not directly verified by Werner's Arin lexicon, while object/subject slot structure is independently plausible."}
+  ],
+  "model_implication": {
+    "old_view":"Old Arin had a modest blind lead driven by repeated -aŋ and a surface -taŋ argument.",
+    "new_view":"Old Arin remains plausible, but the evidence should be decomposed: direct Arin lexical kel is strong only after gloss reveal; blind evidence comes mainly from Yeniseian template/past/object/subject architecture; ek, got and kt remain reconstruction-heavy gaps.",
+    "recommended_status":"STRONG_HYPOTHESIS_NARROW_AND_MORPHOLOGY_DEPENDENT",
+    "next_highest_IG":"Audit Proto-Yeniseian etymological dictionaries / Fortescue-Vajda for ek 'go', got 'foot', kt 'take', and t 'out' before increasing Old Arin confidence."
+  }
+}

@@ -84,18 +84,13 @@ def run_blind_phase(blind,out):
     ablations=blind["ablations"]
     by_id={a["id"]:a for a in ablations}
     blind_cfg=by_id["BLIND_ALL"]
-
     matrix=[]
     for m in models:
         s=evidence_score(m,blind_cfg)
         matrix.append({
-            "id":m["id"],
-            "name":m["name"],
-            "blind_evidence_balance":s["score"],
-            "support_count":s["support_count"],
-            "challenge_count":s["challenge_count"],
-            "evidence_count":s["evidence_count"],
-            "published_analysis":" | ".join(m.get("published_analysis",[])),
+            "id":m["id"],"name":m["name"],"blind_evidence_balance":s["score"],
+            "support_count":s["support_count"],"challenge_count":s["challenge_count"],
+            "evidence_count":s["evidence_count"],"published_analysis":" | ".join(m.get("published_analysis",[])),
             "analysis_source":m.get("analysis_source","")
         })
     matrix.sort(key=lambda r:(-int(r["blind_evidence_balance"]),r["id"]))
@@ -113,14 +108,9 @@ def run_blind_phase(blind,out):
         top_score=scored[0][1]["score"] if scored else None
         for rank,(m,s) in enumerate(scored,1):
             ablation_rows.append({
-                "ablation":a["id"],
-                "description":a["description"],
-                "rank":rank,
-                "model_id":m["id"],
-                "model":m["name"],
-                "evidence_balance":s["score"],
-                "support_count":s["support_count"],
-                "challenge_count":s["challenge_count"],
+                "ablation":a["id"],"description":a["description"],"rank":rank,
+                "model_id":m["id"],"model":m["name"],"evidence_balance":s["score"],
+                "support_count":s["support_count"],"challenge_count":s["challenge_count"],
                 "evidence_ids":";".join(s["used_ids"])
             })
             if s["score"]==top_score:
@@ -133,13 +123,9 @@ def run_blind_phase(blind,out):
     for m in models:
         for e in m.get("evidence",[]):
             ledger.append({
-                "model_id":m["id"],
-                "model":m["name"],
-                "evidence_id":e["id"],
-                "dimension":e["dimension"],
-                "value":e["value"],
-                "blind":str(bool(e.get("blind",True))).lower(),
-                "source":e.get("source",""),
+                "model_id":m["id"],"model":m["name"],"evidence_id":e["id"],
+                "dimension":e["dimension"],"value":e["value"],
+                "blind":str(bool(e.get("blind",True))).lower(),"source":e.get("source",""),
                 "claim":e.get("claim","")
             })
     write_csv(out/"evidence_ledger.csv",ledger,["model_id","model","evidence_id","dimension","value","blind","source","claim"])
@@ -150,8 +136,7 @@ def run_gu_audit(gu,out):
     rows=[]
     for state in gu["reading_states"]:
         rows.append({
-            "state":state["id"],
-            "family":state["family"],
+            "state":state["id"],"family":state["family"],
             "representative_values":" / ".join(state["representative_values"]),
             "ordinary_lexeme_support":state["ordinary_lexeme_support"],
             "foreign_name_title_support":state["foreign_name_title_support"],
@@ -159,6 +144,22 @@ def run_gu_audit(gu,out):
         })
     write_csv(out/"gu_reading_audit.csv",rows,["state","family","representative_values","ordinary_lexeme_support","foreign_name_title_support","candidate_effect"])
     return rows
+
+
+def run_morpheme_audit(morph,out):
+    rows=[]
+    for chunk in morph["chunks"]:
+        for m in chunk.get("morphemes",[]):
+            rows.append({
+                "surface":chunk["surface"],"published_yeniseian":chunk["published_yeniseian"],
+                "traditional_gloss":chunk["traditional_gloss"],"unit":m["unit"],"claim":m["claim"],
+                "status":m["status"],"strength":m["strength"],
+                "primary_evidence":m["primary_evidence"],"cost":m["cost"]
+            })
+    write_csv(out/"couplet_morpheme_audit.csv",rows,["surface","published_yeniseian","traditional_gloss","unit","claim","status","strength","primary_evidence","cost"])
+    globals_rows=[{"id":x["id"],"status":x["status"],"finding":x["finding"]} for x in morph["global_findings"]]
+    write_csv(out/"couplet_global_findings.csv",globals_rows,["id","status","finding"])
+    return rows,globals_rows
 
 
 def main():
@@ -174,7 +175,6 @@ def main():
     vg=variant_graph(q["witnesses"])
     (out/"variant_graph.json").write_text(json.dumps({"dependency_groups":groups,"variants":vg},ensure_ascii=False,indent=2),encoding="utf-8")
 
-    # Legacy weighted priors are retained for comparison only.
     scores=[]
     for h in q["hypotheses"]:
         row=dict(h)
@@ -193,86 +193,66 @@ def main():
     lattice=load_json(resolve_project_file(a.query_pack,phase["phonology_lattice"]))
     blind=load_json(resolve_project_file(a.query_pack,phase["blind_candidates"]))
     gu=load_json(resolve_project_file(a.query_pack,phase["gu_reading_audit"]))
+    morph=load_json(resolve_project_file(a.query_pack,phase["couplet_morpheme_audit"]))
 
     lattice_rows=[]
     for r in lattice["rows"]:
         lattice_rows.append({
-            "position":r["position"],"char":r["char"],
-            "shimunek2015":r["shimunek2015"],"vovin2016":r["vovin2016"],
-            "agreement":r["agreement"],"note":r["note"]
+            "position":r["position"],"char":r["char"],"shimunek2015":r["shimunek2015"],
+            "vovin2016":r["vovin2016"],"agreement":r["agreement"],"note":r["note"]
         })
     write_csv(out/"phonology_lattice_4c.csv",lattice_rows,["position","char","shimunek2015","vovin2016","agreement","note"])
     blind_matrix,ablation_summary=run_blind_phase(blind,out)
     gu_rows=run_gu_audit(gu,out)
+    morph_rows,global_rows=run_morpheme_audit(morph,out)
 
     major_div=[r for r in lattice_rows if r["agreement"]=="MAJOR_DIVERGENCE"]
-    blind_leader=blind_matrix[0] if blind_matrix else None
+    blind_top=int(blind_matrix[0]["blind_evidence_balance"]) if blind_matrix else None
+    blind_leaders=[r["id"] for r in blind_matrix if int(r["blind_evidence_balance"])==blind_top]
+    gap_statuses={"UNEXPLAINED","DIRECT_ARIN_GAP","DIRECT_LEXICAL_MISMATCH_OPEN","DOWNGRADED_SEGMENTATION_FORK"}
+    direct_gap_units=[r["unit"] for r in morph_rows if r["status"] in gap_statuses]
+    strong_units=[r["unit"] for r in morph_rows if r["strength"]=="strong"]
+
     manifest={
-      "model_version":q["model_version"],
-      "research_question":q["research_question"],
-      "witness_count":len(q["witnesses"]),
-      "dependency_group_count":len(groups),
-      "hypothesis_count":len(scores),
-      "priority_term_count":len(queue),
-      "legacy_top_model":scores[0]["name"] if scores else None,
-      "legacy_top_score":scores[0]["anre_score"] if scores else None,
-      "blind_top_model":blind_leader["name"] if blind_leader else None,
-      "blind_evidence_balance":blind_leader["blind_evidence_balance"] if blind_leader else None,
-      "lattice_major_divergence_count":len(major_div),
-      "lattice_major_divergence_chars":[r["char"] for r in major_div],
-      "gu_latent_state_count":len(gu_rows),
-      "gu_status":gu["status"],
-      "gu_information_gain_rank":gu["information_gain_update"]["new_rank"],
+      "model_version":q["model_version"],"research_question":q["research_question"],
+      "witness_count":len(q["witnesses"]),"dependency_group_count":len(groups),
+      "hypothesis_count":len(scores),"priority_term_count":len(queue),
+      "legacy_top_model":scores[0]["name"] if scores else None,"legacy_top_score":scores[0]["anre_score"] if scores else None,
+      "blind_top_models":blind_leaders,"blind_top_score":blind_top,
+      "lattice_major_divergence_count":len(major_div),"lattice_major_divergence_chars":[r["char"] for r in major_div],
+      "gu_latent_state_count":len(gu_rows),"gu_status":gu["status"],
+      "morpheme_audit_row_count":len(morph_rows),"morpheme_direct_gap_units":direct_gap_units,"morpheme_strong_units":strong_units,
       "ablation_summary":ablation_summary,
-      "note":"Legacy weighted scores and evidence-balance totals are diagnostic workflow outputs, not historical verdicts or probabilities. 谷 is now marginalized as an unresolved polyphonic latent transcription state; model promotion requires independent morphology and holdout stability."
+      "note":"Evidence-balance totals are diagnostic bookkeeping, not historical verdicts or probabilities. v1.4 no longer treats every Yeniseian morpheme as equally attested: direct Arin lexical evidence, family-level structure, and reconstruction-heavy gaps are separate evidence classes."
     }
     raw=json.dumps(q,ensure_ascii=False,sort_keys=True).encode()
     manifest["query_pack_sha256"]=hashlib.sha256(raw).hexdigest()
     (out/"run_manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
 
     next_search={"highest_information_gain":[
-        {"id":"IG_MORPH","rank":1,"claim":"Old Arin leads BLIND_ALL, but NO_MORPHOLOGY flips the leader to the contact model.","action":"Verify proposed Arin -taŋ/-aŋ and internal verb-template slots against independently attested Arin/Yeniseian paradigms, preferably Werner 2005 and other primary grammatical descriptions, without reusing the couplet analysis as evidence."},
-        {"id":"IG_TURKIC_CHANNEL","rank":2,"claim":"The Shimunek Turkic parse contains explicit reconstruction costs including a zero-mapped 支 and acknowledged vowel-harmony/accusative issues.","action":"Re-run its segmentation against all admissible Chinese transcription states and count zero mappings, compression/expansion and hypothetical morphology explicitly."},
-        {"id":"IG_GU_CONTEXT","rank":3,"claim":"谷 is genuinely polyphonic and non-default l-/y-readings occur in Inner-Asian title/name contexts, so the graph alone cannot adjudicate K vs L vs Y.","action":"Search for local Wei-Jin transcription conventions or parallel foreign names using 谷; until such evidence appears, marginalize the position rather than hard-pick kok or luk."},
-        {"id":"IG_HOLDOUT_74","rank":4,"claim":"The couplet is too small to identify a language securely by itself.","action":"After morphology and transcription-cost audits, freeze weights and run the 74-term corpus as chronological holdout; no tuning after reveal."}
+        {"id":"IG_PROTO_ROOTS","rank":1,"claim":"The strongest unresolved Old Arin/Yeniseian uncertainty is no longer generic morphology but the reconstruction-heavy units t=out, ek=go, got=foot(?) and kt=take.","action":"Audit Proto-Yeniseian etymological dictionaries and independent Ket/Yugh/Kott/Assan/Arin/Pumpokol cognate sets for each unit without using the Chinese gloss as a search key where possible."},
+        {"id":"IG_SEGMENTATION","rank":2,"claim":"Vovin's kt+aŋ segmentation and the later surface -taŋ Arin argument compete for the same t boundary.","action":"Resolve the segmentation fork before allowing t to support both a lexical root and a person-number suffix."},
+        {"id":"IG_TURKIC_CHANNEL","rank":3,"claim":"The Turkic parse still carries zero-mapping, harmony and case-reconstruction costs.","action":"Build the same morpheme-level primary audit for su-Ø | kete-r erkan | boklug-gu | tukta-ŋ and compare patch counts symmetrically."},
+        {"id":"IG_BOOK_74","rank":4,"claim":"The couplet alone cannot decide the identity of the wider language community or validate the book's Hebrew claims.","action":"Start the 74-term book audit: for each author term, freeze date/location first, then compare Hebrew/Aramaic, Yeniseian, Turkic/Iranian and Chinese-internal histories with the same patch-cost rules."}
     ]}
     (out/"next_search.json").write_text(json.dumps(next_search,ensure_ascii=False,indent=2),encoding="utf-8")
 
-    lines=[
-        f"# Shile ANRE run — {q['model_version']}","",
-        f"Question: {q['research_question']}","",
-        "## Dependency collapse"
-    ]
-    for g,ids in groups.items():
-        lines.append(f"- {g}: {', '.join(ids)}")
+    lines=[f"# Shile ANRE run — {q['model_version']}","",f"Question: {q['research_question']}","","## Dependency collapse"]
+    for g,ids in groups.items(): lines.append(f"- {g}: {', '.join(ids)}")
     lines += ["","## 4C transcription lattice"]
-    for r in lattice_rows:
-        lines.append(f"- {r['char']}: Shimunek={r['shimunek2015']} | Vovin={r['vovin2016']} | {r['agreement']}")
-    lines += ["","## 谷 polyphonic latent-state audit"]
-    for r in gu_rows:
-        lines.append(f"- {r['state']} {r['family']}: {r['representative_values']} | foreign-context={r['foreign_name_title_support']}")
-    lines += [
-        f"- Model rule: {gu['model_rule']['new']}",
-        f"- IG update: 谷 moves from rank {gu['information_gain_update']['previous_rank']} to {gu['information_gain_update']['new_rank']}; morphology becomes the top question."
-    ]
+    for r in lattice_rows: lines.append(f"- {r['char']}: Shimunek={r['shimunek2015']} | Vovin={r['vovin2016']} | {r['agreement']}")
+    lines += ["","## Morpheme audit"]
+    for r in morph_rows:
+        lines.append(f"- {r['surface']} :: {r['unit']} = {r['claim']} → {r['status']} / {r['strength']}")
     lines += ["","## Blind evidence balance (gloss hidden)"]
-    for r in blind_matrix:
-        lines.append(f"- {r['name']}: {r['blind_evidence_balance']:+d} (support {r['support_count']}, challenge {r['challenge_count']})")
+    for r in blind_matrix: lines.append(f"- {r['name']}: {r['blind_evidence_balance']:+d} (support {r['support_count']}, challenge {r['challenge_count']})")
     lines += ["","## Ablation leaders"]
-    for aid,s in ablation_summary.items():
-        lines.append(f"- {aid}: {', '.join(s['leaders'])} at {s['top_score']:+d}")
-    lines += ["","## Legacy seeded-prior order (comparison only)"]
-    for r in scores:
-        lines.append(f"- {r['name']}: {r['anre_score']:.4f} ({r['status']})")
-    lines += ["","## Contradictions"]
-    for c in q["contradictions"]:
-        lines.append(f"- {c['id']}: {c['claim']} → {c['action']}")
-    lines += [
-        "","## Interpretation guard",
-        "The 谷 audit removes a false binary. K-, L-, and Y/J-initial reading families are historically real, and rare readings themselves occur in Inner-Asian name/title contexts. Therefore this graph currently has high uncertainty but low discriminatory value between Old Arin and Turkic.",
-        "The strongest live discriminator is now morphology: Old Arin remains STRONG HYPOTHESIS because BLIND_ALL leads, but the NO_MORPHOLOGY flip means the identification is not LOCKED.",
-        "A high score never promotes a hypothesis to FACT. Promotion requires independent historical evidence, chronology fit, primary morphology checks and successful holdout tests."
-    ]
+    for aid,s in ablation_summary.items(): lines.append(f"- {aid}: {', '.join(s['leaders'])} at {s['top_score']:+d}")
+    lines += ["","## Global primary-source findings"]
+    for r in global_rows: lines.append(f"- {r['id']} [{r['status']}]: {r['finding']}")
+    lines += ["","## Interpretation guard",
+        "The strongest direct Arin lexical anchor is kel 'army', and it appears only after the traditional gloss is revealed. Blind support is mainly family-level Yeniseian templatic architecture. The units śu, t=out, ek=go, got=foot and kt=take are not all directly attested as Old Arin morphemes in Werner 2005.",
+        "A tie or narrow lead is not a historical verdict. The next promotion gate is independent proto-language/cognate verification plus a symmetric Turkic morpheme audit and 74-term holdout."]
     (out/"report.md").write_text("\n".join(lines)+"\n",encoding="utf-8")
 
 

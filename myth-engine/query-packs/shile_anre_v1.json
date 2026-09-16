@@ -1,11 +1,12 @@
 {
-  "model_version": "shile-anre-v1.3-werner-primary",
-  "research_question": "Which historical-language model best explains the Jie couplet and the book's wider lexical claims after chronology, geography, source-dependence, transcription-channel uncertainty, polyphonic-character latent states, primary-source morphology auditing, blind morphology, ablation and patch-cost controls?",
+  "model_version": "shile-anre-v1.4-morpheme-audit",
+  "research_question": "Which historical-language model best explains the Jie couplet and the book's wider lexical claims after chronology, geography, source-dependence, transcription-channel uncertainty, polyphonic-character latent states, primary-source morpheme auditing, blind morphology, ablation and patch-cost controls?",
   "status_policy": ["FACT", "INFERENCE", "STRONG_HYPOTHESIS", "OPEN_HYPOTHESIS", "CANON"],
   "phase2_files": {
     "phonology_lattice": "research/shile-anre/phonology_lattice_4c_v1.json",
     "blind_candidates": "research/shile-anre/blind_candidates_v13.json",
-    "gu_reading_audit": "research/shile-anre/gu_reading_audit_v12.json"
+    "gu_reading_audit": "research/shile-anre/gu_reading_audit_v12.json",
+    "couplet_morpheme_audit": "research/shile-anre/couplet_morpheme_audit_v14.json"
   },
   "witnesses": [
     {"id":"GSZ","title":"高僧傳·佛圖澄傳","compiled":"6th c.","text":"秀支替戾岡，僕谷劬禿當","label":"此羯語也","source_class":"early_literary_witness","dependency_group":"fotucheng-tradition"},
@@ -20,7 +21,7 @@
     {"surface":"劬禿當","gloss":"捉","slot":"catch"}
   ],
   "hypotheses": [
-    {"id":"H_OLD_ARIN","name":"Old Arin / Yeniseian","phonetic_fit":0.84,"semantic_fit":0.90,"chronology_fit":0.82,"geography_fit":0.74,"morphology_fit":0.82,"source_independence":0.66,"patch_cost":0.20,"holdout_bonus":0.08,"status":"STRONG_HYPOTHESIS"},
+    {"id":"H_OLD_ARIN","name":"Old Arin / Yeniseian","phonetic_fit":0.82,"semantic_fit":0.90,"chronology_fit":0.82,"geography_fit":0.74,"morphology_fit":0.70,"source_independence":0.70,"patch_cost":0.30,"holdout_bonus":0.08,"status":"STRONG_HYPOTHESIS"},
     {"id":"H_TURKIC","name":"Early Turkic","phonetic_fit":0.66,"semantic_fit":0.78,"chronology_fit":0.78,"geography_fit":0.78,"morphology_fit":0.58,"source_independence":0.62,"patch_cost":0.38,"holdout_bonus":0.03,"status":"OPEN_HYPOTHESIS"},
     {"id":"H_CONTACT","name":"Yeniseian-Turkic contact model","phonetic_fit":0.70,"semantic_fit":0.78,"chronology_fit":0.80,"geography_fit":0.86,"morphology_fit":0.50,"source_independence":0.62,"patch_cost":0.42,"holdout_bonus":0.02,"status":"OPEN_HYPOTHESIS"},
     {"id":"H_AUTHOR_STITCHED","name":"Hungarian+Persian+Finnish stitched fit","phonetic_fit":0.55,"semantic_fit":0.82,"chronology_fit":0.28,"geography_fit":0.25,"morphology_fit":0.08,"source_independence":0.30,"patch_cost":0.88,"holdout_bonus":0.00,"status":"OPEN_HYPOTHESIS"},
@@ -42,11 +43,14 @@
     {"id":"C_LABEL","claim":"Major transmitted witnesses inspected here read 此羯語也, while OCR/digital derivatives can corrupt 羯 into other graphically similar strings.","action":"Do not promote 羌語/褐語 to a historical variant without a concrete edition image or manuscript witness."},
     {"id":"C_SOURCE_DEP","claim":"高僧傳 and 晉書 are not independent witnesses to the event tradition.","action":"Collapse dependency groups before counting support."},
     {"id":"C_4C_EXACT","claim":"There is no single directly observed exact pronunciation for the 328 CE Chinese transcription channel.","action":"Keep a lattice of published reconstructions and score robustness across them instead of selecting one convenient reading."},
-    {"id":"C_GU_POLYPHONY","claim":"谷 has historically attested k-, l-, and y/j-initial reading families, with l- and y/j-readings themselves occurring in Inner-Asian title/name contexts.","action":"Treat 谷 as latent {K,L,Y}; do not use default lexical frequency as a decisive foreign-transcription prior and do not let a candidate choose its preferred reading for free."},
-    {"id":"C_WERNER_TANG","claim":"Werner 2005 primary data does contain a 3PL surface form in -taŋ, but the same 'stand' predicate is also 1PL; Werner's generalized reconstruction gives 1PL -taŋ/*-toŋ and animate 3PL -aŋ/-iaŋ, and calls the 'stand' paradigm peculiar.","action":"Downgrade -taŋ from a clean Arin-specific 3PL diagnostic to modest surface compatibility; keep the broader Yeniseian -aŋ morphology question separate."},
-    {"id":"C_YENISEIAN_CRITIQUE","claim":"Savelyev & Jeong 2020 criticized the older Pumpokol-style Yeniseian solution for unattested morphemes and unmatched units.","action":"Treat the newer Old Arin refinement as a new testable model that must explicitly clear, not erase, the older critique."},
+    {"id":"C_GU_POLYPHONY","claim":"谷 has historically attested k-, l-, and y/j-initial reading families, with l- and y/j-readings themselves occurring in Inner-Asian title/name contexts.","action":"Treat 谷 as latent {K,L,Y}; do not let a candidate choose its preferred reading for free."},
+    {"id":"C_WERNER_TANG","claim":"Werner 2005 primary data contains a 3PL surface form in -taŋ, but the same peculiar 'stand' predicate is also 1PL; Werner's generalized reconstruction gives 1PL -taŋ/*-toŋ and animate 3PL -aŋ/-iaŋ.","action":"Keep -taŋ only as modest surface compatibility, not a clean Arin-specific 3PL diagnostic."},
+    {"id":"C_DIRECT_LEXICAL_GAPS","claim":"Werner's direct Arin lexicon gives kel = army, but direct Arin go, foot and take forms do not match the proposed ek, got and kt morphemes.","action":"Separate the strong kel anchor from reconstruction-heavy predicate internals; require Proto-Yeniseian etymological support before increasing confidence."},
+    {"id":"C_SEGMENTATION_FORK","claim":"Vovin's parse uses kt+aŋ at the end of the second predicate, while the later Arin argument discusses surface <taŋ> as a 3PL ending.","action":"Do not double-count the same t as evidence for both root and suffix until the segmentation boundary is explicitly reconciled."},
+    {"id":"C_PUMPOKOL_SCARCITY","claim":"Werner reports only two or three secure Pumpokol B-affix verbal forms and warns against broad inflectional conclusions; later sources also contain Yugh forms mislabelled as Pumpokol.","action":"Penalize detailed Pumpokol-specific paradigmatic reconstruction unless supported by independent primary evidence."},
+    {"id":"C_YENISEIAN_CRITIQUE","claim":"Savelyev & Jeong 2020 criticized the older Pumpokol-style Yeniseian solution for unattested morphemes and unmatched units.","action":"Require the Arin refinement to clear those gaps item by item."},
     {"id":"C_CONTACT_MIX","claim":"Independent evidence supports Turkic-Yeniseian contact, but contact alone does not prove phrase-level code-switching.","action":"Apply a switch cost unless a boundary or borrowing diagnostic is independently demonstrated."}
   ],
   "score_weights": {"phonetic_fit":0.24,"semantic_fit":0.10,"chronology_fit":0.14,"geography_fit":0.12,"morphology_fit":0.22,"source_independence":0.10,"holdout_bonus":0.08,"patch_cost_penalty":0.22},
-  "legacy_score_note": "Weighted priors remain only for backward-comparison. v1.3 blind evidence uses Werner 2005 primary Arin morphology and no longer treats -taŋ as a clean unique 3PL diagnostic. 谷 remains marginalized as an unresolved polyphonic latent transcription state."
+  "legacy_score_note": "Weighted priors remain backward-comparison only. v1.4 primary morpheme audit distinguishes direct Arin evidence (kel), family-level Yeniseian structure (template, liquid past, actant slots, -aŋ) and reconstruction-heavy gaps (śu, t=out, ek=go, got=foot, kt=take)."
 }

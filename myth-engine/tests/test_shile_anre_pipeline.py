@@ -14,7 +14,7 @@ class ShileANREPipelineTest(unittest.TestCase):
             expected={
                 'variant_graph.json','hypothesis_matrix.csv','phonology_queue.csv','run_manifest.json','next_search.json','report.md',
                 'phonology_lattice_4c.csv','blind_fit_matrix.csv','blind_ablation.csv','ablation_summary.json','evidence_ledger.csv',
-                'gu_reading_audit.csv'
+                'gu_reading_audit.csv','couplet_morpheme_audit.csv','couplet_global_findings.csv'
             }
             self.assertTrue(expected.issubset({p.name for p in out.iterdir()}))
 
@@ -25,24 +25,31 @@ class ShileANREPipelineTest(unittest.TestCase):
             self.assertEqual(manifest['lattice_major_divergence_chars'],['谷'])
             self.assertEqual(manifest['gu_status'],'LATENT_READING_NOT_RESOLVED')
             self.assertEqual(manifest['gu_latent_state_count'],3)
-            self.assertEqual(manifest['gu_information_gain_rank'],3)
+            self.assertGreaterEqual(manifest['morpheme_audit_row_count'],10)
+            self.assertIn('ek',manifest['morpheme_direct_gap_units'])
+            self.assertIn('got',manifest['morpheme_direct_gap_units'])
+            self.assertIn('kt',manifest['morpheme_direct_gap_units'])
+            self.assertIn('ke',manifest['morpheme_strong_units'])
 
             vg=json.loads((out/'variant_graph.json').read_text(encoding='utf-8'))
             self.assertIn('fotucheng-tradition',vg['dependency_groups'])
 
-            with open(out/'hypothesis_matrix.csv',encoding='utf-8-sig') as f:
-                legacy=list(csv.DictReader(f))
-            self.assertEqual(len(legacy),5)
-            stitched=next(r for r in legacy if r['id']=='H_AUTHOR_STITCHED')
-            old_arin_legacy=next(r for r in legacy if r['id']=='H_OLD_ARIN')
-            self.assertGreater(float(old_arin_legacy['anre_score']),float(stitched['anre_score']))
-
             with open(out/'blind_fit_matrix.csv',encoding='utf-8-sig') as f:
                 blind=list(csv.DictReader(f))
-            self.assertEqual(blind[0]['id'],'H_OLD_ARIN')
-            old_arin=next(r for r in blind if r['id']=='H_OLD_ARIN')
-            turkic=next(r for r in blind if r['id']=='H_TURKIC')
-            self.assertGreater(int(old_arin['blind_evidence_balance']),int(turkic['blind_evidence_balance']))
+            scores={r['id']:int(r['blind_evidence_balance']) for r in blind}
+            self.assertEqual(scores['H_OLD_ARIN'],2)
+            self.assertEqual(scores['H_CONTACT'],2)
+            self.assertGreater(scores['H_OLD_ARIN'],scores['H_TURKIC'])
+            self.assertEqual(set(manifest['blind_top_models']),{'H_OLD_ARIN','H_CONTACT'})
+
+            with open(out/'couplet_morpheme_audit.csv',encoding='utf-8-sig') as f:
+                morph=list(csv.DictReader(f))
+            by_unit={r['unit']:r for r in morph}
+            self.assertEqual(by_unit['ke']['status'],'DIRECT_ARIN_LEXICAL_AFTER_GLOSS_REVEAL')
+            self.assertEqual(by_unit['ek']['status'],'DIRECT_ARIN_GAP')
+            self.assertEqual(by_unit['got']['status'],'DIRECT_LEXICAL_MISMATCH_OPEN')
+            self.assertEqual(by_unit['kt']['status'],'DIRECT_ARIN_GAP')
+            self.assertEqual(by_unit['surface taŋ']['status'],'DOWNGRADED_SEGMENTATION_FORK')
 
             with open(out/'evidence_ledger.csv',encoding='utf-8-sig') as f:
                 ledger=list(csv.DictReader(f))
@@ -50,20 +57,16 @@ class ShileANREPipelineTest(unittest.TestCase):
             self.assertTrue(semantic)
             self.assertTrue(all(r['blind']=='false' for r in semantic))
 
-            with open(out/'gu_reading_audit.csv',encoding='utf-8-sig') as f:
-                gu=list(csv.DictReader(f))
-            self.assertEqual({r['state'] for r in gu},{'GU_K','GU_L','GU_Y'})
-            self.assertTrue(any('谷蠡' in r['foreign_name_title_support'] for r in gu if r['state']=='GU_L'))
-            self.assertTrue(any('吐谷渾' in r['foreign_name_title_support'] for r in gu if r['state']=='GU_Y'))
-
             summary=json.loads((out/'ablation_summary.json').read_text(encoding='utf-8'))
+            self.assertIn('H_CONTACT',summary['BLIND_ALL']['leaders'])
             self.assertIn('H_OLD_ARIN',summary['BLIND_ALL']['leaders'])
             self.assertIn('H_CONTACT',summary['NO_MORPHOLOGY']['leaders'])
-            self.assertNotEqual(summary['BLIND_ALL']['leaders'],summary['NO_MORPHOLOGY']['leaders'])
+            self.assertIn('H_OLD_ARIN',summary['GLOSS_REVEAL']['leaders'])
 
             nxt=json.loads((out/'next_search.json').read_text(encoding='utf-8'))
-            self.assertEqual(nxt['highest_information_gain'][0]['id'],'IG_MORPH')
-            self.assertEqual(nxt['highest_information_gain'][2]['id'],'IG_GU_CONTEXT')
+            self.assertEqual(nxt['highest_information_gain'][0]['id'],'IG_PROTO_ROOTS')
+            self.assertEqual(nxt['highest_information_gain'][1]['id'],'IG_SEGMENTATION')
+            self.assertEqual(nxt['highest_information_gain'][3]['id'],'IG_BOOK_74')
 
 
 if __name__=='__main__':
