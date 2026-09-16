@@ -13,7 +13,8 @@ class ShileANREPipelineTest(unittest.TestCase):
             out=Path(td)
             expected={
                 'variant_graph.json','hypothesis_matrix.csv','phonology_queue.csv','run_manifest.json','next_search.json','report.md',
-                'phonology_lattice_4c.csv','blind_fit_matrix.csv','blind_ablation.csv','ablation_summary.json','evidence_ledger.csv'
+                'phonology_lattice_4c.csv','blind_fit_matrix.csv','blind_ablation.csv','ablation_summary.json','evidence_ledger.csv',
+                'gu_reading_audit.csv'
             }
             self.assertTrue(expected.issubset({p.name for p in out.iterdir()}))
 
@@ -22,6 +23,9 @@ class ShileANREPipelineTest(unittest.TestCase):
             self.assertGreaterEqual(manifest['priority_term_count'],10)
             self.assertIn('not historical verdicts',manifest['note'])
             self.assertEqual(manifest['lattice_major_divergence_chars'],['谷'])
+            self.assertEqual(manifest['gu_status'],'LATENT_READING_NOT_RESOLVED')
+            self.assertEqual(manifest['gu_latent_state_count'],3)
+            self.assertEqual(manifest['gu_information_gain_rank'],3)
 
             vg=json.loads((out/'variant_graph.json').read_text(encoding='utf-8'))
             self.assertIn('fotucheng-tradition',vg['dependency_groups'])
@@ -46,10 +50,20 @@ class ShileANREPipelineTest(unittest.TestCase):
             self.assertTrue(semantic)
             self.assertTrue(all(r['blind']=='false' for r in semantic))
 
+            with open(out/'gu_reading_audit.csv',encoding='utf-8-sig') as f:
+                gu=list(csv.DictReader(f))
+            self.assertEqual({r['state'] for r in gu},{'GU_K','GU_L','GU_Y'})
+            self.assertTrue(any('谷蠡' in r['foreign_name_title_support'] for r in gu if r['state']=='GU_L'))
+            self.assertTrue(any('吐谷渾' in r['foreign_name_title_support'] for r in gu if r['state']=='GU_Y'))
+
             summary=json.loads((out/'ablation_summary.json').read_text(encoding='utf-8'))
             self.assertIn('H_OLD_ARIN',summary['BLIND_ALL']['leaders'])
             self.assertIn('H_CONTACT',summary['NO_MORPHOLOGY']['leaders'])
             self.assertNotEqual(summary['BLIND_ALL']['leaders'],summary['NO_MORPHOLOGY']['leaders'])
+
+            nxt=json.loads((out/'next_search.json').read_text(encoding='utf-8'))
+            self.assertEqual(nxt['highest_information_gain'][0]['id'],'IG_MORPH')
+            self.assertEqual(nxt['highest_information_gain'][2]['id'],'IG_GU_CONTEXT')
 
 
 if __name__=='__main__':
