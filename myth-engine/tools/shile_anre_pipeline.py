@@ -146,6 +146,21 @@ def run_blind_phase(blind,out):
     return matrix,summary
 
 
+def run_gu_audit(gu,out):
+    rows=[]
+    for state in gu["reading_states"]:
+        rows.append({
+            "state":state["id"],
+            "family":state["family"],
+            "representative_values":" / ".join(state["representative_values"]),
+            "ordinary_lexeme_support":state["ordinary_lexeme_support"],
+            "foreign_name_title_support":state["foreign_name_title_support"],
+            "candidate_effect":state["candidate_effect"]
+        })
+    write_csv(out/"gu_reading_audit.csv",rows,["state","family","representative_values","ordinary_lexeme_support","foreign_name_title_support","candidate_effect"])
+    return rows
+
+
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--query-pack",required=True)
@@ -159,7 +174,7 @@ def main():
     vg=variant_graph(q["witnesses"])
     (out/"variant_graph.json").write_text(json.dumps({"dependency_groups":groups,"variants":vg},ensure_ascii=False,indent=2),encoding="utf-8")
 
-    # Legacy v1.0 weighted priors are retained for comparison only.
+    # Legacy weighted priors are retained for comparison only.
     scores=[]
     for h in q["hypotheses"]:
         row=dict(h)
@@ -174,10 +189,11 @@ def main():
         queue.append({"priority":f"P{i:02d}","term":t["term"],"target_period":t["target_period"],"task":t["task"],"status":"TODO_YEAR_SOUND"})
     write_csv(out/"phonology_queue.csv",queue,["priority","term","target_period","task","status"])
 
-    # Phase 2: published reconstruction lattice + gloss-hidden evidence balance.
     phase=q.get("phase2_files",{})
     lattice=load_json(resolve_project_file(a.query_pack,phase["phonology_lattice"]))
     blind=load_json(resolve_project_file(a.query_pack,phase["blind_candidates"]))
+    gu=load_json(resolve_project_file(a.query_pack,phase["gu_reading_audit"]))
+
     lattice_rows=[]
     for r in lattice["rows"]:
         lattice_rows.append({
@@ -187,6 +203,7 @@ def main():
         })
     write_csv(out/"phonology_lattice_4c.csv",lattice_rows,["position","char","shimunek2015","vovin2016","agreement","note"])
     blind_matrix,ablation_summary=run_blind_phase(blind,out)
+    gu_rows=run_gu_audit(gu,out)
 
     major_div=[r for r in lattice_rows if r["agreement"]=="MAJOR_DIVERGENCE"]
     blind_leader=blind_matrix[0] if blind_matrix else None
@@ -203,18 +220,21 @@ def main():
       "blind_evidence_balance":blind_leader["blind_evidence_balance"] if blind_leader else None,
       "lattice_major_divergence_count":len(major_div),
       "lattice_major_divergence_chars":[r["char"] for r in major_div],
+      "gu_latent_state_count":len(gu_rows),
+      "gu_status":gu["status"],
+      "gu_information_gain_rank":gu["information_gain_update"]["new_rank"],
       "ablation_summary":ablation_summary,
-      "note":"Legacy weighted scores and v1.1 evidence-balance totals are diagnostic workflow outputs, not historical verdicts or probabilities. Promotion requires independent evidence and holdout stability."
+      "note":"Legacy weighted scores and evidence-balance totals are diagnostic workflow outputs, not historical verdicts or probabilities. 谷 is now marginalized as an unresolved polyphonic latent transcription state; model promotion requires independent morphology and holdout stability."
     }
     raw=json.dumps(q,ensure_ascii=False,sort_keys=True).encode()
     manifest["query_pack_sha256"]=hashlib.sha256(raw).hexdigest()
     (out/"run_manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
 
     next_search={"highest_information_gain":[
-        {"id":"IG_GU","claim":"谷 is the only character with a major reconstruction divergence between the two published phrase analyses (Shimunek: luk; Vovin: kok).","action":"Resolve 谷 with independent Later Han / Northern EMC evidence and edition-specific phonology before allowing either candidate model to choose its preferred reading."},
-        {"id":"IG_MORPH","claim":"Old Arin leads the blind evidence ledger, but the NO_MORPHOLOGY ablation is designed to test whether that lead collapses when morphology is removed.","action":"Verify every proposed Arin morpheme, especially -taŋ and the internal verb-template slots, against independently attested Arin/Yeniseian paradigms rather than the couplet analysis itself."},
-        {"id":"IG_TURKIC_CHANNEL","claim":"The Shimunek Turkic parse contains explicit reconstruction costs including a zero-mapped 支 and acknowledged vowel-harmony/accusative issues.","action":"Re-run its segmentation against both published Chinese reconstruction layers and count zero mappings, compression/expansion and hypothetical morphology explicitly."},
-        {"id":"IG_HOLDOUT_74","claim":"The couplet is too small to identify a language securely by itself.","action":"After the 4C channel and morphology audit, use the 74-term corpus as chronological holdout: freeze weights first, then test whether Old Arin, Turkic or contact predictions generalize."}
+        {"id":"IG_MORPH","rank":1,"claim":"Old Arin leads BLIND_ALL, but NO_MORPHOLOGY flips the leader to the contact model.","action":"Verify proposed Arin -taŋ/-aŋ and internal verb-template slots against independently attested Arin/Yeniseian paradigms, preferably Werner 2005 and other primary grammatical descriptions, without reusing the couplet analysis as evidence."},
+        {"id":"IG_TURKIC_CHANNEL","rank":2,"claim":"The Shimunek Turkic parse contains explicit reconstruction costs including a zero-mapped 支 and acknowledged vowel-harmony/accusative issues.","action":"Re-run its segmentation against all admissible Chinese transcription states and count zero mappings, compression/expansion and hypothetical morphology explicitly."},
+        {"id":"IG_GU_CONTEXT","rank":3,"claim":"谷 is genuinely polyphonic and non-default l-/y-readings occur in Inner-Asian title/name contexts, so the graph alone cannot adjudicate K vs L vs Y.","action":"Search for local Wei-Jin transcription conventions or parallel foreign names using 谷; until such evidence appears, marginalize the position rather than hard-pick kok or luk."},
+        {"id":"IG_HOLDOUT_74","rank":4,"claim":"The couplet is too small to identify a language securely by itself.","action":"After morphology and transcription-cost audits, freeze weights and run the 74-term corpus as chronological holdout; no tuning after reveal."}
     ]}
     (out/"next_search.json").write_text(json.dumps(next_search,ensure_ascii=False,indent=2),encoding="utf-8")
 
@@ -228,6 +248,13 @@ def main():
     lines += ["","## 4C transcription lattice"]
     for r in lattice_rows:
         lines.append(f"- {r['char']}: Shimunek={r['shimunek2015']} | Vovin={r['vovin2016']} | {r['agreement']}")
+    lines += ["","## 谷 polyphonic latent-state audit"]
+    for r in gu_rows:
+        lines.append(f"- {r['state']} {r['family']}: {r['representative_values']} | foreign-context={r['foreign_name_title_support']}")
+    lines += [
+        f"- Model rule: {gu['model_rule']['new']}",
+        f"- IG update: 谷 moves from rank {gu['information_gain_update']['previous_rank']} to {gu['information_gain_update']['new_rank']}; morphology becomes the top question."
+    ]
     lines += ["","## Blind evidence balance (gloss hidden)"]
     for r in blind_matrix:
         lines.append(f"- {r['name']}: {r['blind_evidence_balance']:+d} (support {r['support_count']}, challenge {r['challenge_count']})")
@@ -242,7 +269,8 @@ def main():
         lines.append(f"- {c['id']}: {c['claim']} → {c['action']}")
     lines += [
         "","## Interpretation guard",
-        "Blind evidence-balance totals are transparent bookkeeping, not probabilities. The strongest current discriminator is morphology; if removing morphology changes the leader, the language identification remains morphology-dependent rather than locked.",
+        "The 谷 audit removes a false binary. K-, L-, and Y/J-initial reading families are historically real, and rare readings themselves occur in Inner-Asian name/title contexts. Therefore this graph currently has high uncertainty but low discriminatory value between Old Arin and Turkic.",
+        "The strongest live discriminator is now morphology: Old Arin remains STRONG HYPOTHESIS because BLIND_ALL leads, but the NO_MORPHOLOGY flip means the identification is not LOCKED.",
         "A high score never promotes a hypothesis to FACT. Promotion requires independent historical evidence, chronology fit, primary morphology checks and successful holdout tests."
     ]
     (out/"report.md").write_text("\n".join(lines)+"\n",encoding="utf-8")

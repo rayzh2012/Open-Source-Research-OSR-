@@ -1,0 +1,86 @@
+{
+  "version": "gu-audit-v1.2",
+  "target": "谷 in 僕谷 of the Jié couplet",
+  "status": "LATENT_READING_NOT_RESOLVED",
+  "reason": "The graph 谷 was historically polyphonic, and non-default readings are themselves attested in Inner-Asian names/titles. Therefore lexical-frequency priors from ordinary Chinese cannot be used as a decisive transcription prior in a foreign-language couplet.",
+  "sources": [
+    {
+      "id": "VOVIN_VAJDA_VAISSIERE_2016",
+      "citation": "Vovin, Vajda & de la Vaissière 2016, Journal Asiatique 304(1):125-144, DOI 10.2143/JA.304.1.3146838",
+      "evidence": [
+        "Their Chart 1 lists multiple historical readings for 谷 across reconstruction systems rather than a single value.",
+        "They criticize Shimunek et al.'s selection of *lok as a northern-frontier reading because no source is supplied for that contextual claim.",
+        "They argue the k-initial reading is overall the most frequent/common reading, while explicitly acknowledging the l- and y-initial reading families."
+      ]
+    },
+    {
+      "id": "BAXTER_SAGART_2014",
+      "citation": "Baxter & Sagart 2014 reconstruction list / Old Chinese: A New Reconstruction",
+      "evidence": [
+        "The ordinary 'valley' lexeme 谷 has Middle Chinese kuwk and Old Chinese *C.qˤok in Baxter-Sagart.",
+        "This independently anchors a k-initial reading family but does not establish that a foreign transcription in the fourth century must select that reading."
+      ]
+    },
+    {
+      "id": "TRADITIONAL_READING_CONTEXTS",
+      "citation": "Traditional Middle Chinese reading traditions as indexed in modern historical dictionaries",
+      "evidence": [
+        "谷 also has Middle Chinese luwk, preserved specifically in 谷蠡, a Xiongnu official title.",
+        "谷 also has Middle Chinese yowk, preserved specifically in 吐谷渾 / 谷渾, an Inner-Asian ethnonym/name context.",
+        "Because rare readings occur precisely in foreign-name/title contexts, 'default Chinese lexical frequency' is not a safe prior for the couplet's phonographic use."
+      ]
+    }
+  ],
+  "reading_states": [
+    {
+      "id": "GU_K",
+      "family": "k-initial",
+      "representative_values": ["kuwk", "kok", "kəwk"],
+      "ordinary_lexeme_support": "strong",
+      "foreign_name_title_support": "possible",
+      "candidate_effect": "helps Bokkok-like analyses relative to boklug-like analyses"
+    },
+    {
+      "id": "GU_L",
+      "family": "l-initial",
+      "representative_values": ["luwk", "lok", "ləwk"],
+      "ordinary_lexeme_support": "specialized",
+      "foreign_name_title_support": "directly attested in 谷蠡 Xiongnu title tradition",
+      "candidate_effect": "helps boklug-like analyses relative to Bokkok-like analyses"
+    },
+    {
+      "id": "GU_Y",
+      "family": "y/j-initial",
+      "representative_values": ["yowk", "yok", "juawk"],
+      "ordinary_lexeme_support": "specialized",
+      "foreign_name_title_support": "directly attested in 吐谷渾 / 谷渾 tradition",
+      "candidate_effect": "does not cleanly privilege either current whole-phrase model"
+    }
+  ],
+  "model_rule": {
+    "old": "Treat luk vs kok as a binary major divergence to be solved before language comparison.",
+    "new": "Treat 谷 reading as a latent categorical variable {K,L,Y}. Run candidate models across all admissible reading states. Do not reward a model simply for choosing the reading state it needs.",
+    "penalty": "Apply a reading-selection patch cost only if a model requires one state while independently dated transcription evidence favors another. Until then, marginalize/neutralize this position rather than hard-pick it."
+  },
+  "information_gain_update": {
+    "previous_rank": 1,
+    "new_rank": 3,
+    "why": "The audit establishes that the uncertainty is real and context-sensitive, but not presently identifiable from the graph alone. More effort on 谷 is lower-yield than auditing the morphology that flips the ablation leader.",
+    "new_top_question": "Can the proposed Arin -taŋ/-aŋ and internal verb-template slots be verified independently of the Jié couplet, without circular reuse of the same analysis?"
+  },
+  "classification": {
+    "FACT": [
+      "谷 has multiple historical reading traditions.",
+      "k-, l-, and y/j-initial reading families are represented in Middle Chinese reconstruction traditions.",
+      "The l- and y/j-initial readings occur in Inner-Asian name/title contexts such as 谷蠡 and 吐谷渾."
+    ],
+    "INFERENCE": [
+      "Foreign transcription context weakens the prior that the ordinary k-initial lexical reading must have been intended in the couplet.",
+      "谷 alone should therefore have low discriminatory weight between Old Arin and Turkic until an independent local transcription convention is found."
+    ],
+    "OPEN": [
+      "Which exact reading was intended in the Jié couplet.",
+      "Whether the l-initial reading used in 谷蠡 reflects the same regional/transcriptional convention relevant to the couplet."
+    ]
+  }
+}
