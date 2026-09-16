@@ -1,0 +1,45 @@
+{
+  "version": "werner-primary-v1.3",
+  "source": "Heinrich Werner, Die Jenissej-Sprachen des 18. Jahrhunderts (2005)",
+  "scope": "Arin chapter; primary scan checked at printed pp. 149-155",
+  "physical_pdf_pages": 354,
+  "printed_to_pdf_offset_in_arin_section": 6,
+  "findings": [
+    {
+      "printed_page": 150,
+      "pdf_page": 156,
+      "status": "PRIMARY_VERIFIED",
+      "claim": "Werner explicitly says not all persons are attested and the full predicative personal-suffix system can only be reconstructed by analogy with other Yeniseian languages."
+    },
+    {
+      "printed_page": 150,
+      "pdf_page": 156,
+      "status": "PRIMARY_VERIFIED",
+      "claim": "Werner's reconstructed table gives 1PL -taŋ/*-toŋ, 2PL *-kaŋ/*-koŋ, 3PL animate -aŋ/-iaŋ, and 3PL inanimate -a."
+    },
+    {
+      "printed_page": 150,
+      "pdf_page": 156,
+      "status": "PRIMARY_VERIFIED",
+      "claim": "On the same page the verbal form at'aŋ-taŋ is glossed 'wir stehen' = 'we stand', i.e. first-person plural."
+    },
+    {
+      "printed_page": 152,
+      "pdf_page": 158,
+      "status": "PRIMARY_VERIFIED",
+      "claim": "Werner introduces the Arin 'stand' forms as Ganz eigentümlich ('quite peculiar'). The paradigm gives the same surface predicate ending -taŋ for 1PL and 3PL; the 3PL line carries a tentative derivational note (< -aŋ ?)."
+    },
+    {
+      "printed_page": 155,
+      "pdf_page": 161,
+      "status": "PRIMARY_VERIFIED",
+      "claim": "The Arin lexicon entry for 'stand' independently repeats source-labelled 1PL, 2PL and 3PL forms; 1PL and 3PL again share the same surface predicate."
+    }
+  ],
+  "model_effect": {
+    "retain": "A 3PL Arin surface form ending in -taŋ is independently attested, so formal compatibility with the Ji couplet is real.",
+    "downgrade": "Werner 2005 does not support treating -taŋ as a clean unique 3PL diagnostic. In his generalized reconstruction -taŋ is 1PL, while animate 3PL is -aŋ/-iaŋ, and the 'stand' paradigm is explicitly peculiar and syncretic between 1PL and 3PL.",
+    "recommended_scoring": "Replace +2 Arin-specific 3PL diagnostic with +1 surface compatibility and -1 non-diagnostic/syncretism challenge (net 0 for this subclaim).",
+    "status": "OLD_ARIN_STRONG_HYPOTHESIS_MORPHOLOGY_NARROWED"
+  }
+}
