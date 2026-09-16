@@ -1,0 +1,43 @@
+name: Fetch Shile Wuxiang Qiangu Yidi PDF
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fetch-shile-wuxiang.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SOURCE_URL: 'https://wtgadtq.org/d4/X/69af6XS/f/1789533910/50000/g5/upload_files/upload_files_duxiu_main_20240526/annas_archive_data__aacid__upload_files_duxiu_main__20240526T064713Z--20240526T064714Z/aacid__upload_files_duxiu_main__20240526T064713Z__6uC5rL37hLyWQYAwjkU4nj~/kPSfXP57Hg2QpKvEGtrQbQ/%E7%9F%B3%E5%8B%92%20%3A%20%E6%AD%A6%E4%B9%A1%E5%8D%83%E5%8F%A4%E4%B8%80%E5%B8%9D%20--%20%E9%A9%AC%E7%94%9F%E6%97%BA%E4%B8%BB%E7%BC%96%3B%20%E9%A9%AC%E7%94%9F%E6%97%BA%20--%20Shile%20ji%20Hou%20Zhao%20wen%20hua%20yan%20jiu%20cong%20shu%2C%20Di%201%20ban%2C%20--%20%E5%8C%97%E4%BA%AC%3A%E4%B8%AD%E5%9B%BD%E7%A4%BE%E4%BC%9A%E5%87%BA%E7%89%88%E7%A4%BE%20--%20isbn13%209787508727592%20--%20569607cdc741e10414fb1960b3b472bb%20--%20Anna%E2%80%99s%20Archive.pdf'
+      PDF: '石勒_武乡千古一帝_马生旺主编_2009.pdf'
+    steps:
+      - name: Download source PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 5 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 30 --max-time 1500 \
+            -A 'Mozilla/5.0' \
+            "$SOURCE_URL" -o "$PDF"
+          test "$(head -c 5 "$PDF")" = "%PDF-"
+          stat -c '%s %n' "$PDF" | tee SIZE.txt
+          sha256sum "$PDF" | tee SHA256SUMS.txt
+          ls -lh "$PDF"
+
+      - name: Upload original PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shile-wuxiang-qiangu-yidi-2009
+          path: |
+            石勒_武乡千古一帝_马生旺主编_2009.pdf
+            SIZE.txt
+            SHA256SUMS.txt
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
