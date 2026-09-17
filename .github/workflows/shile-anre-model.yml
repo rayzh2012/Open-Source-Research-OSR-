@@ -6,7 +6,9 @@ on:
       - '.github/workflows/shile-anre-model.yml'
       - 'myth-engine/query-packs/shile_anre_v1.json'
       - 'myth-engine/tools/shile_anre_pipeline.py'
+      - 'myth-engine/tools/shile_book_controls.py'
       - 'myth-engine/tests/test_shile_anre_pipeline.py'
+      - 'myth-engine/tests/test_shile_book_controls.py'
       - 'research/shile-anre/**'
   push:
     branches: [master]
@@ -14,7 +16,9 @@ on:
       - '.github/workflows/shile-anre-model.yml'
       - 'myth-engine/query-packs/shile_anre_v1.json'
       - 'myth-engine/tools/shile_anre_pipeline.py'
+      - 'myth-engine/tools/shile_book_controls.py'
       - 'myth-engine/tests/test_shile_anre_pipeline.py'
+      - 'myth-engine/tests/test_shile_book_controls.py'
       - 'research/shile-anre/**'
   workflow_dispatch:
     inputs:
@@ -45,13 +49,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Run smoke tests
-        run: python -m unittest myth-engine/tests/test_shile_anre_pipeline.py -v
+      - name: Run Shile tests
+        run: python -m unittest discover myth-engine/tests -p 'test_shile_*.py' -v
 
-      - name: Run Shile ANRE v1.4 model
+      - name: Run Shile ANRE v1.5 model
         run: |
           python myth-engine/tools/shile_anre_pipeline.py \
             --query-pack myth-engine/query-packs/shile_anre_v1.json \
+            --output-dir out/shile-anre
+          python myth-engine/tools/shile_book_controls.py \
+            --controls research/shile-anre/book_lexical_controls_v15.json \
             --output-dir out/shile-anre
 
       - name: Guard required artifacts and model disclaimers
@@ -68,17 +75,22 @@ jobs:
           test -s out/shile-anre/gu_reading_audit.csv
           test -s out/shile-anre/couplet_morpheme_audit.csv
           test -s out/shile-anre/couplet_global_findings.csv
+          test -s out/shile-anre/book_lexical_controls.csv
+          test -s out/shile-anre/book_uniqueness_summary.json
+          test -s out/shile-anre/book_controls_report.md
           test -s out/shile-anre/next_search.json
           grep -q 'not historical verdicts' out/shile-anre/run_manifest.json
           grep -q 'DIRECT_ARIN_LEXICAL_AFTER_GLOSS_REVEAL' out/shile-anre/couplet_morpheme_audit.csv
-          grep -q 'DIRECT_LEXICAL_MISMATCH_OPEN' out/shile-anre/couplet_morpheme_audit.csv
-          grep -q 'DOWNGRADED_SEGMENTATION_FORK' out/shile-anre/couplet_morpheme_audit.csv
-          grep -q 'IG_PROTO_ROOTS' out/shile-anre/next_search.json
-          grep -q 'IG_BOOK_74' out/shile-anre/next_search.json
+          grep -q 'EXACT_SOUND_MEANING_CONTROL' out/shile-anre/book_lexical_controls.csv
+          grep -q 'DESTROYS_UNIQUENESS' out/shile-anre/book_lexical_controls.csv
+          grep -q 'never establishes Yeniseian etymology' out/shile-anre/book_uniqueness_summary.json
           grep -q '羯語' myth-engine/query-packs/shile_anre_v1.json
 
-      - name: Print run report
-        run: cat out/shile-anre/report.md
+      - name: Print run reports
+        run: |
+          cat out/shile-anre/report.md
+          echo '\n--- BOOK CONTROL REPORT ---'
+          cat out/shile-anre/book_controls_report.md
 
       - name: Upload research artifact
         uses: actions/upload-artifact@v4
