@@ -1,0 +1,44 @@
+name: Fetch Byteimg PDF
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fetch-byteimg-pdf.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SOURCE_URL: 'https://p9-flow-sign.byteimg.com/tos-cn-i-ik7evvg4ik/rc/pc/super_tool/4ed1a37f1a294141853ef684700ae4dd.pdf~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202610021537380A351E7CC67EA5D0FFE5&rrcfp=935dee89&x-expires=1791531549&x-signature=0%2FZyw%2FgeoZS9aho9izOmz2LHfjs%3D'
+      PDF: 'byteimg_4ed1a37f1a294141853ef684700ae4dd.pdf'
+    steps:
+      - name: Download source PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 5 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 30 --max-time 1500 \
+            -A 'Mozilla/5.0' \
+            "$SOURCE_URL" -o "$PDF"
+          test "$(head -c 5 "$PDF")" = "%PDF-"
+          stat -c '%s %n' "$PDF" | tee SIZE.txt
+          sha256sum "$PDF" | tee SHA256SUMS.txt
+          file "$PDF"
+          ls -lh "$PDF"
+
+      - name: Upload original PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: byteimg-pdf-4ed1a37f1a294141853ef684700ae4dd
+          path: |
+            byteimg_4ed1a37f1a294141853ef684700ae4dd.pdf
+            SIZE.txt
+            SHA256SUMS.txt
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
