@@ -1,0 +1,44 @@
+name: Fetch Sun Hua Bronze Age PDF
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fetch-sunhua-bronze-age.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SOURCE_URL: 'https://www.ecsponline.com/yz/B5C6E125E1E0F4ACE90A44FD6235062E6000.pdf'
+      PDF: 'Sun_Hua_Sichuan_Basin_Bronze_Age_2000.pdf'
+    steps:
+      - name: Download source PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 5 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 30 --max-time 1500 \
+            -A 'Mozilla/5.0' \
+            "$SOURCE_URL" -o "$PDF"
+          test "$(head -c 5 "$PDF")" = "%PDF-"
+          stat -c '%s %n' "$PDF" | tee SIZE.txt
+          sha256sum "$PDF" | tee SHA256SUMS.txt
+          file "$PDF"
+          ls -lh "$PDF"
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sunhua-sichuan-basin-bronze-age-2000
+          path: |
+            Sun_Hua_Sichuan_Basin_Bronze_Age_2000.pdf
+            SIZE.txt
+            SHA256SUMS.txt
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
