@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      SOURCE_URL: 'https://www.proletarian.me/download.php?book=%E5%9B%9B%E5%B7%9D%E7%9B%86%E5%9C%B0%E7%9A%84%E9%9D%92%E9%93%9C%E6%97%B6%E4%BB%A3&link=books%2Fa0efb777d04fc6a3e66b18c03f36fe6a.pdf'
+      SOURCE_URL: 'https://library.proletarian.me/books/a0efb777d04fc6a3e66b18c03f36fe6a.pdf'
       PDF: 'Sun_Hua_Sichuan_Basin_Bronze_Age_2000_FULL.pdf'
       CHUNK: 'Sun_Hua_pp315-360_working_extract.pdf'
     steps:
