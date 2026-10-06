@@ -1,4 +1,4 @@
-name: Fetch Sun Hua Sichuan Bronze Age
+name: Fetch Sun Hua Full Book Research Window
 
 on:
   push:
@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      SOURCE_URL: 'https://www.ecsponline.com/yz/B5C6E125E1E0F4ACE90A44FD6235062E6000.pdf'
-      PDF: 'sunhua_sichuan_bronze_age_2000.pdf'
+      SOURCE_URL: 'https://s3.us-west-1.wasabisys.com/p-library/books/a0efb777d04fc6a3e66b18c03f36fe6a.pdf'
+      PDF: 'Sun_Hua_Sichuan_Basin_Bronze_Age_2000_FULL.pdf'
     steps:
-      - name: Download source PDF
+      - name: Download and validate full PDF
         shell: bash
         run: |
           set -euo pipefail
@@ -26,11 +26,13 @@ jobs:
             -A 'Mozilla/5.0' \
             "$SOURCE_URL" -o "$PDF"
           test "$(head -c 5 "$PDF")" = "%PDF-"
+          pdfinfo "$PDF" | tee PDFINFO.txt
+          PAGES=$(pdfinfo "$PDF" | awk '/^Pages:/ {print $2}')
+          test "$PAGES" -gt 350
           stat -c '%s %n' "$PDF" | tee SIZE.txt
           sha256sum "$PDF" | tee SHA256SUMS.txt
-          file "$PDF"
 
-      - name: Locate and extract Bieling and Shu-origin chapters
+      - name: Extract printed pages 320-352 research window
         shell: bash
         run: |
           set -euo pipefail
@@ -38,61 +40,39 @@ jobs:
           python - <<'PY'
           from pypdf import PdfReader, PdfWriter
           from pathlib import Path
-
-          src = Path("sunhua_sichuan_bronze_age_2000.pdf")
-          r = PdfReader(str(src))
-          targets = ["鳖灵名义考", "蜀人渊源考"]
-          hits = []
-          page_texts = []
-          for i, p in enumerate(r.pages):
-              try:
-                  t = p.extract_text() or ""
-              except Exception:
-                  t = ""
-              page_texts.append(t)
-              compact = t.replace(" ", "").replace("\n","")
-              if any(x in compact for x in targets):
-                  hits.append(i)
-
-          Path("MATCHES.txt").write_text(
-              f"pages_total={len(r.pages)}\n"
-              + "hits_zero_based=" + ",".join(map(str,hits)) + "\n"
-              + "hits_one_based=" + ",".join(str(x+1) for x in hits) + "\n",
-              encoding="utf-8"
-          )
-
-          if hits:
-              start = max(0, min(hits)-2)
-              end = min(len(r.pages)-1, max(hits)+24)
-          else:
-              start = min(315, len(r.pages)-1)
-              end = min(len(r.pages)-1, 370)
-
-          w = PdfWriter()
-          outtxt = []
-          for i in range(start, end+1):
-              w.add_page(r.pages[i])
-              outtxt.append(f"\n===== PDF_PAGE_{i+1} =====\n{page_texts[i]}")
-          with open("sunhua_bieling_shuren_extract.pdf","wb") as f:
-              w.write(f)
-          Path("sunhua_bieling_shuren_extract.txt").write_text("\n".join(outtxt), encoding="utf-8")
-          Path("RANGE.txt").write_text(
-              f"extract_zero_based={start}-{end}\nextract_one_based={start+1}-{end+1}\n",
-              encoding="utf-8"
-          )
+          r=PdfReader("Sun_Hua_Sichuan_Basin_Bronze_Age_2000_FULL.pdf")
+          # In this edition printed p.1 begins around physical PDF p.5.
+          # Use a wide physical-page window to safely cover printed pp.320-352.
+          start=max(0,320)   # zero-based => physical page 321
+          end=min(len(r.pages)-1,360) # physical page 361
+          w=PdfWriter()
+          txt=[]
+          hits=[]
+          for i in range(start,end+1):
+              p=r.pages[i]
+              w.add_page(p)
+              try: t=p.extract_text() or ""
+              except Exception: t=""
+              txt.append(f"\n===== FULL_PDF_PAGE_{i+1} =====\n{t}")
+              c=t.replace(" ","").replace("\n","")
+              if "鳖灵名义考" in c or "蜀人渊源考" in c:
+                  hits.append(i+1)
+          with open("SunHua_Bieling_ShuOrigins_window.pdf","wb") as f: w.write(f)
+          Path("SunHua_Bieling_ShuOrigins_window.txt").write_text("\n".join(txt),encoding="utf-8")
+          Path("RANGE.txt").write_text(f"full_pdf_pages={len(r.pages)}\nwindow_physical_pages={start+1}-{end+1}\ntitle_hits={hits}\n",encoding="utf-8")
           PY
-          cat MATCHES.txt RANGE.txt
-          ls -lh "$PDF" sunhua_bieling_shuren_extract.pdf sunhua_bieling_shuren_extract.txt
+          cat RANGE.txt
+          ls -lh SunHua_Bieling_ShuOrigins_window.pdf SunHua_Bieling_ShuOrigins_window.txt
 
-      - name: Upload research artifact
+      - name: Upload research window artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sunhua-sichuan-bronze-age-bieling-shuren
+          name: sunhua-full-bieling-shuorigins-window
           path: |
-            sunhua_bieling_shuren_extract.pdf
-            sunhua_bieling_shuren_extract.txt
-            MATCHES.txt
+            SunHua_Bieling_ShuOrigins_window.pdf
+            SunHua_Bieling_ShuOrigins_window.txt
             RANGE.txt
+            PDFINFO.txt
             SIZE.txt
             SHA256SUMS.txt
           compression-level: 0
