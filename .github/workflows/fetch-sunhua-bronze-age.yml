@@ -1,4 +1,4 @@
-name: Resolve Sun Hua Full PDF Link
+name: Fetch Sun Hua Sichuan Bronze Age
 
 on:
   push:
@@ -10,25 +10,91 @@ permissions:
   contents: read
 
 jobs:
-  resolve:
+  fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
+    env:
+      SOURCE_URL: 'https://www.ecsponline.com/yz/B5C6E125E1E0F4ACE90A44FD6235062E6000.pdf'
+      PDF: 'sunhua_sichuan_bronze_age_2000.pdf'
     steps:
-      - name: Inspect library download page
+      - name: Download source PDF
         shell: bash
         run: |
           set -euo pipefail
-          URL='https://www.proletarian.me/download.php?book=%E5%9B%9B%E5%B7%9D%E7%9B%86%E5%9C%B0%E7%9A%84%E9%9D%92%E9%93%9C%E6%97%B6%E4%BB%A3&link=books%2Fa0efb777d04fc6a3e66b18c03f36fe6a.pdf'
-          curl -fL -A 'Mozilla/5.0' "$URL" -o page.html
-          echo '--- LINKS ---'
-          grep -Eo '(href|src)=["'"'][^"'"']+["'"']' page.html | head -100
-          echo '--- HASH CONTEXT ---'
-          grep -n -C 3 'a0efb777d04fc6a3e66b18c03f36fe6a' page.html || true
-          echo '--- PDF CONTEXT ---'
-          grep -n -C 3 -Ei '\\.pdf|download|books/' page.html | head -160 || true
-      - name: Upload resolver page
+          curl -fL --retry 6 --retry-all-errors --retry-delay 3 \
+            --connect-timeout 30 --max-time 1500 \
+            -A 'Mozilla/5.0' \
+            "$SOURCE_URL" -o "$PDF"
+          test "$(head -c 5 "$PDF")" = "%PDF-"
+          stat -c '%s %n' "$PDF" | tee SIZE.txt
+          sha256sum "$PDF" | tee SHA256SUMS.txt
+          file "$PDF"
+
+      - name: Locate and extract Bieling and Shu-origin chapters
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet pypdf
+          python - <<'PY'
+          from pypdf import PdfReader, PdfWriter
+          from pathlib import Path
+
+          src = Path("sunhua_sichuan_bronze_age_2000.pdf")
+          r = PdfReader(str(src))
+          targets = ["鳖灵名义考", "蜀人渊源考"]
+          hits = []
+          page_texts = []
+          for i, p in enumerate(r.pages):
+              try:
+                  t = p.extract_text() or ""
+              except Exception:
+                  t = ""
+              page_texts.append(t)
+              compact = t.replace(" ", "").replace("\n","")
+              if any(x in compact for x in targets):
+                  hits.append(i)
+
+          Path("MATCHES.txt").write_text(
+              f"pages_total={len(r.pages)}\n"
+              + "hits_zero_based=" + ",".join(map(str,hits)) + "\n"
+              + "hits_one_based=" + ",".join(str(x+1) for x in hits) + "\n",
+              encoding="utf-8"
+          )
+
+          if hits:
+              start = max(0, min(hits)-2)
+              end = min(len(r.pages)-1, max(hits)+24)
+          else:
+              start = min(315, len(r.pages)-1)
+              end = min(len(r.pages)-1, 370)
+
+          w = PdfWriter()
+          outtxt = []
+          for i in range(start, end+1):
+              w.add_page(r.pages[i])
+              outtxt.append(f"\n===== PDF_PAGE_{i+1} =====\n{page_texts[i]}")
+          with open("sunhua_bieling_shuren_extract.pdf","wb") as f:
+              w.write(f)
+          Path("sunhua_bieling_shuren_extract.txt").write_text("\n".join(outtxt), encoding="utf-8")
+          Path("RANGE.txt").write_text(
+              f"extract_zero_based={start}-{end}\nextract_one_based={start+1}-{end+1}\n",
+              encoding="utf-8"
+          )
+          PY
+          cat MATCHES.txt RANGE.txt
+          ls -lh "$PDF" sunhua_bieling_shuren_extract.pdf sunhua_bieling_shuren_extract.txt
+
+      - name: Upload research artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sunhua-download-resolver
-          path: page.html
-          retention-days: 1
+          name: sunhua-sichuan-bronze-age-bieling-shuren
+          path: |
+            sunhua_bieling_shuren_extract.pdf
+            sunhua_bieling_shuren_extract.txt
+            MATCHES.txt
+            RANGE.txt
+            SIZE.txt
+            SHA256SUMS.txt
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
