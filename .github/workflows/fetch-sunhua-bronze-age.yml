@@ -1,4 +1,4 @@
-name: Fetch Sun Hua Bronze Age PDF
+name: Fetch Sun Hua Bronze Age Research Pages
 
 on:
   push:
@@ -14,10 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      SOURCE_URL: 'https://www.ecsponline.com/yz/B5C6E125E1E0F4ACE90A44FD6235062E6000.pdf'
-      PDF: 'Sun_Hua_Sichuan_Basin_Bronze_Age_2000.pdf'
+      SOURCE_URL: 'https://www.proletarian.me/books/a0efb777d04fc6a3e66b18c03f36fe6a.pdf'
+      PDF: 'Sun_Hua_Sichuan_Basin_Bronze_Age_2000_FULL.pdf'
+      CHUNK: 'Sun_Hua_pp315-360_working_extract.pdf'
     steps:
-      - name: Download source PDF
+      - name: Download and validate full PDF
         shell: bash
         run: |
           set -euo pipefail
@@ -26,19 +27,45 @@ jobs:
             -A 'Mozilla/5.0' \
             "$SOURCE_URL" -o "$PDF"
           test "$(head -c 5 "$PDF")" = "%PDF-"
-          stat -c '%s %n' "$PDF" | tee SIZE.txt
-          sha256sum "$PDF" | tee SHA256SUMS.txt
           file "$PDF"
           ls -lh "$PDF"
+          sha256sum "$PDF" | tee SHA256_FULL.txt
+          pdfinfo "$PDF" | tee PDFINFO.txt
+          PAGES=$(pdfinfo "$PDF" | awk '/^Pages:/ {print $2}')
+          test "$PAGES" -gt 350
 
-      - name: Upload PDF artifact
+      - name: Extract research window and text probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip -q install pypdf
+          python - <<'PY'
+          from pypdf import PdfReader, PdfWriter
+          src='Sun_Hua_Sichuan_Basin_Bronze_Age_2000_FULL.pdf'
+          out='Sun_Hua_pp315-360_working_extract.pdf'
+          r=PdfReader(src)
+          w=PdfWriter()
+          for p in range(314, min(360, len(r.pages))):
+              w.add_page(r.pages[p])
+          with open(out,'wb') as f: w.write(f)
+          print('FULL_PAGES', len(r.pages), 'EXTRACT_PAGES', len(w.pages))
+          PY
+          pdfinfo "$CHUNK" | tee PDFINFO_CHUNK.txt
+          pdftotext -layout "$CHUNK" chunk_text.txt || true
+          grep -n -E '鳖灵|蜀人渊源|庸国|开明|楚庄王' chunk_text.txt | head -200 | tee TARGET_HITS.txt || true
+          ls -lh "$CHUNK" chunk_text.txt TARGET_HITS.txt
+
+      - name: Upload research extract artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sunhua-sichuan-basin-bronze-age-2000
+          name: sunhua-pp315-360-research-extract
           path: |
-            Sun_Hua_Sichuan_Basin_Bronze_Age_2000.pdf
-            SIZE.txt
-            SHA256SUMS.txt
+            Sun_Hua_pp315-360_working_extract.pdf
+            PDFINFO.txt
+            PDFINFO_CHUNK.txt
+            TARGET_HITS.txt
+            chunk_text.txt
+            SHA256_FULL.txt
           compression-level: 0
           retention-days: 7
           if-no-files-found: error
