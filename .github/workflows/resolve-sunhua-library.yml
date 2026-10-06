@@ -1,0 +1,40 @@
+name: Resolve Sun Hua Full Book URL
+
+on:
+  push:
+    paths:
+      - '.github/workflows/resolve-sunhua-library.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download wrapper page and inspect
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://www.proletarian.me/download.php?book=%E5%9B%9B%E5%B7%9D%E7%9B%86%E5%9C%B0%E7%9A%84%E9%9D%92%E9%93%9C%E6%97%B6%E4%BB%A3&link=books%2Fa0efb777d04fc6a3e66b18c03f36fe6a.pdf'
+          curl -fL -A 'Mozilla/5.0' "$URL" -o page.html
+          wc -c page.html
+          file page.html
+          echo '--- PAGE SOURCE ---'
+          sed -n '1,260p' page.html || true
+          echo '--- ALL URL-LIKE STRINGS ---'
+          python - <<'PY'
+          import re
+          s=open('page.html','r',encoding='utf-8',errors='replace').read()
+          for x in sorted(set(re.findall(r'https?://[^"\'<> ]+|(?:books|files|download|pdf)[^"\'<> ]*',s,re.I))):
+              print(x)
+          PY
+      - name: Upload resolver page
+        uses: actions/upload-artifact@v4
+        with:
+          name: sunhua-full-url-resolver
+          path: page.html
+          retention-days: 2
+          if-no-files-found: error
