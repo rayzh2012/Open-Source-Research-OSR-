@@ -1,0 +1,36 @@
+name: Fetch Sun Hua 2000 PDF
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fetch-sunhua-2000.yml'
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PDF: sunhua_sichuan_basin_bronze_age_2000.pdf
+      URL1: https://www.ecsponline.com/yz/B5C6E125E1E0F4ACE90A44FD6235062E6000.pdf
+      URL2: https://www.proletarian.me/books/a0efb777d04fc6a3e66b18c03f36fe6a.pdf
+    steps:
+      - name: Download PDF
+        shell: bash
+        run: |
+          set -euxo pipefail
+          if ! curl -fL --retry 4 --retry-all-errors --retry-delay 3 --connect-timeout 30 --max-time 1500 -A 'Mozilla/5.0' "$URL1" -o "$PDF"; then
+            rm -f "$PDF"
+            curl -fL --retry 4 --retry-all-errors --retry-delay 3 --connect-timeout 30 --max-time 1500 -A 'Mozilla/5.0' "$URL2" -o "$PDF"
+          fi
+          test "$(head -c 5 "$PDF")" = "%PDF-"
+          file "$PDF"
+          stat -c '%n %s bytes' "$PDF"
+          sha256sum "$PDF"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sunhua-sichuan-basin-bronze-age-2000
+          path: sunhua_sichuan_basin_bronze_age_2000.pdf
+          compression-level: 0
+          retention-days: 7
