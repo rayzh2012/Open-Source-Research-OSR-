@@ -26,9 +26,14 @@ jobs:
             -A 'Mozilla/5.0' \
             "$SOURCE_URL" -o "$PDF"
           test "$(head -c 5 "$PDF")" = "%PDF-"
-          pdfinfo "$PDF" | tee PDFINFO.txt
-          PAGES=$(pdfinfo "$PDF" | awk '/^Pages:/ {print $2}')
-          test "$PAGES" -gt 350
+          python - <<'PY'
+          from pypdf import PdfReader
+          r=PdfReader("Sun_Hua_Sichuan_Basin_Bronze_Age_2000_FULL.pdf")
+          n=len(r.pages)
+          print(f"Pages: {n}")
+          open("PDFINFO.txt","w").write(f"Pages: {n}\n")
+          assert n > 350, n
+          PY
           stat -c '%s %n' "$PDF" | tee SIZE.txt
           sha256sum "$PDF" | tee SHA256SUMS.txt
 
