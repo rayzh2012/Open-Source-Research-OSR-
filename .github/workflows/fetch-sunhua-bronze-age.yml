@@ -26,6 +26,7 @@ jobs:
             -A 'Mozilla/5.0' \
             "$SOURCE_URL" -o "$PDF"
           test "$(head -c 5 "$PDF")" = "%PDF-"
+          python -m pip install --quiet pypdf
           python - <<'PY'
           from pypdf import PdfReader
           r=PdfReader("Sun_Hua_Sichuan_Basin_Bronze_Age_2000_FULL.pdf")
