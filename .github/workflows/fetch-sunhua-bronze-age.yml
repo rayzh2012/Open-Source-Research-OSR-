@@ -1,4 +1,4 @@
-name: Fetch Sun Hua Bronze Age Research Pages
+name: Resolve Sun Hua Full PDF Link
 
 on:
   push:
@@ -10,62 +10,25 @@ permissions:
   contents: read
 
 jobs:
-  fetch:
+  resolve:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      SOURCE_URL: 'https://library.proletarian.me/books/a0efb777d04fc6a3e66b18c03f36fe6a.pdf'
-      PDF: 'Sun_Hua_Sichuan_Basin_Bronze_Age_2000_FULL.pdf'
-      CHUNK: 'Sun_Hua_pp315-360_working_extract.pdf'
+    timeout-minutes: 10
     steps:
-      - name: Download and validate full PDF
+      - name: Inspect library download page
         shell: bash
         run: |
           set -euo pipefail
-          curl -fL --retry 5 --retry-all-errors --retry-delay 2 \
-            --connect-timeout 30 --max-time 1500 \
-            -A 'Mozilla/5.0' \
-            "$SOURCE_URL" -o "$PDF"
-          test "$(head -c 5 "$PDF")" = "%PDF-"
-          file "$PDF"
-          ls -lh "$PDF"
-          sha256sum "$PDF" | tee SHA256_FULL.txt
-          pdfinfo "$PDF" | tee PDFINFO.txt
-          PAGES=$(pdfinfo "$PDF" | awk '/^Pages:/ {print $2}')
-          test "$PAGES" -gt 350
-
-      - name: Extract research window and text probe
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip -q install pypdf
-          python - <<'PY'
-          from pypdf import PdfReader, PdfWriter
-          src='Sun_Hua_Sichuan_Basin_Bronze_Age_2000_FULL.pdf'
-          out='Sun_Hua_pp315-360_working_extract.pdf'
-          r=PdfReader(src)
-          w=PdfWriter()
-          for p in range(314, min(360, len(r.pages))):
-              w.add_page(r.pages[p])
-          with open(out,'wb') as f: w.write(f)
-          print('FULL_PAGES', len(r.pages), 'EXTRACT_PAGES', len(w.pages))
-          PY
-          pdfinfo "$CHUNK" | tee PDFINFO_CHUNK.txt
-          pdftotext -layout "$CHUNK" chunk_text.txt || true
-          grep -n -E '鳖灵|蜀人渊源|庸国|开明|楚庄王' chunk_text.txt | head -200 | tee TARGET_HITS.txt || true
-          ls -lh "$CHUNK" chunk_text.txt TARGET_HITS.txt
-
-      - name: Upload research extract artifact
+          URL='https://www.proletarian.me/download.php?book=%E5%9B%9B%E5%B7%9D%E7%9B%86%E5%9C%B0%E7%9A%84%E9%9D%92%E9%93%9C%E6%97%B6%E4%BB%A3&link=books%2Fa0efb777d04fc6a3e66b18c03f36fe6a.pdf'
+          curl -fL -A 'Mozilla/5.0' "$URL" -o page.html
+          echo '--- LINKS ---'
+          grep -Eo '(href|src)=["'"'][^"'"']+["'"']' page.html | head -100
+          echo '--- HASH CONTEXT ---'
+          grep -n -C 3 'a0efb777d04fc6a3e66b18c03f36fe6a' page.html || true
+          echo '--- PDF CONTEXT ---'
+          grep -n -C 3 -Ei '\\.pdf|download|books/' page.html | head -160 || true
+      - name: Upload resolver page
         uses: actions/upload-artifact@v4
         with:
-          name: sunhua-pp315-360-research-extract
-          path: |
-            Sun_Hua_pp315-360_working_extract.pdf
-            PDFINFO.txt
-            PDFINFO_CHUNK.txt
-            TARGET_HITS.txt
-            chunk_text.txt
-            SHA256_FULL.txt
-          compression-level: 0
-          retention-days: 7
-          if-no-files-found: error
+          name: sunhua-download-resolver
+          path: page.html
+          retention-days: 1
