@@ -7,7 +7,7 @@ No merging of similarly pronounced or visually similar graphemes.
 """
 import argparse,csv,hashlib,json,re,collections,datetime,pathlib,unicodedata
 
-TARGETS = ['瞍','𥈃','𥈟']  # first is main lemma, 𥈃 is attested variant; 𥈟 requires editorial review
+TARGETS = ['瞍','𥈃','𥈟']  # 瞍通行形；𥈃、𥈟见汉典/《说文》字书。按字形分列后合计
 CONTROLS = ['馊','叟','瞽','盲','眇']
 CONTEXT = 52
 
@@ -98,23 +98,22 @@ def main():
         'source_primary_url':'https://github.com/gujilab/chinese-classical-corpus/blob/main/output/corpus.jsonl',
         'primary_commit':args.commit,'primary_sha256':sha.hexdigest(),'supplementary_commit':args.supp_commit,
         'works_count':len(rr),'books_with_exact':sum(1 for r in rr if r['瞍']>0),
-        'exact_count':sum(r['瞍'] for r in rr),'variant_verified_count':sum(r['𥈃'] for r in rr),
-        'potential_variant_unverified_count':sum(r['𥈟'] for r in rr),
+        'exact_count':sum(r['瞍'] for r in rr),'variants_attested_count':sum(r['𥈃']+r['𥈟'] for r in rr),
         'han_chars':sum(r['han_chars'] for r in rr),'groups':dict(kinds),
         'coverage_warning':'仅索引语料库覆盖的作品。主库历史仅前15部正史；补充仅山海经、搜神记。不可称全二十四史、全部志怪或全部传本。',
-        'editorial_note':'瞽瞍多为舜父专名，不能作为瞍人种族出没。𥈃为已核异体；𥈟需核字书。叟/馊/瞽/盲均不自动等值。'
+        'editorial_note':'瞽瞍多为舜父专名，段玉裁主张人名应作瞽叟；不能作为瞍人种族出没。𥈃/𥈟均为可追溯字书的历史异写但保留分列；叟/馊/瞽/盲不自动等值。'
     }
     (args.out/'summary.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
     md=['# 「瞍」古籍频率 — 可复验批量搜索','',f'主版本: gujilab {args.commit[:12]}, SHA256 {sha.hexdigest()}',
        f'补充版本: hanzhaodeng {args.supp_commit[:12]}','',f'纳入作品: {len(rr)} 部；正文汉字总量: {report["han_chars"]:,}',
        f'「瞍」精确命中: {report["exact_count"]}；命中作品数: {report["books_with_exact"]}',
-       f'已确认异体「𥈃」单列: {report["variant_verified_count"]}；「𥈟」未核异写单列: {report["potential_variant_unverified_count"]}',
+       f'字书异体「𥈃」「𥈟」各自单列: {sum(r["𥈃"] for r in rr)}, {sum(r["𥈟"] for r in rr)}；三种同词形合计: {report["exact_count"] + report["variants_attested_count"]}',
        '', '| 类别 | 作品数 | 紑精确命中 | 每百万汉字 |','|---|---:|---:|---:|']
     for kind,z in sorted(kinds.items()):md.append(f'| {kind} | {z["works"]} | {z["瞍"]} | {1e6*z["瞍"]/z["han_chars"] if z["han_chars"] else 0:.2f} |')
     md.extend(['','## 命中原典（精确字）','', '| 书名 | 类别 | 「瞍」 | 每百万汉字 |','|---|---|---:|---:|'])
     for r in sorted([r for r in rr if r['瞍']>0],key=lambda x:-x['瞍']):md.append(f'| {r["book"]} | {r["category"]} | {r["瞍"]} | {r["exact_per_million_han"]} |')
     md.extend(['','## 解释边界','- 《说文》瞍：无目；但和瞽、盲、叟均有注释层面的交叉，不能凭机械字频证明不同生物族群。',
-    '- 将「瞽瞍」人名、《诗经》矇瞍礼乐，以及字书释义分别标注，不从字频反推出“无眼人”真实存在。',
+    '- 将「瞽瞍」人名、《诗经》矇瞍礼乐，以及字书释义分别标注；清代段玉裁主张舜父人名应作「瞽叟」而非「瞽瞍」，故须保留版本/释读竞争。不能从字频反推出“无眼人”真实存在。',
     '- 小体量小说/志怪只统计公开文本中已得到的数据集，必须另做更多文本扩容。','',report['coverage_warning'],'',
     '更细逐例出处见 occurrences.csv，零命中的书也在 counts_by_book.csv，便于审计“全书是否真的被读取”。'])
     (args.out/'REPORT.md').write_text('\n'.join(md)+'\n',encoding='utf8')
