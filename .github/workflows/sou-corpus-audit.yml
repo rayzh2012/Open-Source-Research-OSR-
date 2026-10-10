@@ -1,0 +1,50 @@
+name: Sou Classical Corpus Audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "25 3 1 * *"
+  push:
+    paths:
+      - "research/sou-lexical-audit/**"
+      - ".github/workflows/sou-corpus-audit.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sou-classical-corpus-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Count 瞍 in source texts only
+        run: python research/sou-lexical-audit/audit_sou.py
+      - name: Publish results as downloadable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sou-historical-lexical-audit
+          path: reports/sou/
+          if-no-files-found: error
+          retention-days: 90
+      - name: Commit versioned results
+        continue-on-error: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f reports/sou/
+          if ! git diff --cached --quiet; then
+            git commit -m "data: refresh 瞍 historical lexeme evidence and provenance"
+            git push
+          else
+            echo "No corpus changes; nothing to commit."
+          fi
