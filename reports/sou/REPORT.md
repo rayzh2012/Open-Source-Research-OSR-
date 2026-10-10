@@ -14,7 +14,7 @@
 
 瞽瞍是人名候选；瞍人另列；叟、馊不得并入瞍。
 
-详情见 contexts.csv、per_work.csv、per_genre.csv、provenance.json。
+详情见 contexts.csv、per_work.csv、per_genre.csv、provenance.json。带【】等明示括号的集解/索隐另列为 marked apparatus，无法辨明的仍属 body_or_unmarked。
 
 未覆盖的九部正史或志怪不能被报为零。
 

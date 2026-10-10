@@ -61,5 +61,5 @@
   ],
   "scope": "13 classics + first 15/24 histories + Zizhi Tongjian + Shuowen, supplemented by selected myths",
   "excluded": "last nine official histories, other editions and most fantasy texts",
-  "counting_rule": "counts text content only; overlapping witnesses not independent"
+  "counting_rule": "counts text content only; overlapping witnesses not independent; annotations inside bracket glyphs counted separately"
 }
