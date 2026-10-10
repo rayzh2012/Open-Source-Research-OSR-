@@ -1,0 +1,42 @@
+name: Ancient text character census - 瞍
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/sou-classical-frequency.yml'
+      - 'tools/sou_corpus/**'
+permissions:
+  contents: read
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout open scholarly datasets with pinned provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth=1 --filter=blob:none --sparse https://github.com/gujilab/chinese-classical-corpus.git /tmp/gujilab
+          git -C /tmp/gujilab sparse-checkout set --no-cone output/corpus.jsonl
+          git clone --depth=1 --filter=blob:none --sparse https://github.com/hanzhaodeng/chinese-ancient-text.git /tmp/ancient
+          git -C /tmp/ancient sparse-checkout set --no-cone '山海经.json' '搜神记.json'
+          test -s /tmp/gujilab/output/corpus.jsonl
+          test -s /tmp/ancient/山海经.json
+          test -s /tmp/ancient/搜神记.json
+          echo "PRIMARY_SHA=$(git -C /tmp/gujilab rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "EXTRA_SHA=$(git -C /tmp/ancient rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Scan all records (exact form and variants separately)
+        run: |
+          python3 tools/sou_corpus/scan.py \
+            --primary /tmp/gujilab/output/corpus.jsonl \
+            --extras-dir /tmp/ancient \
+            --commit "$PRIMARY_SHA" --supp-commit "$EXTRA_SHA" \
+            --out reports/sou
+          cat reports/sou/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload raw auditable tables
+        uses: actions/upload-artifact@v4
+        with:
+          name: sou-ancient-text-census
+          path: reports/sou/
+          retention-days: 90
