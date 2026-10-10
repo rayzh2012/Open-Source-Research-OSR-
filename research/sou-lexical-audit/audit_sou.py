@@ -13,7 +13,7 @@ MAIN=BASE+'/gujilab/chinese-classical-corpus/main/output/corpus.jsonl'
 SECOND=['山海经','搜神记','神异经','列仙传','博物志','搜神后记','淮南子','庄子','列子']
 HIST=set('史记 汉书 后汉书 三国志 晋书 宋书 南齐书 梁书 陈书 魏书 北齐书 周书 南史 北史 隋书 资治通鉴'.split())
 CLASSICS=set('大学 中庸 论语 孟子 诗经 尚书 礼记 周易 春秋左传 春秋公羊传 春秋穀梁传 孝经 尔雅'.split())
-TERMS=['瞍','瞽瞍','矇瞍','蒙瞍','瞍人','瞽叟','馊','叟','瞽']
+TERMS=['瞍','瞽瞍','矇瞍','蒙瞍','瞍人','朦瞍','瞽叟','馊','叟','瞽','𥈃','𥈟']
 stats=defaultdict(lambda:{'chars':0,'segments':0,'words':Counter(),'roles':Counter()})
 rows=[]; provenance=[]; unavailable=[]
 def download(url,path,required=False):
@@ -44,7 +44,7 @@ def genre(book,secondary=False):
 def label(text,pos):
  prev=text[max(0,pos-1):pos]
  if prev=='瞽':return 'NAME_GUSOU'
- if prev in ('矇','蒙'):return 'RITUAL_MUSIC'
+ if prev in ('矇','蒙','朦'):return 'RITUAL_MUSIC'
  if text[pos:pos+2]=='瞍人':return 'EXPLICIT_SOU_REN'
  if text[pos:pos+2] in ('瞍赋','瞍賦','瞍奏','瞍工','瞍诵','瞍誦'):return 'RITUAL_MUSIC'
  return 'UNRESOLVED'
