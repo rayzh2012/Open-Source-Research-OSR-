@@ -1,0 +1,60 @@
+{
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/gujilab/chinese-classical-corpus/main/output/corpus.jsonl",
+      "bytes": 53918993,
+      "sha256": "41f2b6105754dc1f384ecc5c3805cfca85be355f0d6314b855ebd4747f225381",
+      "status": "ok"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/山海经.json",
+      "status": "'ascii' codec can't encode characters in position 45-47: ordinal not in range(128)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/搜神记.json",
+      "status": "'ascii' codec can't encode characters in position 45-47: ordinal not in range(128)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/神异经.json",
+      "status": "'ascii' codec can't encode characters in position 45-47: ordinal not in range(128)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/列仙传.json",
+      "status": "'ascii' codec can't encode characters in position 45-47: ordinal not in range(128)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/博物志.json",
+      "status": "'ascii' codec can't encode characters in position 45-47: ordinal not in range(128)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/搜神后记.json",
+      "status": "'ascii' codec can't encode characters in position 45-48: ordinal not in range(128)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/淮南子.json",
+      "status": "'ascii' codec can't encode characters in position 45-47: ordinal not in range(128)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/庄子.json",
+      "status": "'ascii' codec can't encode characters in position 45-46: ordinal not in range(128)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/列子.json",
+      "status": "'ascii' codec can't encode characters in position 45-46: ordinal not in range(128)"
+    }
+  ],
+  "missing": [
+    "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/山海经.json",
+    "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/搜神记.json",
+    "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/神异经.json",
+    "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/列仙传.json",
+    "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/博物志.json",
+    "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/搜神后记.json",
+    "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/淮南子.json",
+    "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/庄子.json",
+    "https://raw.githubusercontent.com/hanzhaodeng/chinese-ancient-text/master/列子.json"
+  ],
+  "scope": "13 classics + first 15/24 histories + Zizhi Tongjian + Shuowen, supplemented by selected myths",
+  "excluded": "last nine official histories, other editions and most fantasy texts",
+  "counting_rule": "counts text content only; overlapping witnesses not independent"
+}
