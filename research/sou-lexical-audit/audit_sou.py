@@ -3,6 +3,7 @@
 import csv, hashlib, json, re, time
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
+from urllib.parse import quote
 from pathlib import Path
 from collections import defaultdict, Counter
 ROOT=Path('research/sou-lexical-audit')
@@ -68,7 +69,7 @@ with p.open(encoding='utf-8-sig') as f:
         str(d.get('id') or ln),t)
 for book in SECOND:
  path=CACHE/(book+'.json')
- url=BASE+'/hanzhaodeng/chinese-ancient-text/master/'+book+'.json'
+ url=BASE+'/hanzhaodeng/chinese-ancient-text/master/'+quote(book,safe='')+'.json'
  if not download(url,path):continue
  try:items=json.loads(path.read_text(encoding='utf-8-sig')).get('articles',[])
  except ValueError as exc:
