@@ -49,14 +49,20 @@ def label(text,pos):
  if text[pos:pos+2]=='瞍人':return 'EXPLICIT_SOU_REN'
  if text[pos:pos+2] in ('瞍赋','瞍賦','瞍奏','瞍工','瞍诵','瞍誦'):return 'RITUAL_MUSIC'
  return 'UNRESOLVED'
+def bracket_layer(text,pos):
+ # Mark only clearly-delimited commentarial passages, not unmarked quotations.
+ for left,right in [('【','】'),('〔','〕'),('〈','〉')]:
+  if text.rfind(left,0,pos)>text.rfind(right,0,pos):
+   return 'MARKED_APPARATUS'
+ return 'BODY_OR_UNMARKED'
 def scan(book,edition,chapter,segment,text,secondary=False):
  key=(edition,genre(book,secondary),book); s=stats[key]
  s['segments']+=1;s['chars']+=len(text)
  for term in TERMS:s['words'][term]+=text.count(term)
  for hit in re.finditer('瞍',text):
-  i=hit.start(); tag=label(text,i);s['roles'][tag]+=1
+  i=hit.start(); tag=label(text,i);layer=bracket_layer(text,i);s['roles'][tag]+=1;s['roles'][layer]+=1
   rows.append({'corpus':edition,'genre':key[1],'book':book,'chapter':chapter,'segment':segment,
-   'offset':i,'role_auto':tag,'context':text[max(0,i-50):i+51].replace('\n',' ')})
+   'offset':i,'role_auto':tag,'text_layer':layer,'context':text[max(0,i-50):i+51].replace('\n',' ')})
 p=CACHE/'main.jsonl'
 download(MAIN,p,required=True)
 with p.open(encoding='utf-8-sig') as f:
@@ -82,37 +88,37 @@ for book in SECOND:
    if isinstance(t,str):scan(book,'hanzhaodeng',str(article.get('title') or ''),
                             str(i)+'/'+str(j),t,True)
 fields=['corpus','genre','book','chars','segments']+TERMS+['per_million',
-        'NAME_GUSOU','RITUAL_MUSIC','EXPLICIT_SOU_REN','UNRESOLVED']
+        'NAME_GUSOU','RITUAL_MUSIC','EXPLICIT_SOU_REN','UNRESOLVED','MARKED_APPARATUS','BODY_OR_UNMARKED']
 with (OUT/'per_work.csv').open('w',encoding='utf-8-sig',newline='') as f:
  w=csv.DictWriter(f,fieldnames=fields);w.writeheader()
  for (edition,cat,book),s in sorted(stats.items()):
   d={'corpus':edition,'genre':cat,'book':book,'chars':s['chars'],
      'segments':s['segments'],'per_million':round(1e6*s['words']['瞍']/s['chars'],4) if s['chars'] else 0}
   d.update({term:s['words'][term] for term in TERMS})
-  d.update({term:s['roles'][term] for term in fields[-4:]})
+  d.update({term:s['roles'][term] for term in fields[-6:]})
   w.writerow(d)
 with (OUT/'contexts.csv').open('w',encoding='utf-8-sig',newline='') as f:
- cols=['corpus','genre','book','chapter','segment','offset','role_auto','context']
+ cols=['corpus','genre','book','chapter','segment','offset','role_auto','text_layer','context']
  w=csv.DictWriter(f,fieldnames=cols);w.writeheader();w.writerows(rows)
 group=defaultdict(Counter)
 for (ed,cat,b),s in stats.items():
  g=group[(ed,cat)];g['chars']+=s['chars'];g['segments']+=s['segments']
  g['sou']+=s['words']['瞍'];g['name']+=s['roles']['NAME_GUSOU']
- g['ritual']+=s['roles']['RITUAL_MUSIC'];g['explicit']+=s['roles']['EXPLICIT_SOU_REN']
+ g['ritual']+=s['roles']['RITUAL_MUSIC'];g['explicit']+=s['roles']['EXPLICIT_SOU_REN'];g['apparatus']+=s['roles']['MARKED_APPARATUS'];g['body']+=s['roles']['BODY_OR_UNMARKED']
 with (OUT/'per_genre.csv').open('w',encoding='utf-8-sig',newline='') as f:
- w=csv.writer(f);w.writerow(['corpus','genre','chars','segments','瞍','per_million','name','ritual','literal_瞍人'])
+ w=csv.writer(f);w.writerow(['corpus','genre','chars','segments','瞍','per_million','name','ritual','literal_瞍人','marked_commentary','body_or_unmarked'])
  for (ed,cat),d in sorted(group.items()):
   w.writerow([ed,cat,d['chars'],d['segments'],d['sou'],
-   round(1e6*d['sou']/d['chars'],4) if d['chars'] else 0,d['name'],d['ritual'],d['explicit']])
+   round(1e6*d['sou']/d['chars'],4) if d['chars'] else 0,d['name'],d['ritual'],d['explicit'],d['apparatus'],d['body']])
 (OUT/'provenance.json').write_text(json.dumps({'sources':provenance,'missing':unavailable,
  'scope':'13 classics + first 15/24 histories + Zizhi Tongjian + Shuowen, supplemented by selected myths',
  'excluded':'last nine official histories, other editions and most fantasy texts',
- 'counting_rule':'counts text content only; overlapping witnesses not independent'},ensure_ascii=False,indent=2),encoding='utf8')
+ 'counting_rule':'counts text content only; overlapping witnesses not independent; annotations inside bracket glyphs counted separately'},ensure_ascii=False,indent=2),encoding='utf8')
 rank=sorted([(b,ed,cat,s['words']['瞍']) for (ed,cat,b),s in stats.items() if s['words']['瞍']],key=lambda x:-x[3])
 lines=['# 瞍字古籍频率审计','','仅为电子传本的字频，绝不等于独立古史证据或「瞍人」存在证据。','','| 书名 | 语料库 | 类别 | 瞍次数 |','|---|---|---|---:|']
 lines.extend('| '+b+' | '+ed+' | '+cat+' | '+str(n)+' |' for b,ed,cat,n in rank)
 lines+=['','瞽瞍是人名候选；瞍人另列；叟、馊不得并入瞍。','',
- '详情见 contexts.csv、per_work.csv、per_genre.csv、provenance.json。','',
+ '详情见 contexts.csv、per_work.csv、per_genre.csv、provenance.json。带【】等明示括号的集解/索隐另列为 marked apparatus，无法辨明的仍属 body_or_unmarked。','',
  '未覆盖的九部正史或志怪不能被报为零。','',
  '总精确字频（跨不同版本可能重复）：'+str(len(rows))]
 (OUT/'REPORT.md').write_text('\n'.join(lines)+'\n',encoding='utf8')
