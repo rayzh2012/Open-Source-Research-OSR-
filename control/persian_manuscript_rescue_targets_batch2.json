@@ -1,0 +1,18 @@
+{
+  "schema_version":"osr-persian-manuscript-rescue-targets-v1",
+  "destination_root":"龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/manuscripts",
+  "items":[
+    {"id":"kashmiri_hindu_persian_sharada_cc0","ia_id":"KashmiriHinduPersianManuscriptInterspersedWithSharadaEGangotriDigitalTrust","title":"Kashmiri Hindu Persian Manuscript Interspersed With Sharada","date":null,"license":"CC0 1.0","licenseurl":"http://creativecommons.org/publicdomain/zero/1.0/","collection":"eGangotri / Internet Archive"},
+    {"id":"kachkol_namah_sufism_cc0","ia_id":"Kachkol-namah-ARarePersianManuscriptOfSufism","title":"Kachkol-namah - A rare Persian manuscript of Sufism","date":null,"license":"CC0 1.0","licenseurl":"http://creativecommons.org/publicdomain/zero/1.0/","collection":"Internet Archive"},
+    {"id":"aain_e_akbari_persian_cc0","ia_id":"sdzn_aain-e-akbari-abul-fazl-allami-mughal-history-persian-manuscript-sarvanand-koul-premi","title":"Aain-e-Akbari Persian Manuscript","date":null,"license":"CC0 1.0","licenseurl":"https://creativecommons.org/publicdomain/zero/1.0/","collection":"Sarvanand Koul Premi / Internet Archive"},
+    {"id":"omnameh_srinagar_1896_cc0","ia_id":"OmnamehAndOtherTextsManuscriptFromSrinagar1896PersianManuscript","title":"Omnameh and Other Texts Manuscript from Srinagar 1896","date":"1896","license":"CC0 1.0","licenseurl":"http://creativecommons.org/publicdomain/zero/1.0/","collection":"eGangotri / Internet Archive"},
+    {"id":"diwan_hafiz_kashi_nath_pandita_cc0","ia_id":"diwanehafizshirazpersianmanuscriptfromresidenceofshrikashinathpanditajammu","title":"Diwan-e-Hafiz Shiraz Persian Manuscript","date":null,"license":"CC0 1.0","licenseurl":"http://creativecommons.org/publicdomain/zero/1.0/","collection":"Kashi Nath Pandita / Internet Archive"},
+    {"id":"mujmua_tawareekh_kashmir_cc0","ia_id":"BKDc_mujmua-tawareek-history-of-kashmir-persian-manuscript-pandit-birbal-kachroo-peer","title":"Mujmua Tawareekh History of Kashmir Persian Manuscript","date":null,"license":"CC0 1.0","licenseurl":"https://creativecommons.org/publicdomain/zero/1.0/","collection":"Peerzada Muhammad Ashraf Collection / Internet Archive"},
+    {"id":"gulistan_saadi_egangotri_cc0","ia_id":"GulistaanBySaadiNumberedWithPencilsPersianManuscript","title":"Gulistan by Saadi Persian Manuscript","date":null,"license":"CC0 1.0","licenseurl":"http://creativecommons.org/publicdomain/zero/1.0/","collection":"eGangotri / Internet Archive"}
+  ],
+  "quarantine":[
+    {"ia_id":"Maslak-ul-akhyar-PersianManuscript","reason":"CC BY-NC-ND 3.0; no-derivatives policy review required."},
+    {"ia_id":"fawaid-ul-fuwad-of-khwaja-hasan-sajzi-1685-persian-manuscript","reason":"No explicit license URL in IA metadata."},
+    {"ia_id":"shamail-ul-atqiya-wa-fazail-e-auliya-shamail-ul-atqiya-wa-zail-ul-atqiya-persian","reason":"No explicit license URL in IA metadata."}
+  ]
+}

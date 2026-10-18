@@ -1,0 +1,63 @@
+name: Wikisource Dump Discovery
+
+on:
+  push:
+    branches:
+      - stage2-direct-miner-v3-1
+    paths:
+      - '.github/workflows/wikisource-discovery.yml'
+      - 'control/wikisource_discover.py'
+      - 'control/wikisource_ingest_targets.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wikisource-dump-discovery
+  cancel-in-progress: true
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build latest complete Wikisource dump manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          python control/wikisource_discover.py \
+            --targets control/wikisource_ingest_targets.json \
+            --output /tmp/wikisource_discovery_manifest.json
+      - name: Commit discovery manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'osr-wikisource-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git fetch origin stage2-direct-miner-v3-1
+          git reset --hard origin/stage2-direct-miner-v3-1
+          cp /tmp/wikisource_discovery_manifest.json control/wikisource_discovery_manifest.json
+          git add control/wikisource_discovery_manifest.json
+          if git diff --cached --quiet; then
+            echo 'Discovery manifest unchanged.'
+            exit 0
+          fi
+          git commit -m 'wikisource: refresh discovery manifest [skip ci]'
+          for n in 1 2 3 4 5; do
+            if git push origin HEAD:stage2-direct-miner-v3-1; then
+              exit 0
+            fi
+            sleep $((n*3))
+            git fetch origin stage2-direct-miner-v3-1
+            git rebase origin/stage2-direct-miner-v3-1
+          done
+          exit 1

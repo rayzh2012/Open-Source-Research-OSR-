@@ -1,0 +1,43 @@
+name: Gallica Persian Rights Probe
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/gallica-persian-rights-probe.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rights:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Query Gallica Categories facets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import urllib.parse, urllib.request, json
+          q='((dc.language all "per") or (dc.language all "fas")) and (dc.type all "manuscrit")'
+          url='https://gallica.bnf.fr/services/Categories?'+urllib.parse.urlencode({'SRU':q}, quote_via=urllib.parse.quote)
+          # Categories returns JSON but currently rejects an explicit application/json Accept header.
+          req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 (compatible; OSR-Preservation/1.0)'})
+          with urllib.request.urlopen(req,timeout=90) as r:
+              data=r.read(); ctype=r.headers.get('content-type','')
+          print('HTTP_BYTES='+str(len(data)))
+          print('CONTENT_TYPE='+ctype)
+          obj=json.loads(data.decode('utf-8-sig'))
+          def walk(x,path=''):
+              if isinstance(x,dict):
+                  for k,v in x.items():
+                      p=f'{path}.{k}' if path else str(k)
+                      if str(k).lower() in {'provenance','free_access','typedoc','language','nqamoyen'}:
+                          print('FACET '+p+'='+json.dumps(v,ensure_ascii=False,sort_keys=True))
+                      walk(v,p)
+              elif isinstance(x,list):
+                  for i,v in enumerate(x): walk(v,f'{path}[{i}]')
+          walk(obj)
+          print('FULL_JSON='+json.dumps(obj,ensure_ascii=False,sort_keys=True))
+          PY

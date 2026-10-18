@@ -1,0 +1,6 @@
+{
+  "id": 1,
+  "action": "QUICKWIT_PILOT",
+  "purpose": "Measure Chinese full-text index size ratio, ingest throughput, and phrase-search latency on representative Literature-zh and ChineseWebText2.0-HQ parquet shards before full 508GB backfill.",
+  "requested_at": "2026-08-22T03:31:00-04:00"
+}

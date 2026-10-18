@@ -1,0 +1,82 @@
+name: Wellcome Pre-1700 Small-Manuscript Tranche
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - 'control/wellcome_pre1700_small_tranche_request.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wellcome-pre1700-small-tranche
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - id: plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          p=json.load(open('control/wellcome_pre1700_small_tranche_request.json'))
+          assert p['mode'] in {'small_tranche','failed_tail_retry'}
+          ids=p['work_ids']
+          assert len(ids)==p['expected_items']==len(set(ids))
+          print('matrix='+json.dumps({'work_id':ids},separators=(',',':')))
+          PY
+
+  rescue:
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 19
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure preservation environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Preserve complete small manuscript
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p result
+          set -o pipefail
+          python control/wellcome_pre1700_full_item_worker.py \
+            --work-id "${{ matrix.work_id }}" \
+            --work-dir "/tmp/wellcome-${{ matrix.work_id }}" \
+            2>&1 | tee "result/${{ matrix.work_id }}.log"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wellcome-small-${{ matrix.work_id }}-${{ github.run_id }}
+          path: result/
+          retention-days: 30
+          if-no-files-found: warn

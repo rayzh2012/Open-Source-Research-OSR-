@@ -1,0 +1,60 @@
+name: OSR Research Package Repair
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/research_package_repair_request.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: osr-research-package-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate repair target — compact only
+        shell: python
+        run: |
+          import json
+          req=json.load(open('control/research_package_repair_request.json',encoding='utf-8'))
+          cur=json.load(open('control/m5_exact_evidence_summary.json',encoding='utf-8'))
+          if req.get('run_id') != cur.get('run_id'):
+              raise SystemExit(f"repair target mismatch: request={req.get('run_id')} current={cur.get('run_id')}")
+          print({'status':'DRY_RUN_PASS','run_id':cur.get('run_id'),'raw_corpus_download':False})
+      - name: Rebuild analyzer from compact exact evidence
+        run: python tools/osr_m5_evidence_analyzer.py
+      - name: Rebuild corrected quality audit
+        run: python tools/osr_m5_evidence_quality_audit.py
+      - name: Rebuild source chronology audit
+        run: python tools/osr_m5_source_chronology_audit.py
+      - name: Rebuild local-only graph
+        run: python tools/osr_m6_graph_prep.py
+      - name: Build and optionally send Notion payload
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID }}
+        run: python tools/osr_notion_writeback.py
+      - name: Archive and validate complete package
+        run: python tools/osr_archive_research_package.py
+      - name: Commit repaired compact package
+        run: |
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/m5_evidence_analysis.json control/m5_evidence_quality_audit.json control/m5_source_chronology_audit.json control/m6_graph_prep.json control/notion_writeback_latest.json control/research_runs/
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: repair complete archived package'
+          git pull --rebase origin stage2-direct-miner-v3-1
+          git push origin HEAD:stage2-direct-miner-v3-1

@@ -1,0 +1,28 @@
+name: Gallica Persian Rights Audit
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/gallica-persian-rights-audit.yml','control/gallica_persian_rights_audit.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - name: Configure Drive
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+      - name: Audit fixed BnF worklist
+        shell: bash
+        run: python control/gallica_persian_rights_audit.py

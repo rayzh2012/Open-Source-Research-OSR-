@@ -1,0 +1,59 @@
+name: LOC Persian Targeted Retry
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - '.github/workflows/loc-persian-targeted-retry.yml'
+      - 'control/loc_persian_targeted_retry.py'
+      - 'control/loc_persian_targeted_retry_request.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  retry:
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        item_id: ['2015481463','2016397783','2016496951']
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure preservation environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Retry ${{ matrix.item_id }}
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p result
+          python control/loc_persian_targeted_retry.py \
+            --item-id '${{ matrix.item_id }}' \
+            --work-dir "/tmp/loc-target-${{ matrix.item_id }}" \
+            2>&1 | tee "result/${{ matrix.item_id }}.log"
+      - name: Save targeted recovery log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: loc-persian-target-${{ matrix.item_id }}-${{ github.run_id }}
+          path: result/
+          retention-days: 14
+          if-no-files-found: warn

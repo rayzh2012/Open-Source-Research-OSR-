@@ -1,0 +1,115 @@
+{
+  "status": "PASS",
+  "engine": "Quickwit/Tantivy pilot",
+  "quickwit_image": "quickwit/quickwit:0.9.0",
+  "tokenizer": "chinese_compatible + positions",
+  "text_stored": false,
+  "locator_fields_stored": [
+    "corpus",
+    "shard",
+    "row",
+    "chunk",
+    "row_hash"
+  ],
+  "chunk_chars": 8192,
+  "chunk_overlap": 128,
+  "sources": [
+    {
+      "corpus": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00233-of-00233.parquet",
+      "download_bytes": 80314697,
+      "download_seconds": 2.306,
+      "download_mib_s": 33.209,
+      "sha256": "d452713dfc7fecf65e713541a5c85c2f772f51e46b5cd3d6bb34b0aff3b6693e",
+      "text_column": "text",
+      "rows_sampled": 3000,
+      "chunks_indexed": 3513,
+      "text_bytes": 42855271,
+      "sample_phrase": "磕头的平",
+      "sample_locator": {
+        "row": 0,
+        "row_hash": "f45902801a4bc56e40028ff9470bc831743e73e12ee9dbbae5f24b1f19420a44"
+      },
+      "parquet_rows": 9660,
+      "row_groups": 1
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "file": "data/CASIA-LM_ChineseWebText2.0_partial-001554.parquet",
+      "download_bytes": 233887256,
+      "download_seconds": 6.977,
+      "download_mib_s": 31.969,
+      "sha256": "7413ab08278b34d41c2ac12767992d8195ef39aa22be3ef1db8e35a035b12f41",
+      "text_column": "text",
+      "rows_sampled": 3000,
+      "chunks_indexed": 3023,
+      "text_bytes": 10334264,
+      "sample_phrase": "那是一个",
+      "sample_locator": {
+        "row": 0,
+        "row_hash": "d8fd7c579d5c840fd27024e4500e8bc29015fcbfe0d55a5ece5b1dfa5f5b5302"
+      },
+      "parquet_rows": 93566,
+      "row_groups": 1
+    }
+  ],
+  "sampled_text_bytes": 53189535,
+  "ndjson_bytes": 54591588,
+  "index_data_bytes": 327465051,
+  "index_to_sampled_text_ratio": 6.1566,
+  "ingest_seconds": 14.41,
+  "ingest_mib_s_on_sampled_text": 3.52,
+  "queries": [
+    {
+      "corpus": "Literature-zh",
+      "phrase": "磕头的平",
+      "num_hits": 1,
+      "elapsed_ms": 7.492,
+      "hits": [
+        {
+          "chunk": 0,
+          "corpus": "Literature-zh",
+          "row": 0,
+          "row_hash": "f45902801a4bc56e40028ff9470bc831743e73e12ee9dbbae5f24b1f19420a44",
+          "shard": "source-0.parquet"
+        }
+      ]
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "phrase": "那是一个",
+      "num_hits": 7,
+      "elapsed_ms": 6.207,
+      "hits": [
+        {
+          "chunk": 0,
+          "corpus": "ChineseWebText2.0-HighQuality",
+          "row": 1623,
+          "row_hash": "69c8533fea05ed78a6236eb43df38a7aab4f226446796d3bef28b1d92dae7eb6",
+          "shard": "source-1.parquet"
+        },
+        {
+          "chunk": 0,
+          "corpus": "ChineseWebText2.0-HighQuality",
+          "row": 392,
+          "row_hash": "d48677715a9b135bb5a1601ae1f149ca1b28efb3e5cda356f58cb35133a61276",
+          "shard": "source-1.parquet"
+        },
+        {
+          "chunk": 0,
+          "corpus": "ChineseWebText2.0-HighQuality",
+          "row": 0,
+          "row_hash": "d8fd7c579d5c840fd27024e4500e8bc29015fcbfe0d55a5ece5b1dfa5f5b5302",
+          "shard": "source-1.parquet"
+        }
+      ]
+    }
+  ],
+  "total_seconds": 29.814,
+  "runner": "GitHub Actions 1000003431",
+  "github_run_id": "32559988422",
+  "github_sha": "fefa2215d769c54c8386bce2ab1efe3d607420b4",
+  "decision_note": "Pilot only. Full 508GB backfill requires durable object/index storage; do not persist the full index in GitHub artifacts."
+}

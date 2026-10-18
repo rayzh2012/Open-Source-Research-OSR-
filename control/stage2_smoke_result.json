@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "source": "Geralt-Targaryen/Literature-zh",
+  "file": "literature_zh-00233-of-00233.parquet",
+  "bytes": 80314697,
+  "download_seconds": 1.837,
+  "download_mib_s": 41.698,
+  "sha256": "d452713dfc7fecf65e713541a5c85c2f772f51e46b5cd3d6bb34b0aff3b6693e",
+  "rows": 9660,
+  "row_groups": 1,
+  "text_columns": [
+    "text"
+  ],
+  "footer_seconds": 0.00068,
+  "sample": {
+    "column": "text",
+    "row": 0,
+    "chars": 17952,
+    "sha256": "f45902801a4bc56e40028ff9470bc831743e73e12ee9dbbae5f24b1f19420a44"
+  },
+  "runner": "GitHub Actions 1000003430",
+  "github_run_id": "32559403037",
+  "github_sha": "299b9e3066f6adc87c9f05e79d729b605f433e0b"
+}

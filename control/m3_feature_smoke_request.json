@@ -1,0 +1,7 @@
+{
+  "id": 1,
+  "action": "M3_FEATURE_SMOKE",
+  "run_id": "m3-feature-smoke-001",
+  "scope": "last parquet shard from each of the two canonical public corpora",
+  "purpose": "Validate compact research-feature extraction quality, provenance, and result expansion before any full-corpus M3 scale-out."
+}

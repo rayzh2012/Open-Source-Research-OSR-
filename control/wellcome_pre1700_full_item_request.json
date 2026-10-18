@@ -1,0 +1,16 @@
+{
+  "schema_version": "osr-wellcome-pre1700-full-item-request-v1",
+  "request_id": "wellcome-pre1700-registry-and-full-item-smoke-001",
+  "mode": "full_item_smoke",
+  "requested_at": "2026-08-28T03:24:00Z",
+  "smoke_work_id": "v3vxt8j9",
+  "expected_smoke_pages": 25,
+  "purpose": "Build the durable item-level rights-qualified pre-1700 PDM/open registry, then preserve all 25 IIIF pages of the Johnson Papyrus as a bounded full-item smoke with hashes, provenance, canonical Google Drive writes, and exact Drive readback before any full-corpus expansion.",
+  "constraints": {
+    "rights": "Per-item Public Domain Mark (license id=pdm) and open-access location are both required and rechecked at retrieval time.",
+    "retrieval": "Anonymous official Wellcome Catalogue API and IIIF only; never bypass login, CAPTCHA, paywall, robots, rate limits, or access controls.",
+    "compute": "Standard GitHub-hosted ubuntu-latest only; no paid, larger, GPU, VM, Colab, Replit agent, or external paid API.",
+    "preservation": "Save raw metadata and manifest, every intended IIIF page, per-file SHA256/MD5, page index, resumable checkpoint, COMPLETE marker, and exact Google Drive size/MD5/JSON readback.",
+    "scaling": "Do not launch a full-corpus rescue until this bounded full-item smoke passes end to end."
+  }
+}

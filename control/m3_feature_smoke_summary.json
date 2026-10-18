@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "files": 2,
+  "raw_bytes_downloaded": 314201953,
+  "feature_result_bytes": 36677,
+  "compression_ratio_vs_raw": 0.00011673,
+  "sources": [
+    {
+      "source": "Literature-zh",
+      "file": "literature_zh-00233-of-00233.parquet",
+      "rows": 9660,
+      "chars": 49150442,
+      "scan_seconds": 10.067,
+      "entity_terms": 30,
+      "cooccurrence_pairs": 100,
+      "motifs": 6,
+      "temporal_hints": 100,
+      "place_hints": 100
+    },
+    {
+      "source": "ChineseWebText2.0-HighQuality",
+      "file": "data/CASIA-LM_ChineseWebText2.0_partial-001554.parquet",
+      "rows": 93566,
+      "chars": 123313084,
+      "scan_seconds": 26.256,
+      "entity_terms": 32,
+      "cooccurrence_pairs": 100,
+      "motifs": 6,
+      "temporal_hints": 100,
+      "place_hints": 100
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+name: LOC Persian Manuscript PDF Rescue
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - '.github/workflows/loc-persian-pdf-rescue.yml'
+      - 'control/loc_persian_pdf_rescue_worker.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: loc-persian-pdf-rescue
+  cancel-in-progress: false
+
+jobs:
+  auth:
+    runs-on: ubuntu-latest
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - run: test -n "${RCLONE_CONFIG_B64:-}" || { echo '::error::Missing RCLONE_CONFIG_B64'; exit 42; }
+
+  rescue:
+    needs: auth
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        partition: [0,1,2,3,4,5,6,7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure preservation environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Rescue partition ${{ matrix.partition }}
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p result
+          python control/loc_persian_pdf_rescue_worker.py \
+            --partition '${{ matrix.partition }}' \
+            --partitions 8 \
+            --work-dir "/tmp/loc-persian-${{ matrix.partition }}" \
+            2>&1 | tee "result/partition-${{ matrix.partition }}.log"
+      - name: Save recovery log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: loc-persian-pdf-${{ matrix.partition }}-${{ github.run_id }}
+          path: result/
+          retention-days: 14
+          if-no-files-found: warn

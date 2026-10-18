@@ -1,0 +1,14 @@
+{
+  "schema_version": "osr-persian-catalogue-rescue-v1",
+  "destination_root": "龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/reference_catalogues",
+  "items": [
+    {"id":"king_of_oudh_sprenger_1854","title":"A catalogue of the Arabic, Persian and Hindustany manuscripts of the libraries of the King of Oudh","year":1854,"ia_id":"catalogueofarabi01spreuoft","rights":"1854 publication","source_note":"Internet Archive scan; preserve IA metadata and provenance."},
+    {"id":"royal_asiatic_society_morley_1854","title":"A descriptive catalogue of the historical manuscripts in the Arabic and Persian languages","year":1854,"ia_id":"adescriptivecat00irelgoog","rights":"1854 publication","source_note":"Internet Archive scan; preserve IA metadata and provenance."},
+    {"id":"mulla_firuz_rehatsek_1873","title":"Catalogue Raisonne of the Arabic, Hindostani, Persian, and Turkish manuscripts in the Mulla Firuz Library","year":1873,"ia_id":"catalogueraison00rehagoog","rights":"1873 publication","source_note":"Internet Archive scan; preserve IA metadata and provenance."},
+    {"id":"bodleian_sachau_ethe_v1_1889","title":"Catalogue of the Persian, Turkish, Hindustani and Pushtu manuscripts in the Bodleian Library, vol. 1","year":1889,"ia_id":"catalogueofpersi01bodluoft","rights":"1889 publication","source_note":"Internet Archive scan; preserve IA metadata and provenance."},
+    {"id":"bodleian_sachau_ethe_v3_1889","title":"Catalogue of the Persian, Turkish, Hindustani and Pushtu manuscripts in the Bodleian Library, vol. 3","year":1889,"ia_id":"catalogueofpersi03bodluoft","rights":"1889 publication","source_note":"Internet Archive scan; preserve IA metadata and provenance."},
+    {"id":"asiatic_society_bengal_ashraf_ali_1890","title":"A catalogue of the Persian books and manuscripts in the Library of the Asiatic Society of Bengal","year":1890,"ia_id":"catalogueofpersi00asiauoft","rights":"1890 publication","source_note":"Internet Archive scan; preserve IA metadata and provenance."},
+    {"id":"india_office_ross_browne_1902","title":"Catalogue of two collections of Persian and Arabic manuscripts preserved in the India Office Library","year":1902,"ia_id":"catalogueoftwoco00greauoft","rights":"1902 publication","source_note":"Internet Archive scan; preserve IA metadata and provenance."},
+    {"id":"calcutta_madrasah_ahmad_1905","title":"Catalogue of the Arabic and Persian manuscripts in the library of the Calcutta Madrasah","year":1905,"ia_id":"catalogueofarabi00ahma","rights":"1905 publication","source_note":"Internet Archive scan; preserve IA metadata and provenance."}
+  ]
+}

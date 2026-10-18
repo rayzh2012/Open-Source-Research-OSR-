@@ -1,0 +1,61 @@
+name: Persian Manuscript Licensed Discovery v1
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/persian-manuscript-licensed-discovery-v1.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Discover explicitly reusable Persian manuscript objects on IA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,urllib.parse,urllib.request
+          licenses=[
+            'http://creativecommons.org/publicdomain/zero/1.0/',
+            'https://creativecommons.org/publicdomain/zero/1.0/',
+            'http://creativecommons.org/publicdomain/mark/1.0/',
+            'https://creativecommons.org/publicdomain/mark/1.0/',
+            'http://creativecommons.org/licenses/by-nc/4.0/',
+            'https://creativecommons.org/licenses/by-nc/4.0/'
+          ]
+          textq='(title:(persian AND manuscript*) OR description:(persian AND manuscript*) OR subject:(persian AND manuscript*)) AND mediatype:texts'
+          allrows={}
+          for lic in licenses:
+            q=f'({textq}) AND licenseurl:"{lic}"'
+            params=urllib.parse.urlencode({'q':q,'fl[]':['identifier','title','date','creator','licenseurl','collection','description'],'rows':200,'page':1,'output':'json','sort[]':'downloads desc'},doseq=True)
+            req=urllib.request.Request('https://archive.org/advancedsearch.php?'+params,headers={'User-Agent':'OSR-Preservation/1.0'})
+            try:
+              with urllib.request.urlopen(req,timeout=120) as r:o=json.load(r)
+            except Exception as e:
+              print('QUERY_ERROR',lic,repr(e)); continue
+            for d in o.get('response',{}).get('docs',[]):
+              iid=d.get('identifier')
+              if iid: allrows[iid]=d
+          rows=[]
+          for iid,d in allrows.items():
+            req=urllib.request.Request('https://archive.org/metadata/'+iid,headers={'User-Agent':'OSR-Preservation/1.0'})
+            try:
+              with urllib.request.urlopen(req,timeout=90) as r:o=json.load(r)
+            except Exception as e:
+              continue
+            m=o.get('metadata') or {}; originals=[]; total=0
+            for f in o.get('files',[]):
+              n=f.get('name','');src=f.get('source');size=int(f.get('size') or 0);fmt=f.get('format','')
+              if src=='original' and n.lower().endswith(('.pdf','.tif','.tiff','.jpg','.jpeg','.jp2.zip')):
+                originals.append({'name':n,'format':fmt,'size':size,'md5':f.get('md5'),'sha1':f.get('sha1')});total+=size
+            if originals:
+              rows.append({'id':iid,'title':m.get('title') or d.get('title'),'date':m.get('date') or d.get('date'),'creator':m.get('creator') or d.get('creator'),'collection':m.get('collection') or d.get('collection'),'licenseurl':m.get('licenseurl') or d.get('licenseurl'),'original_bytes':total,'originals':originals})
+          rows.sort(key=lambda x:(-x['original_bytes'],str(x.get('title') or '')))
+          print('CANDIDATE_COUNT='+str(len(rows)))
+          print('RESULT_JSON='+json.dumps(rows,ensure_ascii=False,sort_keys=True))
+          PY

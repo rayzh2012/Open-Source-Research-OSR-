@@ -1,0 +1,9 @@
+{
+  "schema_version":"osr-persian-catalogue-rescue-v1",
+  "destination_root":"龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/reference_catalogues",
+  "items":[
+    {"id":"trinity_cambridge_palmer_1870","title":"A descriptive Catalogue of the Arabic, Persian, and Turkish manuscripts in the library of Trinity College, Cambridge","year":1870,"ia_id":"10800040bsb","rights":"1870 publication","source_note":"Internet Archive scan; preserve IA metadata and provenance."},
+    {"id":"ouseley_persian_miscellanies_1795","title":"Persian miscellanies: an essay to facilitate the reading of Persian manuscripts, with engraved specimens","year":1795,"ia_id":"persianmiscellan00ouse","rights":"1795 publication","source_note":"Internet Archive scan; preserve IA metadata and provenance."},
+    {"id":"specimens_persian_manuscripts_1902","title":"Specimens of Persian Manuscripts","year":1902,"ia_id":"in.ernet.dli.2015.544287","rights":"1902 publication","source_note":"Internet Archive scan; preserve IA metadata and provenance."}
+  ]
+}

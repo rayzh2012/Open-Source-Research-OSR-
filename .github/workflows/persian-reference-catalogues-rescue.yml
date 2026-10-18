@@ -1,0 +1,63 @@
+name: Persian Reference Catalogues Rescue
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/persian-reference-catalogues-rescue.yml','control/persian_catalogue_rescue_worker.py','control/persian_catalogue_rescue_targets.json']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - id: plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          o=json.load(open('control/persian_catalogue_rescue_targets.json',encoding='utf-8'))
+          ids=[x['id'] for x in o.get('items',[]) if x.get('id')]
+          if not ids: raise SystemExit('no catalogue targets')
+          print('matrix='+json.dumps({'target_id':ids},separators=(',',':')))
+          PY
+  rescue:
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Configure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+      - name: Preserve ${{ matrix.target_id }}
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p result
+          python control/persian_catalogue_rescue_worker.py --target-id '${{ matrix.target_id }}' --registry control/persian_catalogue_rescue_targets.json --work-dir "/tmp/catalogue-${{ matrix.target_id }}" 2>&1 | tee "result/${{ matrix.target_id }}.log"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: persian-catalogue-${{ matrix.target_id }}-${{ github.run_id }}
+          path: result/
+          retention-days: 30

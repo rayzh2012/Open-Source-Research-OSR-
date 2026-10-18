@@ -1,0 +1,9 @@
+{
+  "schema_version":"osr-persian-manuscript-rescue-targets-v1",
+  "destination_root":"龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/manuscripts",
+  "items":[
+    {"id":"penn_ljs196_persian_leaves_pdm","ia_id":"ljs196","title":"Overpainted leaves from a Persian manuscript and an Arabic lithograph","date":null,"license":"Public Domain Mark 1.0","licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/","collection":"Penn Libraries LJS / OPenn / Internet Archive"},
+    {"id":"muniyat_musalli_peerzada_cc0","ia_id":"tjpv_muniyat-ul-musalli-subutu-fareezat-is-salati-arabic-persian-manuscript-on-islami_202412","title":"Muniyat-ul-Musalli / Arabic-Persian Manuscript on Islamiyat","date":null,"license":"CC0 1.0","licenseurl":"https://creativecommons.org/publicdomain/zero/1.0/","collection":"Peerzada Muhammad Ashraf Collection Srinagar / Internet Archive"},
+    {"id":"shamail_atqiya_chishtiya_cc0_scan2","ia_id":"txxx_shamail-e-atqiya-by-qazi-shaikh-imaduddin-chishtiya-sufism-related-persian-manus","title":"Shamail-e-Atqiya by Qazi Shaikh Imaduddin Chishtiya - Repeat Scan 2","date":null,"license":"CC0 1.0","licenseurl":"https://creativecommons.org/publicdomain/zero/1.0/","collection":"Mohd Peerzada Ashraf Collection / Internet Archive","relation_note":"Alternate scan of the same work as shamail_atqiya_chishtiya_cc0; different original PDF checksum, retained for scan-quality/page-coverage comparison."}
+  ]
+}

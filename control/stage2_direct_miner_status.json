@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "run_id": "stage2-query-index-backfill-v1-001",
+  "query_pack_version": "v1.0",
+  "query_pack_sha256": "2a09d481a4eb2c37aabdb401f2ace3bb203ef563ce7fd021dfcccd3c93418b93",
+  "workers_completed": 20,
+  "shards_scanned": 1788,
+  "bytes_downloaded": 507947456674,
+  "aggregate_download_GiB": 473.063,
+  "max_worker_elapsed_seconds": 3740.627,
+  "compact_index_bytes": 7015749,
+  "corpus_stats": {
+    "ChineseWebText2.0-HighQuality": {
+      "shards_scanned": 1555,
+      "download_bytes": 279149487345,
+      "rows_scanned": 155493566,
+      "chars_scanned": 149050163349
+    },
+    "Literature-zh": {
+      "shards_scanned": 233,
+      "download_bytes": 228797969329,
+      "rows_scanned": 47087808,
+      "chars_scanned": 148010485811
+    }
+  },
+  "github_run_id": "32560659907",
+  "github_sha": "e12b8fef43aa1769a899871562acc16788b934d4",
+  "finished_unix": 1787389733.0295382
+}

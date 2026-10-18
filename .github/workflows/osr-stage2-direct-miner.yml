@@ -1,0 +1,209 @@
+name: OSR Stage2 Direct Miner
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/stage2_direct_miner_request.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: osr-stage2-direct-miner
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      workers: ${{ steps.p.outputs.workers }}
+      worker_count: ${{ steps.p.outputs.worker_count }}
+      limit_per_worker: ${{ steps.p.outputs.limit_per_worker }}
+      run_id: ${{ steps.p.outputs.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - id: p
+        shell: python
+        run: |
+          import json, os
+          r=json.load(open('control/stage2_direct_miner_request.json',encoding='utf-8'))
+          assert r.get('action') == 'STAGE2_DIRECT_MINE', r
+          n=int(r.get('worker_count',1)); assert 1 <= n <= 20
+          lim=int(r.get('limit_per_worker',0)); assert lim >= 0
+          rid=str(r.get('run_id') or f"run-{os.environ['GITHUB_RUN_ID']}")
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write('workers='+json.dumps(list(range(n)))+'\n')
+              f.write(f'worker_count={n}\nlimit_per_worker={lim}\nrun_id={rid}\n')
+
+  mine:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        worker: ${{ fromJson(needs.plan.outputs.workers) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pyarrow==21.0.0 requests==2.32.4 huggingface_hub==0.34.4
+      - name: Mine assigned shards
+        run: |
+          python tools/osr_stage2_actions_direct_miner.py \
+            --worker-index '${{ matrix.worker }}' \
+            --worker-count '${{ needs.plan.outputs.worker_count }}' \
+            --limit-per-worker '${{ needs.plan.outputs.limit_per_worker }}' \
+            --out-dir 'out/worker-${{ matrix.worker }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: osr-stage2-${{ needs.plan.outputs.run_id }}-worker-${{ matrix.worker }}
+          path: out/worker-${{ matrix.worker }}
+          retention-days: 7
+
+  reduce:
+    needs: [plan, mine]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: osr-stage2-${{ needs.plan.outputs.run_id }}-worker-*
+          path: _stage2_results
+      - name: Reduce worker outputs into compact query index
+        shell: python
+        env:
+          RUN_ID: ${{ needs.plan.outputs.run_id }}
+        run: |
+          import gzip, hashlib, json, os, pathlib, time
+          root=pathlib.Path('_stage2_results')
+          pack_path=pathlib.Path('control/stage2_query_pack.json')
+          pack_bytes=pack_path.read_bytes()
+          pack=json.loads(pack_bytes.decode('utf-8'))
+          pack_sha=hashlib.sha256(pack_bytes).hexdigest()
+          terms=list(dict.fromkeys(pack['terms']))
+
+          worker_summaries=[]
+          shard_records=[]
+          for p in root.rglob('summary.json'):
+              try: worker_summaries.append(json.loads(p.read_text('utf-8')))
+              except Exception as e: print('bad summary', p, repr(e))
+          for p in root.rglob('result.json.gz'):
+              try:
+                  with gzip.open(p,'rt',encoding='utf-8') as f:
+                      obj=json.load(f)
+                  if obj.get('query_pack_sha256') and obj['query_pack_sha256'] != pack_sha:
+                      raise RuntimeError(f"query-pack mismatch in {p}: {obj['query_pack_sha256']} != {pack_sha}")
+                  shard_records.extend(obj.get('results',[]))
+              except Exception as e:
+                  print('bad result', p, repr(e))
+                  raise
+
+          term_index={t:{'total_count':0,'hit_shards':0,'shards':[]} for t in terms}
+          corpus_stats={}
+          inventory=[]
+          for rec in sorted(shard_records,key=lambda x:(x.get('source',''),x.get('file',''))):
+              source=rec['source']; repo=rec['repo']; file=rec['file']
+              c=corpus_stats.setdefault(source,{'shards_scanned':0,'download_bytes':0,'rows_scanned':0,'chars_scanned':0})
+              c['shards_scanned']+=1
+              c['download_bytes']+=int(rec.get('download_bytes',0))
+              c['rows_scanned']+=int(rec.get('rows_scanned',0))
+              c['chars_scanned']+=int(rec.get('chars_scanned',0))
+              inventory.append({
+                  'source':source,'repo':repo,'file':file,
+                  'sha256':rec.get('sha256'),'rows':rec.get('rows'),
+                  'download_bytes':rec.get('download_bytes')
+              })
+              samples_by_term=rec.get('samples',{})
+              for term,count in rec.get('nonzero_counts',{}).items():
+                  bucket=term_index.setdefault(term,{'total_count':0,'hit_shards':0,'shards':[]})
+                  bucket['total_count']+=int(count)
+                  bucket['hit_shards']+=1
+                  locators=[]
+                  for s in samples_by_term.get(term,[]):
+                      locators.append({
+                          'row':s.get('row'),
+                          'position':s.get('position'),
+                          'row_sha256':s.get('row_sha256')
+                      })
+                  bucket['shards'].append({
+                      'source':source,'repo':repo,'file':file,
+                      'count':int(count),'sample_locators':locators
+                  })
+
+          for bucket in term_index.values():
+              bucket['shards'].sort(key=lambda x:(-x['count'],x['source'],x['file']))
+
+          compact={
+              'format':'osr-query-index/v1',
+              'run_id':os.environ['RUN_ID'],
+              'query_pack_version':pack.get('version'),
+              'query_pack_sha256':pack_sha,
+              'mode':pack.get('mode','exact_substring'),
+              'terms':term_index,
+              'corpus_stats':corpus_stats,
+              'inventory':inventory,
+              'evidence_contract':'index hit -> HF source shard + row locator/hash -> exact source-row recheck',
+              'created_unix':time.time(),
+          }
+          compact_raw=json.dumps(compact,ensure_ascii=False,separators=(',',':')).encode('utf-8')
+          compact_path=pathlib.Path('control/stage2_query_index.json.gz')
+          with gzip.open(compact_path,'wb',compresslevel=9) as f:f.write(compact_raw)
+
+          summary_terms={}
+          for term,b in term_index.items():
+              summary_terms[term]={
+                  'total_count':b['total_count'],
+                  'hit_shards':b['hit_shards'],
+                  'top_shards':[
+                      {'source':x['source'],'file':x['file'],'count':x['count']}
+                      for x in b['shards'][:10]
+                  ]
+              }
+          total_shards=len(shard_records)
+          total_bytes=sum(int(x.get('download_bytes',0)) for x in shard_records)
+          elapsed=max([float(x.get('elapsed_seconds',0)) for x in worker_summaries] or [0])
+          summary={
+              'status':'PASS' if shard_records else 'FAILED',
+              'run_id':os.environ['RUN_ID'],
+              'query_pack_version':pack.get('version'),
+              'query_pack_sha256':pack_sha,
+              'workers_completed':len(worker_summaries),
+              'shards_scanned':total_shards,
+              'bytes_downloaded':total_bytes,
+              'aggregate_download_GiB':round(total_bytes/1024**3,3),
+              'max_worker_elapsed_seconds':elapsed,
+              'compact_index_bytes':compact_path.stat().st_size,
+              'corpus_stats':corpus_stats,
+              'terms':summary_terms,
+              'github_run_id':os.environ['GITHUB_RUN_ID'],
+              'github_sha':os.environ['GITHUB_SHA'],
+              'finished_unix':time.time(),
+          }
+          pathlib.Path('control/stage2_query_index_summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n','utf-8')
+          pathlib.Path('control/stage2_direct_miner_status.json').write_text(json.dumps({
+              k:v for k,v in summary.items() if k != 'terms'
+          },ensure_ascii=False,indent=2)+'\n','utf-8')
+          print(json.dumps({k:v for k,v in summary.items() if k not in {'terms','corpus_stats'}},indent=2))
+
+      - name: Commit compact durable index + status
+        run: |
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/stage2_direct_miner_status.json control/stage2_query_index_summary.json control/stage2_query_index.json.gz
+          git diff --cached --quiet && exit 0
+          git commit -m "stage2: query index ${{ needs.plan.outputs.run_id }}"
+          git pull --rebase origin stage2-direct-miner-v3-1
+          git push origin HEAD:stage2-direct-miner-v3-1

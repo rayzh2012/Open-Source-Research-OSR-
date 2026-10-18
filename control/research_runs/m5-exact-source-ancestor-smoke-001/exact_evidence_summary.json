@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "run_id": "m5-exact-source-ancestor-smoke-001",
+  "router_run_id": "m5-router-fusion-chronology-001",
+  "query_term_count": 18,
+  "required_any_term_count": 14,
+  "top_n_shards": 12,
+  "rows_found": 311,
+  "bytes_downloaded": 17212734025,
+  "all_query_term_rows": 0,
+  "four_plus_local_term_rows": 206,
+  "three_plus_local_term_rows": 304,
+  "rows_with_required_local_term": 311,
+  "rows_with_metadata": 131,
+  "min_local_terms": 2,
+  "selection_mode": "required-source-term + best-local-window-per-shard"
+}

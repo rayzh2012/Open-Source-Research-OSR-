@@ -1,0 +1,6 @@
+{
+  "id": 1,
+  "action": "SHARD_ROUTER_PILOT",
+  "purpose": "Measure a one-document-per-Parquet-shard bigram Basic-postings routing index. Target: fit the entire 1788-shard coarse index inside GitHub Actions cache, then exact-scan only candidate shards.",
+  "requested_at": "2026-08-22T03:39:00-04:00"
+}

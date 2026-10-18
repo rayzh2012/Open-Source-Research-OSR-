@@ -1,0 +1,20 @@
+{
+  "schema_version":"osr-persian-manuscript-rescue-targets-v1",
+  "destination_root":"龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/manuscripts",
+  "items":[
+    {"id":"alakh_sahiba_8_folios_cc0","ia_id":"alakhsahibapersianmanuscript8foliosreshiram","title":"Alakh Sahiba Persian Manuscript 8 Folios Reshi Ram","date":null,"license":"CC0 1.0","licenseurl":"http://creativecommons.org/publicdomain/zero/1.0/","collection":"eGangotri / Internet Archive"},
+    {"id":"alakh_sahiba_9_folios_cc0","ia_id":"alakhsahibapersianmanuscript9foliosreshiramdhardedmari","title":"Alakh Sahiba Persian Manuscript 9 Folios Reshi Ram Dhar Dedmari","date":null,"license":"CC0 1.0","licenseurl":"http://creativecommons.org/publicdomain/zero/1.0/","collection":"eGangotri / Internet Archive"},
+    {"id":"mansoor_daikoo_letter_writing_cc0","ia_id":"RnnP_persian-manuscript-letter-writting-essay-writting-mansoor-daikoo-residence","title":"Persian Manuscript Letter Writing / Essay Writing - Mansoor Daikoo Residence","date":null,"license":"CC0 1.0","licenseurl":"http://creativecommons.org/publicdomain/zero/1.0/","collection":"Kashmir Research Institute / Patron Library Collection"},
+    {"id":"mansoor_daikoo_bhagavat_persian_urdu_cc0","ia_id":"AZen_persian-manuscript-shrimad-bhagavat-maha-puran-urdu-mansoor-daikoo-residence","title":"Persian Manuscript Shrimad Bhagavat Maha Puran Urdu - Mansoor Daikoo Residence","date":null,"license":"CC0 1.0","licenseurl":"http://creativecommons.org/publicdomain/zero/1.0/","collection":"Kashmir Research Institute / Patron Library Collection"},
+    {"id":"shamail_atqiya_chishtiya_cc0","ia_id":"dzvy_shamail-e-atqiya-by-qazi-shaikh-imaduddin-chishtiya-sufism-related-persian-manus","title":"Shamail-e-Atqiya by Qazi Shaikh Imaduddin Chishtiya - Persian Sufism Manuscript","date":null,"license":"CC0 1.0","licenseurl":"https://creativecommons.org/publicdomain/zero/1.0/","collection":"Mohd Peerzada Ashraf Collection / Internet Archive"}
+  ],
+  "aliases":[
+    {"ia_id":"persian-manuscript-unknown-title-mansoor-daikoo-residence","canonical_id":"mansoor_daikoo_letter_writing_cc0","canonical_ia_id":"RnnP_persian-manuscript-letter-writting-essay-writting-mansoor-daikoo-residence","sha1":"b1be8aff8a606c5c64784897a2b85ebf0538d49f","reason":"Exact duplicate original PDF; preserve alias metadata, not duplicate bytes."},
+    {"ia_id":"yOIv_persian-manuscript-unidentified-title-mansoor-daikoo","canonical_id":"mansoor_daikoo_bhagavat_persian_urdu_cc0","canonical_ia_id":"AZen_persian-manuscript-shrimad-bhagavat-maha-puran-urdu-mansoor-daikoo-residence","sha1":"bdb504afd5c8bfff4556d323428214a683d1dd7c","reason":"Exact duplicate original PDF; preserve alias metadata, not duplicate bytes."}
+  ],
+  "quarantine":[
+    {"ia_id":"divan-mishah-ul-tareeqat-persian-manuscript","reason":"No explicit licenseurl in IA metadata."},
+    {"ia_id":"nabeel_20170321","reason":"No explicit licenseurl in IA metadata."},
+    {"ia_id":"muniyat-ul-musalli-subutu-fareezat-is-salati-arabic-persian-manuscript-on-islami","reason":"No explicit licenseurl in IA metadata."}
+  ]
+}

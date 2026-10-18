@@ -1,0 +1,18 @@
+{
+  "schema_version": "osr-persian-manuscript-rescue-targets-v1",
+  "destination_root": "龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/manuscripts",
+  "items": [
+    {"id":"npl_persian_1783","ia_id":"PersianManuscript1783gg","title":"Persian Manuscript 1783 A.D.","date":"1197 A.H. or 1783 A.D.","license":"CC BY-NC 4.0","licenseurl":"https://creativecommons.org/licenses/by-nc/4.0/","collection":"Newark Public Library Islamic Manuscripts"},
+    {"id":"npl_persian_1825","ia_id":"PersianManuscript1825ff","title":"Persian Manuscript 1825 A.D.","date":"1240 A.H. or 1825 A.D.","license":"CC BY-NC 4.0","licenseurl":"https://creativecommons.org/licenses/by-nc/4.0/","collection":"Newark Public Library Islamic Manuscripts"},
+    {"id":"npl_persian_1478_a","ia_id":"8PersianManuscripth","title":"8. Persian manuscript","date":"1478","license":"CC BY-NC 4.0","licenseurl":"https://creativecommons.org/licenses/by-nc/4.0/","collection":"Newark Public Library Islamic Manuscripts"},
+    {"id":"npl_persian_1478_b","ia_id":"PersianManuscript1478ee","title":"Persian Manuscript","date":"1478","license":"CC BY-NC 4.0","licenseurl":"https://creativecommons.org/licenses/by-nc/4.0/","collection":"Newark Public Library Islamic Manuscripts"},
+    {"id":"npl_gulistan_1563","ia_id":"9PersianManuscripti","title":"9. Persian manuscript (Gulistan)","date":"1563","license":"CC BY-NC 4.0","licenseurl":"https://creativecommons.org/licenses/by-nc/4.0/","collection":"Newark Public Library Islamic Manuscripts"},
+    {"id":"npl_persian_17c","ia_id":"10PersianManuscriptj","title":"10. Persian Manuscript","date":"17th Century","license":"CC BY-NC 4.0","licenseurl":"https://creativecommons.org/licenses/by-nc/4.0/","collection":"Newark Public Library Islamic Manuscripts"},
+    {"id":"npl_persian_16c","ia_id":"11PersianManuscriptk","title":"11. Persian Manuscript","date":"16th Century","license":"CC BY-NC 4.0","licenseurl":"https://creativecommons.org/licenses/by-nc/4.0/","collection":"Newark Public Library Islamic Manuscripts"},
+    {"id":"persian_manuscript_kashmir_cc0","ia_id":"persianmanuscriptkashmir","title":"Persian Manuscript Kashmir","date":null,"license":"CC0 1.0","licenseurl":"http://creativecommons.org/publicdomain/zero/1.0/","collection":"Internet Archive / eGangotri"}
+  ],
+  "quarantine": [
+    {"ia_id":"McGillLibrary-rbsc_isl_msp-leaf_072-19802","reason":"No explicit license URL in IA metadata; preserve metadata only until rights are independently verified."},
+    {"ia_id":"padmavatpersianmanuscript","reason":"CC BY-NC-ND 4.0; hold out of derivative-preservation pipeline pending a no-derivatives-safe policy."}
+  ]
+}

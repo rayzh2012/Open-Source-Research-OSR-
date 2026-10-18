@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "run_id": "m5-exact-evidence-flood-cluster-002",
+  "top_n_shards": 12,
+  "rows_found": 240,
+  "bytes_downloaded": 17251383634,
+  "all_5_term_rows": 8,
+  "four_plus_term_rows": 25
+}

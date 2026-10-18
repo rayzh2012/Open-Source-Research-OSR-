@@ -1,0 +1,18 @@
+{
+  "schema_version": "osr-gallica-pagecount-census-request-v1",
+  "enabled": true,
+  "staged_revision": 2,
+  "request_id": "gallica-pagecount-census-v1-20260828T051000Z",
+  "requested_at": "2026-08-28T05:10:00Z",
+  "source_smoke_audit_run_id": 33141144250,
+  "source_smoke_audit_status": "PASS",
+  "source_smoke_verified_items": 2,
+  "source_smoke_verified_pages": 144,
+  "source_smoke_verified_image_bytes": 218332828,
+  "expected_arks": 1472,
+  "partitions": 4,
+  "max_parallel": 2,
+  "sleep_seconds": 2.5,
+  "destination": "龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/gallica_persian_manuscripts/census/pagecount_v1",
+  "release_gate": "Enabled only after exact Drive readback audit PASS: 2/2 items, 144/144 pages, 218332828 image bytes, zero errors."
+}

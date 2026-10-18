@@ -1,0 +1,43 @@
+name: India Office Ethe Vol 2 COMPLETE Rewrite
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/india-office-ethe-v2-complete-rewrite.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rewrite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - name: Correct COMPLETE identity metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p "$HOME/.config/rclone" /tmp/ethe-v2
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          python - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          dst='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/reference_catalogues/india_office_ethe_v2_1903/COMPLETE.json'
+          p=subprocess.run(['rclone','cat',dst],text=True,capture_output=True,check=True)
+          o=json.loads(p.stdout)
+          if o.get('ia_id')!='catalogueofpersi02greauoft' or o.get('status')!='PASS':
+              raise SystemExit('refusing rewrite: unexpected COMPLETE identity/status')
+          o['id']='india_office_ethe_v2_1903'
+          o['title']='Catalogue of Persian manuscripts in the library of the India Office, vol. 2'
+          o['year']=1903
+          o['identity_correction_note']='Corrected 2026-08-28 after IA metadata audit: catalogueofpersi02greauoft is volume 2, not volume 1.'
+          out=Path('/tmp/ethe-v2/COMPLETE.json')
+          out.write_text(json.dumps(o,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          subprocess.run(['rclone','copyto',str(out),dst,'--retries','8','--low-level-retries','16'],check=True)
+          q=subprocess.run(['rclone','cat',dst],text=True,capture_output=True,check=True)
+          v=json.loads(q.stdout)
+          assert v.get('id')=='india_office_ethe_v2_1903' and v.get('ia_id')=='catalogueofpersi02greauoft'
+          print('RESULT_JSON='+json.dumps({'status':'PASS','id':v['id'],'ia_id':v['ia_id'],'title':v['title']},ensure_ascii=False,sort_keys=True))
+          PY

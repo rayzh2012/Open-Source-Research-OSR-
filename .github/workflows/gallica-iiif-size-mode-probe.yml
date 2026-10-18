@@ -1,0 +1,40 @@
+name: Gallica IIIF Size Mode Probe
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/gallica-iiif-size-mode-probe.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe full versus 4000px IIIF response
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,time,requests
+          base='https://gallica.bnf.fr/iiif/ark:/12148/btv1b10025022q/f1'
+          urls={
+            'full_native':base+'/full/full/0/native.jpg',
+            'w4000_native':base+'/full/4000,/0/native.jpg',
+            'w3000_native':base+'/full/3000,/0/native.jpg'
+          }
+          out={}
+          for k,u in urls.items():
+              t=time.time()
+              try:
+                  with requests.get(u,stream=True,timeout=(20,60),headers={'User-Agent':'OSR-Preservation/1.0','Accept':'image/jpeg'}) as r:
+                      data=next(r.iter_content(65536),b'')
+                      out[k]={'status':r.status_code,'elapsed_to_first_chunk_s':round(time.time()-t,3),'content_type':r.headers.get('Content-Type'),'content_length':r.headers.get('Content-Length'),'retry_after':r.headers.get('Retry-After'),'first_bytes':data[:4].hex(),'chunk_bytes':len(data)}
+              except Exception as e:
+                  out[k]={'error':repr(e),'elapsed_s':round(time.time()-t,3)}
+              time.sleep(3)
+          print('RESULT_JSON='+json.dumps(out,sort_keys=True))
+          PY

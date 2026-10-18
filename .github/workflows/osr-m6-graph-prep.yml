@@ -1,0 +1,44 @@
+name: OSR M6 Graph Prep
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/m5_evidence_analysis.json
+      - tools/osr_m6_graph_prep.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tools/osr_m6_graph_prep.py
+      - name: Archive run-specific graph
+        shell: python
+        run: |
+          import json, pathlib, shutil
+          p=pathlib.Path('control/m6_graph_prep.json')
+          d=json.loads(p.read_text('utf-8'))
+          run=d.get('source_run_id')
+          if run:
+              out=pathlib.Path('control/research_runs')/run
+              out.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(p,out/'graph_prep.json')
+      - name: Commit graph prep
+        run: |
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add control/m6_graph_prep.json control/research_runs/
+          git diff --cached --quiet && exit 0
+          git commit -m 'm6: graph prep from exact evidence'
+          git pull --rebase origin stage2-direct-miner-v3-1
+          git push origin HEAD:stage2-direct-miner-v3-1

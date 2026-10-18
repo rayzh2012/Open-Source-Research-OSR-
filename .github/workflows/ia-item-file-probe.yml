@@ -1,0 +1,27 @@
+name: IA Item File Probe
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/ia-item-file-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,urllib.request
+          iid='in.ernet.dli.2015.544287'
+          req=urllib.request.Request('https://archive.org/metadata/'+iid,headers={'User-Agent':'OSR-Preservation/1.0'})
+          with urllib.request.urlopen(req,timeout=90) as r:o=json.load(r)
+          fs=[]
+          for f in o.get('files',[]):
+            n=f.get('name',''); fmt=f.get('format','')
+            if n.lower().endswith(('.pdf','.txt','.xml')):
+              fs.append({'name':n,'format':fmt,'size':f.get('size'),'source':f.get('source')})
+          print('RESULT_JSON='+json.dumps(fs,ensure_ascii=False,sort_keys=True))
+          PY

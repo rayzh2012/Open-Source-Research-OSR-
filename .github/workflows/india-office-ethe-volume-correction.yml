@@ -1,0 +1,42 @@
+name: India Office Ethe Volume Identity Correction
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/india-office-ethe-volume-correction.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - name: Verify volume 2 identity and move mislabelled folder
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          ROOT='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/reference_catalogues'
+          SRC="$ROOT/india_office_ethe_v1_1903"
+          DST="$ROOT/india_office_ethe_v2_1903"
+          python - <<'PY'
+          import json,subprocess
+          root='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/reference_catalogues'
+          src=root+'/india_office_ethe_v1_1903/COMPLETE.json'
+          p=subprocess.run(['rclone','cat',src],text=True,capture_output=True,check=True)
+          o=json.loads(p.stdout)
+          if o.get('ia_id')!='catalogueofpersi02greauoft':
+              raise SystemExit('refusing move: source COMPLETE is not expected volume-2 IA object')
+          print('VERIFIED_SOURCE='+json.dumps({'ia_id':o.get('ia_id'),'title':o.get('title'),'status':o.get('status')},ensure_ascii=False))
+          PY
+          if rclone lsf "$DST/COMPLETE.json" >/dev/null 2>&1; then
+            echo 'Destination already exists; refusing destructive overwrite.' >&2
+            exit 2
+          fi
+          rclone moveto "$SRC" "$DST" --retries 8 --low-level-retries 16 --timeout 10m --contimeout 30s
+          echo 'MOVED=india_office_ethe_v1_1903 -> india_office_ethe_v2_1903'

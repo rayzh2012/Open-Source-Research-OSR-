@@ -1,0 +1,40 @@
+name: Gallica Persian SRU Worklist
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/gallica-persian-sru-worklist.yml','control/gallica_persian_sru_worklist.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  worklist:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Configure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+      - name: Preserve worklists
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p result
+          python control/gallica_persian_sru_worklist.py --work-dir /tmp/gallica-worklists 2>&1 | tee result/worker.log
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gallica-persian-worklists-${{ github.run_id }}
+          path: result/
+          retention-days: 30

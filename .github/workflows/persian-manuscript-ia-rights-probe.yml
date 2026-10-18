@@ -1,0 +1,44 @@
+name: Persian Manuscript IA Rights Probe
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/persian-manuscript-ia-rights-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,urllib.request
+          ids=[
+            'PersianManuscript1783gg','PersianManuscript1825ff','8PersianManuscripth','PersianManuscript1478ee','9PersianManuscripti',
+            'McGillLibrary-rbsc_isl_msp-leaf_072-19802','padmavatpersianmanuscript','10PersianManuscriptj','11PersianManuscriptk','persianmanuscriptkashmir'
+          ]
+          rows=[]
+          for iid in ids:
+            req=urllib.request.Request('https://archive.org/metadata/'+iid,headers={'User-Agent':'OSR-Preservation/1.0'})
+            try:
+              with urllib.request.urlopen(req,timeout=90) as r:o=json.load(r)
+            except Exception as e:
+              rows.append({'id':iid,'status':'ERROR','error':str(e)});continue
+            m=o.get('metadata') or {}
+            files=[]
+            for f in o.get('files',[]):
+              n=f.get('name','');fmt=f.get('format','');size=f.get('size')
+              if n.lower().endswith(('.pdf','.jp2.zip','.jpg','.jpeg','.tif','.tiff','.txt','.xml')):
+                files.append({'name':n,'format':fmt,'size':size,'source':f.get('source')})
+            rows.append({
+              'id':iid,'status':'PASS','title':m.get('title'),'date':m.get('date'),'year':m.get('year'),
+              'creator':m.get('creator'),'collection':m.get('collection'),'contributor':m.get('contributor'),
+              'licenseurl':m.get('licenseurl'),'rights':m.get('rights'),'access-restricted-item':m.get('access-restricted-item'),
+              'possible-copyright-status':m.get('possible-copyright-status'),'scanner':m.get('scanner'),'source':m.get('source'),
+              'files':files
+            })
+          print('RESULT_JSON='+json.dumps(rows,ensure_ascii=False,sort_keys=True))
+          PY

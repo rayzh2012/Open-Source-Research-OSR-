@@ -1,0 +1,18 @@
+{
+  "schema_version": "osr-islamicate-rescue-status-v3",
+  "github_run_id": "33121195307",
+  "github_run_attempt": "1",
+  "auth_result": "success",
+  "rescue_result": "success",
+  "status": "PASS",
+  "sources": [
+    {
+      "elapsed_seconds": 4.424,
+      "identity": "703b364204596c6d9d96c9f266b0a8211d6ca87cb78953e4a4f2cc2cd310ab8e",
+      "kind": "hmml_metadata",
+      "snapshot": "Sun_23_Aug_2026_06-05-48_GMT",
+      "source_id": "hmml_reading_room",
+      "status": "SKIP_COMPLETE"
+    }
+  ]
+}

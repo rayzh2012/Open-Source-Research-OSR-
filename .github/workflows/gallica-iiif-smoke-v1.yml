@@ -1,0 +1,49 @@
+name: Gallica IIIF Smoke v1
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - '.github/workflows/gallica-iiif-smoke-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe Gallica IIIF and Pagination endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,time,urllib.request,urllib.error
+          arks=['btv1b10025022q','btv1b10025026h']
+          out=[]
+          def get(url,limit=2_000_000):
+              req=urllib.request.Request(url,headers={'User-Agent':'OSR-Preservation/1.0 (+noncommercial research; polite smoke test)'})
+              t=time.time()
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      data=r.read(limit)
+                      return {'status':r.status,'content_type':r.headers.get('Content-Type'),'bytes_read':len(data),'elapsed_s':round(time.time()-t,3),'prefix_hex':data[:16].hex()}
+              except urllib.error.HTTPError as e:
+                  return {'status':e.code,'error':'HTTPError','retry_after':e.headers.get('Retry-After'),'elapsed_s':round(time.time()-t,3)}
+              except Exception as e:
+                  return {'status':None,'error':repr(e),'elapsed_s':round(time.time()-t,3)}
+          for ark in arks:
+              row={'ark':ark}
+              row['manifest']=get(f'https://gallica.bnf.fr/iiif/ark:/12148/{ark}/manifest.json')
+              time.sleep(2)
+              row['pagination']=get(f'https://gallica.bnf.fr/services/Pagination?ark={ark}')
+              time.sleep(2)
+              row['page1_iiif']=get(f'https://gallica.bnf.fr/iiif/ark:/12148/{ark}/f1/full/1200,/0/native.jpg')
+              out.append(row)
+              time.sleep(3)
+          ok=all(r['manifest'].get('status')==200 and r['pagination'].get('status')==200 and r['page1_iiif'].get('status')==200 for r in out)
+          print('RESULT_JSON='+json.dumps({'status':'PASS' if ok else 'FAIL','items':out},sort_keys=True))
+          if not ok: raise SystemExit(2)
+          PY

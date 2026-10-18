@@ -1,0 +1,255 @@
+name: Wikisource to Drive Ingest
+
+on:
+  push:
+    branches:
+      - stage2-direct-miner-v3-1
+    paths:
+      - '.github/workflows/wikisource-drive-ingest.yml'
+      - 'control/wikisource_ingest_request.json'
+      - 'control/wikisource_discovery_manifest.json'
+      - 'control/wikisource_ingest_shard.py'
+      - 'control/wikisource_dump_to_parquet.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wikisource-drive-ingest
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      request_id: ${{ steps.matrix.outputs.request_id }}
+      expected_shards: ${{ steps.matrix.outputs.expected_shards }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: matrix
+        name: Build exact shard matrix from discovery manifest
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          req=json.load(open('control/wikisource_ingest_request.json',encoding='utf-8'))
+          manifest=json.load(open('control/wikisource_discovery_manifest.json',encoding='utf-8'))
+          if req.get('action') != 'INGEST':
+              raise SystemExit('request action must be INGEST')
+          include=[]
+          for wiki in manifest['wikis']:
+              for shard in wiki['shards']:
+                  include.append({
+                      'wiki_id':wiki['wiki_id'],
+                      'label':wiki['label'],
+                      'dump_date':wiki['dump_date'],
+                      'shard_index':int(shard['index']),
+                      'filename':shard['filename'],
+                      'bytes':int(shard['bytes']) if shard.get('bytes') is not None else -1,
+                  })
+          if not include:
+              raise SystemExit('discovery manifest contains no shards')
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write('matrix='+json.dumps({'include':include},ensure_ascii=False,separators=(',',':'))+'\n')
+              f.write('request_id='+req['request_id']+'\n')
+              f.write('expected_shards='+str(len(include))+'\n')
+          print(json.dumps(include,ensure_ascii=False,indent=2))
+          PY
+
+  auth:
+    runs-on: ubuntu-latest
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - name: Verify Drive credential is configured
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${RCLONE_CONFIG_B64:-}" ]]; then
+            echo '::error::Missing repository secret RCLONE_CONFIG_B64.'
+            exit 42
+          fi
+          echo 'Drive credential secret is present.'
+
+  prepare:
+    needs: [plan, auth]
+    runs-on: ubuntu-latest
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install rclone and configure Drive remote
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Publish source manifests before payload transfer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' > /tmp/wiki_meta.tsv
+          import json
+          req=json.load(open('control/wikisource_ingest_request.json',encoding='utf-8'))
+          m=json.load(open('control/wikisource_discovery_manifest.json',encoding='utf-8'))
+          root=req['destination_root'].strip('/')
+          for w in m['wikis']:
+              print('\t'.join([w['wiki_id'],w['dump_date'],w['sha256sums_url'],root]))
+          PY
+          while IFS=$'\t' read -r wiki date sums_url root; do
+            remote="gdrive:${root}/${wiki}/${date}/meta"
+            curl -fL --retry 5 --retry-delay 2 "$sums_url" -o "/tmp/${wiki}.SHA256SUMS"
+            rclone copyto "/tmp/${wiki}.SHA256SUMS" "${remote}/SHA256SUMS" --retries 6 --low-level-retries 12
+            rclone copyto control/wikisource_discovery_manifest.json "${remote}/DISCOVERY_MANIFEST.json" --retries 6 --low-level-retries 12
+            rclone copyto control/wikisource_ingest_request.json "${remote}/INGEST_REQUEST.json" --retries 6 --low-level-retries 12
+          done < /tmp/wiki_meta.tsv
+
+  ingest:
+    needs: [plan, auth, prepare]
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install ingest dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pyarrow requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+      - name: Configure Drive remote
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          rclone listremotes | grep -qx 'gdrive:'
+      - name: Ingest ${{ matrix.wiki_id }} shard ${{ matrix.shard_index }}
+        shell: bash
+        run: |
+          set -o pipefail
+          work="wikisource-work/${{ matrix.wiki_id }}-${{ matrix.shard_index }}"
+          mkdir -p "$work"
+          python control/wikisource_ingest_shard.py \
+            --manifest control/wikisource_discovery_manifest.json \
+            --request control/wikisource_ingest_request.json \
+            --wiki-id '${{ matrix.wiki_id }}' \
+            --shard-index '${{ matrix.shard_index }}' \
+            --work-dir "$work" \
+            2>&1 | tee "$work/worker.log"
+      - name: Upload tiny recovery result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wikisource-shard-${{ matrix.wiki_id }}-${{ matrix.shard_index }}-${{ github.run_id }}
+          path: |
+            wikisource-work/${{ matrix.wiki_id }}-${{ matrix.shard_index }}/result.json
+            wikisource-work/${{ matrix.wiki_id }}-${{ matrix.shard_index }}/worker.log
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14
+
+  finalize:
+    if: always()
+    needs: [plan, auth, prepare, ingest]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+          fetch-depth: 0
+      - name: Download shard results
+        if: needs.ingest.result != 'skipped'
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: wikisource-shard-*-${{ github.run_id }}
+          path: wikisource-results
+          merge-multiple: false
+      - name: Build strict durable ingest status
+        env:
+          AUTH_RESULT: ${{ needs.auth.result }}
+          PREPARE_RESULT: ${{ needs.prepare.result }}
+          INGEST_RESULT: ${{ needs.ingest.result }}
+          REQUEST_ID: ${{ needs.plan.outputs.request_id }}
+          EXPECTED_SHARDS: ${{ needs.plan.outputs.expected_shards }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import glob, json, os
+          from pathlib import Path
+          expected=int(os.environ.get('EXPECTED_SHARDS') or 0)
+          results=[]
+          for p in glob.glob('wikisource-results/**/result.json',recursive=True):
+              try:
+                  results.append(json.load(open(p,encoding='utf-8')))
+              except Exception as e:
+                  results.append({'path':p,'status':'UNREADABLE','error':repr(e)})
+          keys=[(r.get('wiki_id'),r.get('shard_index')) for r in results if r.get('wiki_id') is not None]
+          unique=len(set(keys))
+          ok_status={'PASS','SKIPPED_ALREADY_COMPLETE'}
+          failures=[r for r in results if r.get('status') not in ok_status]
+          auth=os.environ.get('AUTH_RESULT','unknown')
+          prepare=os.environ.get('PREPARE_RESULT','unknown')
+          ingest=os.environ.get('INGEST_RESULT','unknown')
+          if auth != 'success':
+              status='NEEDS_DRIVE_AUTH'
+          elif prepare != 'success':
+              status='PREPARE_FAILED'
+          elif expected > 0 and len(results)==expected and unique==expected and not failures:
+              status='PASS'
+          else:
+              status='PARTIAL_OR_FAILED'
+          obj={
+              'schema_version':'osr-wikisource-ingest-status-v2',
+              'request_id':os.environ.get('REQUEST_ID'),
+              'github_run_id':os.environ.get('RUN_ID'),
+              'github_run_attempt':os.environ.get('RUN_ATTEMPT'),
+              'auth_result':auth,
+              'prepare_result':prepare,
+              'ingest_result':ingest,
+              'expected_shards':expected,
+              'result_records':len(results),
+              'unique_shards':unique,
+              'failed_records':len(failures),
+              'status':status,
+              'workers':results,
+          }
+          Path('/tmp/wikisource_ingest_status.json').write_text(json.dumps(obj,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(obj,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit status only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'osr-wikisource-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git fetch origin stage2-direct-miner-v3-1
+          git reset --hard origin/stage2-direct-miner-v3-1
+          cp /tmp/wikisource_ingest_status.json control/wikisource_ingest_status.json
+          git add control/wikisource_ingest_status.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'wikisource: update Drive ingest status [skip ci]'
+          for n in 1 2 3 4 5; do
+            if git push origin HEAD:stage2-direct-miner-v3-1; then exit 0; fi
+            sleep $((n*3))
+            git fetch origin stage2-direct-miner-v3-1
+            git rebase origin/stage2-direct-miner-v3-1
+          done
+          exit 1

@@ -1,0 +1,45 @@
+name: Gallica IIIF Drive Status
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/gallica-iiif-drive-status.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
+    steps:
+      - name: Read Drive checkpoints and COMPLETE records
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p "$HOME/.config/rclone"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 -d > "$HOME/.config/rclone/rclone.conf"
+          chmod 600 "$HOME/.config/rclone/rclone.conf"
+          python - <<'PY'
+          import json,subprocess
+          root='gdrive:龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/gallica_persian_manuscripts/items'
+          out=[]
+          for ark in ['btv1b10025022q','btv1b10025026h']:
+              row={'ark':ark}
+              for name in ['CHECKPOINT.json','PAGE_INDEX.json','COMPLETE.json']:
+                  q=subprocess.run(['rclone','cat',f'{root}/{ark}/{name}'],text=True,capture_output=True)
+                  if q.returncode==0:
+                      try:o=json.loads(q.stdout)
+                      except Exception as e: row[name]={'exists':True,'parse_error':str(e)}; continue
+                      if name=='CHECKPOINT.json':
+                          done=o.get('done') or {}; row[name]={'exists':True,'done_pages':len(done),'page_count':o.get('page_count'),'bytes':sum(int((v or {}).get('bytes') or 0) for v in done.values())}
+                      elif name=='PAGE_INDEX.json': row[name]={'exists':True,'selected_pages':o.get('selected_pages'),'page_count':o.get('page_count')}
+                      else: row[name]={'exists':True,'status':o.get('status'),'preserved_pages':o.get('preserved_pages'),'page_count':o.get('page_count'),'image_bytes':o.get('image_bytes'),'delivery_mode':o.get('delivery_mode')}
+                  else: row[name]={'exists':False}
+              out.append(row)
+          print('RESULT_JSON='+json.dumps(out,ensure_ascii=False,sort_keys=True))
+          PY

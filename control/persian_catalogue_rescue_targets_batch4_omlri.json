@@ -1,0 +1,10 @@
+{
+  "schema_version":"osr-persian-catalogue-rescue-v2",
+  "destination_root":"龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE/reference_catalogues",
+  "items":[
+    {"id":"omlri_arabic_persian_catalogue_v1","ia_id":"OrientalManuscriptsLibraryAndResearchCenteromlriArabicAndPersian","title":"OMLRI Arabic and Persian Manuscript Catalogue, Volume 1","date":null,"license":"Public Domain","licenseurl":"http://creativecommons.org/licenses/publicdomain/","collection":"Oriental Manuscripts Library and Research Center / Internet Archive"},
+    {"id":"omlri_arabic_persian_catalogue_v2","ia_id":"OrientalManuscriptsLibraryAndResearchCenteromlriArabicAndPersian_385","title":"OMLRI Arabic and Persian Manuscript Catalogue, Volume 2","date":null,"license":"Public Domain","licenseurl":"http://creativecommons.org/licenses/publicdomain/","collection":"Oriental Manuscripts Library and Research Center / Internet Archive"},
+    {"id":"omlri_arabic_persian_catalogue_v3","ia_id":"OrientalManuscriptsLibraryAndResearchCenteromlriArabicAndPersian_190","title":"OMLRI Arabic and Persian Manuscript Catalogue, Volume 3","date":null,"license":"Public Domain","licenseurl":"http://creativecommons.org/licenses/publicdomain/","collection":"Oriental Manuscripts Library and Research Center / Internet Archive"},
+    {"id":"omlri_arabic_persian_catalogue_v4","ia_id":"OrientalManuscriptsLibraryAndResearchCenteromlriArabicAndPersian_285","title":"OMLRI Arabic and Persian Manuscript Catalogue, Volume 4","date":null,"license":"Public Domain","licenseurl":"http://creativecommons.org/licenses/publicdomain/","collection":"Oriental Manuscripts Library and Research Center / Internet Archive"}
+  ]
+}

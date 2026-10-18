@@ -1,0 +1,67 @@
+{
+  "format": "osr-m5-evidence-quality-audit/v2.1",
+  "run_id": "m5-exact-ming-qing-myth-dense-smoke-001",
+  "rows": 120,
+  "query_term_count": 15,
+  "unique_full_row_hashes": 120,
+  "exact_row_duplicate_fraction": 0.0,
+  "unique_shards": 4,
+  "source_corpora": [
+    "Literature-zh"
+  ],
+  "source_corpus_count": 1,
+  "modern_marker_rows": 46,
+  "classical_marker_rows": 70,
+  "repeated_snippet_rows": 2,
+  "mean_row_matched_terms": 8.0,
+  "mean_local_matched_terms": 2.667,
+  "locality_thresholds": {
+    "2": {
+      "row_ge_k": 120,
+      "local_ge_k": 120,
+      "retention": 1.0,
+      "subset_invariant_ok": true
+    },
+    "3": {
+      "row_ge_k": 115,
+      "local_ge_k": 44,
+      "retention": 0.382609,
+      "subset_invariant_ok": true
+    },
+    "4": {
+      "row_ge_k": 104,
+      "local_ge_k": 18,
+      "retention": 0.173077,
+      "subset_invariant_ok": true
+    },
+    "5": {
+      "row_ge_k": 93,
+      "local_ge_k": 12,
+      "retention": 0.129032,
+      "subset_invariant_ok": true
+    }
+  },
+  "locality_contract": "local window is a subset of the source row; for every k, local_ge_k must be <= row_ge_k",
+  "selection_bias": {
+    "router_top_n_shards": 4,
+    "bounded_rows_per_shard": true,
+    "prevalence_inference_allowed": false
+  },
+  "risk_flags": [
+    "single_source_corpus_in_retrieved_sample",
+    "repeated_snippets_present",
+    "row_level_inflation_vs_local_window_ge_3",
+    "row_level_inflation_vs_local_window_ge_4",
+    "row_level_inflation_vs_local_window_ge_5",
+    "top_shard_bounded_sampling_not_prevalence_estimate",
+    "source_identity_date_genre_not_yet_fully_resolved"
+  ],
+  "quality_gate": {
+    "local_window_required_for_default_graph": true,
+    "requires_independent_source_corpora": true,
+    "requires_source_identity_audit": true,
+    "requires_date_genre_audit": true,
+    "historical_fact_upgrade_allowed": false
+  },
+  "note": "Marker counts are heuristic contamination cues only. This sample is deliberately enriched by router rank and per-shard caps; it cannot estimate full-corpus prevalence. Source identity, edition, date, genre, and independent-source corroboration remain mandatory for historical inference."
+}

@@ -1,0 +1,75 @@
+{
+  "format": "osr-research-package-manifest/v1",
+  "status": "COMPLETE",
+  "run_id": "m5-exact-ming-qing-myth-dense-smoke-001",
+  "required_components": [
+    "exact_evidence.json",
+    "exact_evidence_summary.json",
+    "evidence_analysis.json",
+    "evidence_quality_audit.json",
+    "source_chronology_audit.json",
+    "graph_prep.json",
+    "notion_writeback.json"
+  ],
+  "component_count": 7,
+  "components": [
+    {
+      "name": "exact_evidence.json",
+      "bytes": 972015,
+      "sha256": "3b0268c89f34c5f1506bd0f09f3b77992b9f26c3a96bd0e20ca6b246834f3340",
+      "id_key": "run_id",
+      "run_id": "m5-exact-ming-qing-myth-dense-smoke-001"
+    },
+    {
+      "name": "exact_evidence_summary.json",
+      "bytes": 702,
+      "sha256": "e674fae8fa48e5cf8fe0b025b75f59b3be2e7ab2bb231d4c07369776a0c470a3",
+      "id_key": "run_id",
+      "run_id": "m5-exact-ming-qing-myth-dense-smoke-001"
+    },
+    {
+      "name": "evidence_analysis.json",
+      "bytes": 837136,
+      "sha256": "c20b85f61d7849d69107d6d5613096026c71a89666577d8e6e472bb6f58a0f03",
+      "id_key": "run_id",
+      "run_id": "m5-exact-ming-qing-myth-dense-smoke-001"
+    },
+    {
+      "name": "evidence_quality_audit.json",
+      "bytes": 2181,
+      "sha256": "3dd568f72db24c1b9f730c8bf99902045540ad782b9e76ba3ffabb1a32c3c447",
+      "id_key": "run_id",
+      "run_id": "m5-exact-ming-qing-myth-dense-smoke-001"
+    },
+    {
+      "name": "source_chronology_audit.json",
+      "bytes": 275455,
+      "sha256": "b9534383743944bf2ea2750bd476125871ef51ba65662c428989119de371c0a0",
+      "id_key": "run_id",
+      "run_id": "m5-exact-ming-qing-myth-dense-smoke-001"
+    },
+    {
+      "name": "graph_prep.json",
+      "bytes": 71879,
+      "sha256": "64aba6b584264fe57d7e2328e54da4531640077c76459bdb1b6dfdd487f6b8fb",
+      "id_key": "source_run_id",
+      "run_id": "m5-exact-ming-qing-myth-dense-smoke-001"
+    },
+    {
+      "name": "notion_writeback.json",
+      "bytes": 493,
+      "sha256": "963f2e4ad35d24916c1549b88326bc14bce58127f8db56f46523c3fad3a47753",
+      "id_key": "run_id",
+      "run_id": "m5-exact-ming-qing-myth-dense-smoke-001"
+    }
+  ],
+  "rules": {
+    "all_component_run_ids_match": true,
+    "exact_evidence_required": true,
+    "analysis_required": true,
+    "quality_required": true,
+    "source_chronology_required": true,
+    "graph_required": true,
+    "notion_writeback_payload_required": true
+  }
+}

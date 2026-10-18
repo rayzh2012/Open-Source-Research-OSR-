@@ -1,0 +1,52 @@
+name: Persian Manuscript Licensed Discovery Fast v2
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/persian-manuscript-licensed-discovery-fast-v2.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Fast licensed-candidate discovery from IA search index
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,urllib.parse,urllib.request
+          licenses=[
+            'http://creativecommons.org/publicdomain/zero/1.0/',
+            'https://creativecommons.org/publicdomain/zero/1.0/',
+            'http://creativecommons.org/publicdomain/mark/1.0/',
+            'https://creativecommons.org/publicdomain/mark/1.0/',
+            'http://creativecommons.org/licenses/by-nc/4.0/',
+            'https://creativecommons.org/licenses/by-nc/4.0/'
+          ]
+          queries=[
+            'title:(persian AND manuscript*) AND mediatype:texts',
+            'subject:(persian AND manuscript*) AND mediatype:texts',
+            'description:(persian AND manuscript*) AND mediatype:texts'
+          ]
+          seen={}
+          for lic in licenses:
+            for base in queries:
+              q=f'({base}) AND licenseurl:"{lic}"'
+              params=urllib.parse.urlencode({'q':q,'fl[]':['identifier','title','date','creator','licenseurl','collection','downloads'],'rows':200,'page':1,'output':'json','sort[]':'downloads desc'},doseq=True)
+              req=urllib.request.Request('https://archive.org/advancedsearch.php?'+params,headers={'User-Agent':'OSR-Preservation/1.0'})
+              try:
+                with urllib.request.urlopen(req,timeout=90) as r:o=json.load(r)
+              except Exception as e:
+                print('QUERY_ERROR',lic,base,repr(e));continue
+              for d in o.get('response',{}).get('docs',[]):
+                iid=d.get('identifier')
+                if iid: seen[iid]=d
+          rows=sorted(seen.values(),key=lambda x:(-int(x.get('downloads') or 0),str(x.get('title') or '')))
+          print('CANDIDATE_COUNT='+str(len(rows)))
+          print('RESULT_JSON='+json.dumps(rows,ensure_ascii=False,sort_keys=True))
+          PY

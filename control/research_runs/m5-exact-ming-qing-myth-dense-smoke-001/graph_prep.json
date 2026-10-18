@@ -1,0 +1,2100 @@
+{
+  "format": "osr-graph-prep/v2",
+  "source_run_id": "m5-exact-ming-qing-myth-dense-smoke-001",
+  "nodes": [
+    {
+      "id": "女娲",
+      "type": "research_term"
+    },
+    {
+      "id": "共工",
+      "type": "research_term"
+    },
+    {
+      "id": "炎帝",
+      "type": "research_term"
+    },
+    {
+      "id": "神农",
+      "type": "research_term"
+    },
+    {
+      "id": "黄帝",
+      "type": "research_term"
+    },
+    {
+      "id": "后土",
+      "type": "research_term"
+    },
+    {
+      "id": "句龙",
+      "type": "research_term"
+    },
+    {
+      "id": "不周山",
+      "type": "research_term"
+    },
+    {
+      "id": "补天",
+      "type": "research_term"
+    },
+    {
+      "id": "天柱",
+      "type": "research_term"
+    },
+    {
+      "id": "洪水",
+      "type": "research_term"
+    },
+    {
+      "id": "治水",
+      "type": "research_term"
+    },
+    {
+      "id": "罔物",
+      "type": "research_term"
+    },
+    {
+      "id": "网雾",
+      "type": "research_term"
+    },
+    {
+      "id": "天降",
+      "type": "research_term"
+    }
+  ],
+  "edges": [
+    {
+      "source": "神农",
+      "target": "黄帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 33,
+      "whole_row_rows": 89,
+      "locality_retention": 0.370787,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 983,
+          "row_sha256": "8671ffc430412e7a6e04b8b92f1c22f7c824e1e6a52bc6c62de1abd4c53d11a8"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 221,
+          "row_sha256": "4182df1c2c81e3b3b94440d84c5071eae4180607313095bed17412f0562c75ab"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 419,
+          "row_sha256": "fcc787f43431f8dbac62a0ac9107250eee8e5230a4aa732abb46c3cf36909dc5"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 727,
+          "row_sha256": "c478ad4e4643984bd583105d471648102424a4d9a7e2366260b9a369f86d2a8f"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 215,
+          "row_sha256": "2dd1587965cf4e56535f3c4543b5ff7daab51271abd2e6680722e000c2245f19"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 205,
+          "row_sha256": "008e3c8d483b1433177d4e5671e193d7dfa4a26437f5d122626097216f595c16"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "炎帝",
+      "target": "黄帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 30,
+      "whole_row_rows": 80,
+      "locality_retention": 0.375,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 983,
+          "row_sha256": "8671ffc430412e7a6e04b8b92f1c22f7c824e1e6a52bc6c62de1abd4c53d11a8"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 203,
+          "row_sha256": "f97adb5f854c50d3a5fd1580163d0895808720bbc376085e110d30168ed5e7a1"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 611,
+          "row_sha256": "b364cd1b79529c761668bf745be92c67808d76da827c41311be278305e675488"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1679,
+          "row_sha256": "1fa39320e9fb67443c4a63610456f2773c1f66c9221c0cd0f528c53df4bc91c8"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 452,
+          "row_sha256": "9759ea7ac6b1d0b4a9dfb7bd936a0978dd4ecb419e109581e1a33e20e882a81d"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 947,
+          "row_sha256": "e0b1bdb1df085a5aa4c11f5ed1111910b2a62f4514a03e3ca7b023012fabf9a2"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 215,
+          "row_sha256": "2dd1587965cf4e56535f3c4543b5ff7daab51271abd2e6680722e000c2245f19"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 1693,
+          "row_sha256": "82c79f9743fc7bef6ace44eacdf2be0947848590c951ad6d1b61d47f398bf03e"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "女娲",
+      "target": "补天",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 18,
+      "whole_row_rows": 60,
+      "locality_retention": 0.3,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1646,
+          "row_sha256": "d68fef36bd85655e7f08b6eace28c74f0912e888bb6dbe6a81b840da36db8860"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 456,
+          "row_sha256": "fef7dac5e8195e4701b1d5f6c7f9a93df1e11b4f5f019cd3a99bda33b245dee5"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 539,
+          "row_sha256": "b67cb472811feb36d998163972b18f4b8619e303b078a75820656501a39ab658"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1289,
+          "row_sha256": "296e4d41fd64470e9961971a70cbe604fc1dcf836059b8704472a04a91f14bee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 391,
+          "row_sha256": "31773837edb13c7587292555739adb1128106614a2b5e6723b518938ffa74576"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 507,
+          "row_sha256": "332a14f341f9228c4680415d2a6bb2491fee3b2f7ac3fbbce8f3f604d99fc406"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "女娲",
+      "target": "黄帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 18,
+      "whole_row_rows": 68,
+      "locality_retention": 0.264706,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1646,
+          "row_sha256": "d68fef36bd85655e7f08b6eace28c74f0912e888bb6dbe6a81b840da36db8860"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 494,
+          "row_sha256": "73fa3e503ef08dca7b29180113d3942b1573b3328edf7abe8229df94165aade0"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 1693,
+          "row_sha256": "82c79f9743fc7bef6ace44eacdf2be0947848590c951ad6d1b61d47f398bf03e"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1664,
+          "row_sha256": "09af1e9f58b07b3201c4e3f00fac41fbba2554a565b807598b8248f04f086c30"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1130,
+          "row_sha256": "3b859f10aed7b4e1f808960822b3b2a0221b1dc631e2b23f5539eb8dcab387d5"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 852,
+          "row_sha256": "9d705648e5c31d731a63e38476235bdd233c9297d3ca45b4ddba260289a5c575"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "治水",
+      "target": "洪水",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 16,
+      "whole_row_rows": 90,
+      "locality_retention": 0.177778,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1187,
+          "row_sha256": "20286b63ec73cdc63eb0e89be59a78b9cbb92000b1e4da5eae9f457087acb1f8"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 782,
+          "row_sha256": "f00210f1f0d8fe7ed904a8a5d329a4a9343f8cd1c37494c7f3c7116d877c698c"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 50,
+          "row_sha256": "5e42e6a4aafb6ca37c3200e61af78a1b697d26fecff22b6a95114436c9241e6f"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 959,
+          "row_sha256": "e542ff80670602a79e57ec8854e7e5a07a441b30ca448b9db58e7752e61d3adc"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1066,
+          "row_sha256": "3cafae6cfaff75c1eeb663c53faef65ea3ff6dd2919cbd5348155a7f387e85f7"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1142,
+          "row_sha256": "c71921ad69591a6322c00e78a83bb0947673a19e7c2c3beeae7e66dbf648624b"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 443,
+          "row_sha256": "6964d77b1186c74f21851f62618707db64fe5b947cbd127be896b717c2ce958f"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 687,
+          "row_sha256": "ab702a74a2c11a900d93e7e0e11f9734c0ec334b34895ba4923534af5adff697"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "共工",
+      "target": "黄帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 15,
+      "whole_row_rows": 61,
+      "locality_retention": 0.245902,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 494,
+          "row_sha256": "73fa3e503ef08dca7b29180113d3942b1573b3328edf7abe8229df94165aade0"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 509,
+          "row_sha256": "186b3f34d6e73cc10c3a82ec60754501ea8f7d23332a6a81481baa1e7bf9143e"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1405,
+          "row_sha256": "44dd7f7e374e895b726b1c7ac5fd8de80f35ee66f37c505a1d114ff5a327dd93"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1436,
+          "row_sha256": "b7d9d828feeb7542a631f9aa1771e2e01a9abcc0c2c262314e4eb464ba1f07b2"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 830,
+          "row_sha256": "6eab23fbe6e230514a4d60c2de7c3642d83b95757e9775a102cd95ff9313b1f5"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "炎帝",
+      "target": "神农",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 15,
+      "whole_row_rows": 72,
+      "locality_retention": 0.208333,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 983,
+          "row_sha256": "8671ffc430412e7a6e04b8b92f1c22f7c824e1e6a52bc6c62de1abd4c53d11a8"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 1107,
+          "row_sha256": "d8513b68f4b39953c50011db57fb312858bf53e57b68c87860223e861fea2df4"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 215,
+          "row_sha256": "2dd1587965cf4e56535f3c4543b5ff7daab51271abd2e6680722e000c2245f19"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 205,
+          "row_sha256": "008e3c8d483b1433177d4e5671e193d7dfa4a26437f5d122626097216f595c16"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 261,
+          "row_sha256": "b2e2dbbb331ff1922a94302783dcba60f2a699b536edb3e83cb49f045ae95832"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 229,
+          "row_sha256": "a38de45fcd3bdee0f55e904a441511cf80d6b2958a9baebe05b9a92a6cb34233"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 986,
+          "row_sha256": "8f0e9963cccc3f13d4b1bdfeb3d5c0ea30041e8044b8f61ee25a1af47db7cb59"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1463,
+          "row_sha256": "46054ed07b262fd4d780ede4888b8bf52f33e88978a2dc4ec57214699fb1b7c1"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "后土",
+      "target": "黄帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 13,
+      "whole_row_rows": 65,
+      "locality_retention": 0.2,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1646,
+          "row_sha256": "d68fef36bd85655e7f08b6eace28c74f0912e888bb6dbe6a81b840da36db8860"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 494,
+          "row_sha256": "73fa3e503ef08dca7b29180113d3942b1573b3328edf7abe8229df94165aade0"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1131,
+          "row_sha256": "67c0533af3324671c415bd5dec8ba1fc51ce0926440bc26252af78b830530f33"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 509,
+          "row_sha256": "186b3f34d6e73cc10c3a82ec60754501ea8f7d23332a6a81481baa1e7bf9143e"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1405,
+          "row_sha256": "44dd7f7e374e895b726b1c7ac5fd8de80f35ee66f37c505a1d114ff5a327dd93"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1436,
+          "row_sha256": "b7d9d828feeb7542a631f9aa1771e2e01a9abcc0c2c262314e4eb464ba1f07b2"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 830,
+          "row_sha256": "6eab23fbe6e230514a4d60c2de7c3642d83b95757e9775a102cd95ff9313b1f5"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "治水",
+      "target": "黄帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 12,
+      "whole_row_rows": 89,
+      "locality_retention": 0.134831,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1088,
+          "row_sha256": "ca4fadc9d0956c5f3832c86dd22d0ed46c1e004cc5c82e79507a47875621ee75"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 959,
+          "row_sha256": "e542ff80670602a79e57ec8854e7e5a07a441b30ca448b9db58e7752e61d3adc"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 995,
+          "row_sha256": "dd44e235875a336af85ea1783f684f5d74703569f05feb65df632ba3fe9107fd"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 10,
+          "row_sha256": "f817606c952e895297c25b54f5ea6f25414ae0d1fe994bc4fccb41709ea7542e"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1405,
+          "row_sha256": "44dd7f7e374e895b726b1c7ac5fd8de80f35ee66f37c505a1d114ff5a327dd93"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1664,
+          "row_sha256": "09af1e9f58b07b3201c4e3f00fac41fbba2554a565b807598b8248f04f086c30"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "洪水",
+      "target": "黄帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 12,
+      "whole_row_rows": 92,
+      "locality_retention": 0.130435,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 959,
+          "row_sha256": "e542ff80670602a79e57ec8854e7e5a07a441b30ca448b9db58e7752e61d3adc"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 221,
+          "row_sha256": "4182df1c2c81e3b3b94440d84c5071eae4180607313095bed17412f0562c75ab"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 727,
+          "row_sha256": "c478ad4e4643984bd583105d471648102424a4d9a7e2366260b9a369f86d2a8f"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1405,
+          "row_sha256": "44dd7f7e374e895b726b1c7ac5fd8de80f35ee66f37c505a1d114ff5a327dd93"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1436,
+          "row_sha256": "b7d9d828feeb7542a631f9aa1771e2e01a9abcc0c2c262314e4eb464ba1f07b2"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 229,
+          "row_sha256": "a38de45fcd3bdee0f55e904a441511cf80d6b2958a9baebe05b9a92a6cb34233"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 477,
+          "row_sha256": "948595d675f8987b4097fce3fcd663575372bb1c7acf1c5cdba7a2244030af4b"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "共工",
+      "target": "后土",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 9,
+      "whole_row_rows": 54,
+      "locality_retention": 0.166667,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 494,
+          "row_sha256": "73fa3e503ef08dca7b29180113d3942b1573b3328edf7abe8229df94165aade0"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1355,
+          "row_sha256": "a35dcbfaf2e46b496a432418314ff696bfc515d47bc4cc7596f125eb770b6405"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 509,
+          "row_sha256": "186b3f34d6e73cc10c3a82ec60754501ea8f7d23332a6a81481baa1e7bf9143e"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1405,
+          "row_sha256": "44dd7f7e374e895b726b1c7ac5fd8de80f35ee66f37c505a1d114ff5a327dd93"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1436,
+          "row_sha256": "b7d9d828feeb7542a631f9aa1771e2e01a9abcc0c2c262314e4eb464ba1f07b2"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 830,
+          "row_sha256": "6eab23fbe6e230514a4d60c2de7c3642d83b95757e9775a102cd95ff9313b1f5"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 229,
+          "row_sha256": "a38de45fcd3bdee0f55e904a441511cf80d6b2958a9baebe05b9a92a6cb34233"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "女娲",
+      "target": "神农",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 9,
+      "whole_row_rows": 65,
+      "locality_retention": 0.138462,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 232,
+          "row_sha256": "452fd929fffdae851d566fd19393900ea058af0bc06e168fef4ba689cb2b786e"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "00a4d486f38ef5122709693fc432ac1893a825f21c6fc3fddab390e43bdb54fd"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 986,
+          "row_sha256": "8f0e9963cccc3f13d4b1bdfeb3d5c0ea30041e8044b8f61ee25a1af47db7cb59"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1463,
+          "row_sha256": "46054ed07b262fd4d780ede4888b8bf52f33e88978a2dc4ec57214699fb1b7c1"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 431,
+          "row_sha256": "43564684f1e1b275bb33c24a19b576c2791101f0e74d390cca8fca4d9b69efbd"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "共工",
+      "target": "女娲",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 8,
+      "whole_row_rows": 52,
+      "locality_retention": 0.153846,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 494,
+          "row_sha256": "73fa3e503ef08dca7b29180113d3942b1573b3328edf7abe8229df94165aade0"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 986,
+          "row_sha256": "8f0e9963cccc3f13d4b1bdfeb3d5c0ea30041e8044b8f61ee25a1af47db7cb59"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 533,
+          "row_sha256": "ace81ab227eea12c0d688f2bb45f969d4a908109570a5418d4a98c0a93c9c0e8"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 431,
+          "row_sha256": "43564684f1e1b275bb33c24a19b576c2791101f0e74d390cca8fca4d9b69efbd"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 61,
+          "row_sha256": "442ce41e4fc2659fe45f1ee7c548ebedcae0a76e5fea5b62dc7f69587275d8fa"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "共工",
+      "target": "神农",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 8,
+      "whole_row_rows": 60,
+      "locality_retention": 0.133333,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 229,
+          "row_sha256": "a38de45fcd3bdee0f55e904a441511cf80d6b2958a9baebe05b9a92a6cb34233"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 986,
+          "row_sha256": "8f0e9963cccc3f13d4b1bdfeb3d5c0ea30041e8044b8f61ee25a1af47db7cb59"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 431,
+          "row_sha256": "43564684f1e1b275bb33c24a19b576c2791101f0e74d390cca8fca4d9b69efbd"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 61,
+          "row_sha256": "442ce41e4fc2659fe45f1ee7c548ebedcae0a76e5fea5b62dc7f69587275d8fa"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "女娲",
+      "target": "炎帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 8,
+      "whole_row_rows": 61,
+      "locality_retention": 0.131148,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 1693,
+          "row_sha256": "82c79f9743fc7bef6ace44eacdf2be0947848590c951ad6d1b61d47f398bf03e"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 986,
+          "row_sha256": "8f0e9963cccc3f13d4b1bdfeb3d5c0ea30041e8044b8f61ee25a1af47db7cb59"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1463,
+          "row_sha256": "46054ed07b262fd4d780ede4888b8bf52f33e88978a2dc4ec57214699fb1b7c1"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1129,
+          "row_sha256": "4f144aec46e172dc49a20d99aacec1c297e686c13bef90d36f6f5a33fbdd4576"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 250,
+          "row_sha256": "10a56b012457fe1b32b8380c342a9330dac0435754e4320ff84026f7d8b28c31"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 957,
+          "row_sha256": "038334bb2fd8c925c4975593aefd0f86b9aca545da84cdd2c92e6f7604ca9aa2"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 431,
+          "row_sha256": "43564684f1e1b275bb33c24a19b576c2791101f0e74d390cca8fca4d9b69efbd"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 1100,
+          "row_sha256": "3ab49c0a6fca4b26ede0c828dce89f90941566fdb7821672e79b7633310952a0"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "共工",
+      "target": "洪水",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 7,
+      "whole_row_rows": 61,
+      "locality_retention": 0.114754,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 797,
+          "row_sha256": "d7f424413a185ca67682b456e7eec71e32520569856c144124792a4aca286653"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1405,
+          "row_sha256": "44dd7f7e374e895b726b1c7ac5fd8de80f35ee66f37c505a1d114ff5a327dd93"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1436,
+          "row_sha256": "b7d9d828feeb7542a631f9aa1771e2e01a9abcc0c2c262314e4eb464ba1f07b2"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 229,
+          "row_sha256": "a38de45fcd3bdee0f55e904a441511cf80d6b2958a9baebe05b9a92a6cb34233"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 533,
+          "row_sha256": "ace81ab227eea12c0d688f2bb45f969d4a908109570a5418d4a98c0a93c9c0e8"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 477,
+          "row_sha256": "948595d675f8987b4097fce3fcd663575372bb1c7acf1c5cdba7a2244030af4b"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "女娲",
+      "target": "治水",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 7,
+      "whole_row_rows": 63,
+      "locality_retention": 0.111111,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1289,
+          "row_sha256": "296e4d41fd64470e9961971a70cbe604fc1dcf836059b8704472a04a91f14bee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1664,
+          "row_sha256": "09af1e9f58b07b3201c4e3f00fac41fbba2554a565b807598b8248f04f086c30"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "00a4d486f38ef5122709693fc432ac1893a825f21c6fc3fddab390e43bdb54fd"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1463,
+          "row_sha256": "46054ed07b262fd4d780ede4888b8bf52f33e88978a2dc4ec57214699fb1b7c1"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1224,
+          "row_sha256": "6c302707af03108794ae41d5eb1c008c82266c2a860c3b9ffcb79f25935ccb7c"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1031,
+          "row_sha256": "41ee978bcdcfe0662ba2cbcf09a1e68165c2710200e3adc0da88ffbaef4e992f"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "共工",
+      "target": "治水",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 6,
+      "whole_row_rows": 63,
+      "locality_retention": 0.095238,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1399,
+          "row_sha256": "10a154c0f8728c7ea414e7a3155f464c8ba1cc05a668ef2df275fe06c3f1f6aa"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1405,
+          "row_sha256": "44dd7f7e374e895b726b1c7ac5fd8de80f35ee66f37c505a1d114ff5a327dd93"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 477,
+          "row_sha256": "948595d675f8987b4097fce3fcd663575372bb1c7acf1c5cdba7a2244030af4b"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1259,
+          "row_sha256": "29344e2b12a3d6b02e7265473dfa4792de6bb6a5af65b9bbb2b63180a7950797"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "句龙",
+      "target": "后土",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 5,
+      "whole_row_rows": 20,
+      "locality_retention": 0.25,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1580,
+          "row_sha256": "52648758a46a5beced890abb544a269c1ee3d700304ec9c15c8a9c574b10d723"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 494,
+          "row_sha256": "73fa3e503ef08dca7b29180113d3942b1573b3328edf7abe8229df94165aade0"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1355,
+          "row_sha256": "a35dcbfaf2e46b496a432418314ff696bfc515d47bc4cc7596f125eb770b6405"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 588,
+          "row_sha256": "c345a3a6ccda1a88ac14d9dc68aab83781690142ddb30074e62fb22d52c26c09"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "洪水",
+      "target": "神农",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 5,
+      "whole_row_rows": 82,
+      "locality_retention": 0.060976,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 221,
+          "row_sha256": "4182df1c2c81e3b3b94440d84c5071eae4180607313095bed17412f0562c75ab"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 727,
+          "row_sha256": "c478ad4e4643984bd583105d471648102424a4d9a7e2366260b9a369f86d2a8f"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 229,
+          "row_sha256": "a38de45fcd3bdee0f55e904a441511cf80d6b2958a9baebe05b9a92a6cb34233"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 9,
+          "row_sha256": "b750f866f8edb009949fded7c33d3205ffa5705109f044ebfe86a6a44fb26377"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "补天",
+      "target": "黄帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 5,
+      "whole_row_rows": 56,
+      "locality_retention": 0.089286,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1646,
+          "row_sha256": "d68fef36bd85655e7f08b6eace28c74f0912e888bb6dbe6a81b840da36db8860"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "00a4d486f38ef5122709693fc432ac1893a825f21c6fc3fddab390e43bdb54fd"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "共工",
+      "target": "句龙",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 4,
+      "whole_row_rows": 20,
+      "locality_retention": 0.2,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 494,
+          "row_sha256": "73fa3e503ef08dca7b29180113d3942b1573b3328edf7abe8229df94165aade0"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1355,
+          "row_sha256": "a35dcbfaf2e46b496a432418314ff696bfc515d47bc4cc7596f125eb770b6405"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 588,
+          "row_sha256": "c345a3a6ccda1a88ac14d9dc68aab83781690142ddb30074e62fb22d52c26c09"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "共工",
+      "target": "天柱",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 4,
+      "whole_row_rows": 44,
+      "locality_retention": 0.090909,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1393,
+          "row_sha256": "4d52f6a1b4212b74be8af5a4b26c11e8b26eca88bcbcf72ca811fa015fb0fd83"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 533,
+          "row_sha256": "ace81ab227eea12c0d688f2bb45f969d4a908109570a5418d4a98c0a93c9c0e8"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "共工",
+      "target": "补天",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 4,
+      "whole_row_rows": 46,
+      "locality_retention": 0.086957,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 533,
+          "row_sha256": "ace81ab227eea12c0d688f2bb45f969d4a908109570a5418d4a98c0a93c9c0e8"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "天降",
+      "target": "黄帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 4,
+      "whole_row_rows": 82,
+      "locality_retention": 0.04878,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1559,
+          "row_sha256": "07bc0d9e8e7dfdd8f34f29bf7b3cda0ec8b8ff69d2127c41e51c12da5bb2f2a3"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1130,
+          "row_sha256": "3b859f10aed7b4e1f808960822b3b2a0221b1dc631e2b23f5539eb8dcab387d5"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 16,
+          "row_sha256": "e46807db7880a861a28f551dff8d23fd3646ae0d6702cf5d82ba0729b13c5d42"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1400,
+          "row_sha256": "63b5289cdac9e599649fcd2c36cbe0d9f11d078a49099e484c6b20f16658d0a9"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "女娲",
+      "target": "洪水",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 4,
+      "whole_row_rows": 68,
+      "locality_retention": 0.058824,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 456,
+          "row_sha256": "fef7dac5e8195e4701b1d5f6c7f9a93df1e11b4f5f019cd3a99bda33b245dee5"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 533,
+          "row_sha256": "ace81ab227eea12c0d688f2bb45f969d4a908109570a5418d4a98c0a93c9c0e8"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 388,
+          "row_sha256": "77f449340422ca717cac6840e864a63e040c74f31aec65e5c49c75aca5310df1"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "治水",
+      "target": "神农",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 4,
+      "whole_row_rows": 78,
+      "locality_retention": 0.051282,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "00a4d486f38ef5122709693fc432ac1893a825f21c6fc3fddab390e43bdb54fd"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1463,
+          "row_sha256": "46054ed07b262fd4d780ede4888b8bf52f33e88978a2dc4ec57214699fb1b7c1"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "治水",
+      "target": "补天",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 4,
+      "whole_row_rows": 58,
+      "locality_retention": 0.068966,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1289,
+          "row_sha256": "296e4d41fd64470e9961971a70cbe604fc1dcf836059b8704472a04a91f14bee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "00a4d486f38ef5122709693fc432ac1893a825f21c6fc3fddab390e43bdb54fd"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1224,
+          "row_sha256": "6c302707af03108794ae41d5eb1c008c82266c2a860c3b9ffcb79f25935ccb7c"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "神农",
+      "target": "补天",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 4,
+      "whole_row_rows": 55,
+      "locality_retention": 0.072727,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "00a4d486f38ef5122709693fc432ac1893a825f21c6fc3fddab390e43bdb54fd"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "共工",
+      "target": "炎帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 3,
+      "whole_row_rows": 59,
+      "locality_retention": 0.050847,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 229,
+          "row_sha256": "a38de45fcd3bdee0f55e904a441511cf80d6b2958a9baebe05b9a92a6cb34233"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 986,
+          "row_sha256": "8f0e9963cccc3f13d4b1bdfeb3d5c0ea30041e8044b8f61ee25a1af47db7cb59"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 431,
+          "row_sha256": "43564684f1e1b275bb33c24a19b576c2791101f0e74d390cca8fca4d9b69efbd"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "句龙",
+      "target": "黄帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 3,
+      "whole_row_rows": 22,
+      "locality_retention": 0.136364,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 494,
+          "row_sha256": "73fa3e503ef08dca7b29180113d3942b1573b3328edf7abe8229df94165aade0"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 1134,
+          "row_sha256": "c756e68e9877d2d7f2719a9c216cde4e628e60e7b9b86bbd057fe1f3124df951"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "后土",
+      "target": "治水",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 3,
+      "whole_row_rows": 64,
+      "locality_retention": 0.046875,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 197,
+          "row_sha256": "b893cd737d19b7aba569682eb88b42d1f442301c3d6c51f2fc6fa5eb2885e015"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1405,
+          "row_sha256": "44dd7f7e374e895b726b1c7ac5fd8de80f35ee66f37c505a1d114ff5a327dd93"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "后土",
+      "target": "洪水",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 3,
+      "whole_row_rows": 66,
+      "locality_retention": 0.045455,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1405,
+          "row_sha256": "44dd7f7e374e895b726b1c7ac5fd8de80f35ee66f37c505a1d114ff5a327dd93"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1436,
+          "row_sha256": "b7d9d828feeb7542a631f9aa1771e2e01a9abcc0c2c262314e4eb464ba1f07b2"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 229,
+          "row_sha256": "a38de45fcd3bdee0f55e904a441511cf80d6b2958a9baebe05b9a92a6cb34233"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "天柱",
+      "target": "女娲",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 3,
+      "whole_row_rows": 46,
+      "locality_retention": 0.065217,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 533,
+          "row_sha256": "ace81ab227eea12c0d688f2bb45f969d4a908109570a5418d4a98c0a93c9c0e8"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "天柱",
+      "target": "补天",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 3,
+      "whole_row_rows": 43,
+      "locality_retention": 0.069767,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 533,
+          "row_sha256": "ace81ab227eea12c0d688f2bb45f969d4a908109570a5418d4a98c0a93c9c0e8"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "天柱",
+      "target": "黄帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 3,
+      "whole_row_rows": 59,
+      "locality_retention": 0.050847,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1678,
+          "row_sha256": "2d878b466aa70e697eea26513090db286ae555a7b076813c8a4b89437014c732"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "洪水",
+      "target": "炎帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 3,
+      "whole_row_rows": 76,
+      "locality_retention": 0.039474,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 229,
+          "row_sha256": "a38de45fcd3bdee0f55e904a441511cf80d6b2958a9baebe05b9a92a6cb34233"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 9,
+          "row_sha256": "b750f866f8edb009949fded7c33d3205ffa5705109f044ebfe86a6a44fb26377"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 1377,
+          "row_sha256": "7112c7b3794c7474780e07b7645699505cb57e775844ac3aa17fe82ca5c29fb6"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "洪水",
+      "target": "补天",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 3,
+      "whole_row_rows": 60,
+      "locality_retention": 0.05,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 456,
+          "row_sha256": "fef7dac5e8195e4701b1d5f6c7f9a93df1e11b4f5f019cd3a99bda33b245dee5"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 525,
+          "row_sha256": "9a7225f3d547b84a265c397d080de3601ceb8f95a2edb9d2c462507c374dd700"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 533,
+          "row_sha256": "ace81ab227eea12c0d688f2bb45f969d4a908109570a5418d4a98c0a93c9c0e8"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "不周山",
+      "target": "共工",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 2,
+      "whole_row_rows": 36,
+      "locality_retention": 0.055556,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1393,
+          "row_sha256": "4d52f6a1b4212b74be8af5a4b26c11e8b26eca88bcbcf72ca811fa015fb0fd83"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 588,
+          "row_sha256": "c345a3a6ccda1a88ac14d9dc68aab83781690142ddb30074e62fb22d52c26c09"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "后土",
+      "target": "女娲",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 2,
+      "whole_row_rows": 53,
+      "locality_retention": 0.037736,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1646,
+          "row_sha256": "d68fef36bd85655e7f08b6eace28c74f0912e888bb6dbe6a81b840da36db8860"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 494,
+          "row_sha256": "73fa3e503ef08dca7b29180113d3942b1573b3328edf7abe8229df94165aade0"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "后土",
+      "target": "神农",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 2,
+      "whole_row_rows": 63,
+      "locality_retention": 0.031746,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 229,
+          "row_sha256": "a38de45fcd3bdee0f55e904a441511cf80d6b2958a9baebe05b9a92a6cb34233"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "天柱",
+      "target": "治水",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 2,
+      "whole_row_rows": 58,
+      "locality_retention": 0.034483,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 512,
+          "row_sha256": "ae2a7c2f55ca00ca0ee276ebe39476b2f4b1c8e3f3d51cc5f8d4667b4b5d5ecd"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 425,
+          "row_sha256": "2bc27053b20c95298ef81c039cd0cef16b78eb412cd2454dabfbce5e1fb01028"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "天柱",
+      "target": "洪水",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 2,
+      "whole_row_rows": 58,
+      "locality_retention": 0.034483,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 506,
+          "row_sha256": "943a8330e4840016bbc2bebf54090e969405846c7dff37d11077188bf723e10f"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 533,
+          "row_sha256": "ace81ab227eea12c0d688f2bb45f969d4a908109570a5418d4a98c0a93c9c0e8"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "天柱",
+      "target": "神农",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 2,
+      "whole_row_rows": 53,
+      "locality_retention": 0.037736,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 557,
+          "row_sha256": "43bb971111f2780a96328b2328dcb0d198bc3fe20b940c5f18eee0dbd4c66557"
+        },
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 597,
+          "row_sha256": "a75ee1ff960dc0d3b377691bba6f3a62903480c7a381adf9073dd54a71328fee"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "不周山",
+      "target": "句龙",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 1,
+      "whole_row_rows": 14,
+      "locality_retention": 0.071429,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 588,
+          "row_sha256": "c345a3a6ccda1a88ac14d9dc68aab83781690142ddb30074e62fb22d52c26c09"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "不周山",
+      "target": "后土",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 1,
+      "whole_row_rows": 31,
+      "locality_retention": 0.032258,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 588,
+          "row_sha256": "c345a3a6ccda1a88ac14d9dc68aab83781690142ddb30074e62fb22d52c26c09"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "不周山",
+      "target": "天柱",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 1,
+      "whole_row_rows": 30,
+      "locality_retention": 0.033333,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1393,
+          "row_sha256": "4d52f6a1b4212b74be8af5a4b26c11e8b26eca88bcbcf72ca811fa015fb0fd83"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "句龙",
+      "target": "女娲",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 1,
+      "whole_row_rows": 17,
+      "locality_retention": 0.058824,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 494,
+          "row_sha256": "73fa3e503ef08dca7b29180113d3942b1573b3328edf7abe8229df94165aade0"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "句龙",
+      "target": "治水",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 1,
+      "whole_row_rows": 20,
+      "locality_retention": 0.05,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "句龙",
+      "target": "神农",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 1,
+      "whole_row_rows": 21,
+      "locality_retention": 0.047619,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00142-of-00233.parquet",
+          "row": 1677,
+          "row_sha256": "460830880f9180f1fabcbd3f54e157be9a68a677c218f71e88e060f1dd7049df"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "后土",
+      "target": "炎帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 1,
+      "whole_row_rows": 57,
+      "locality_retention": 0.017544,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00143-of-00233.parquet",
+          "row": 229,
+          "row_sha256": "a38de45fcd3bdee0f55e904a441511cf80d6b2958a9baebe05b9a92a6cb34233"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "后土",
+      "target": "补天",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 1,
+      "whole_row_rows": 46,
+      "locality_retention": 0.021739,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1646,
+          "row_sha256": "d68fef36bd85655e7f08b6eace28c74f0912e888bb6dbe6a81b840da36db8860"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "天降",
+      "target": "女娲",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 1,
+      "whole_row_rows": 62,
+      "locality_retention": 0.016129,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 1130,
+          "row_sha256": "3b859f10aed7b4e1f808960822b3b2a0221b1dc631e2b23f5539eb8dcab387d5"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "天降",
+      "target": "洪水",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 1,
+      "whole_row_rows": 77,
+      "locality_retention": 0.012987,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00145-of-00233.parquet",
+          "row": 666,
+          "row_sha256": "3007d4b76acadf993b21bb8e0a39ca006acb828ecd9b5d0700263d29349e4453"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    },
+    {
+      "source": "治水",
+      "target": "炎帝",
+      "relation": "TEXTUAL_LOCAL_COOCCURRENCE",
+      "local_window_rows": 1,
+      "whole_row_rows": 73,
+      "locality_retention": 0.013699,
+      "evidence_examples": [
+        {
+          "source": "Literature-zh",
+          "file": "literature_zh-00144-of-00233.parquet",
+          "row": 1463,
+          "row_sha256": "46054ed07b262fd4d780ede4888b8bf52f33e88978a2dc4ec57214699fb1b7c1"
+        }
+      ],
+      "truth_status": "TEXTUAL_LOCAL_ONLY"
+    }
+  ],
+  "default_evidence_scope": "stored_local_window",
+  "whole_row_background_only": true,
+  "edge_semantics": "Edge means local textual co-presence in the stored evidence window only; it does not assert identity, causality, chronology, prevalence, or historical truth.",
+  "selection_warning": "Rows came from router-ranked top shards with per-shard caps, so edge counts are not full-corpus prevalence estimates.",
+  "next_gate": "Audit source identity, edition/date, genre, and independent corroboration before any stronger interpretation."
+}

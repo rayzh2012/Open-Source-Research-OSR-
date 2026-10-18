@@ -1,0 +1,13 @@
+{
+  "version": "v1.0",
+  "mode": "exact_substring",
+  "terms": [
+    "女娲", "伏羲", "共工", "炎帝", "神农", "黄帝", "蚩尤", "应龙", "烛龙",
+    "龙王", "龙神", "龙女", "龙母", "虎祖", "虎神", "蛇神", "龟神", "玄武",
+    "洪水", "治水", "补天", "天柱", "不周山", "祭祀", "祭司", "巫", "鬼神",
+    "本主", "祖灵", "图腾", "变形", "异兽", "神婚", "人祭", "献祭"
+  ],
+  "sample_hits_per_term_per_shard": 3,
+  "context_chars": 180,
+  "note": "Cheap-player v1 query pack. Counts are exhaustive within scanned shards; snippets are capped. Expand terms without changing the execution fabric."
+}

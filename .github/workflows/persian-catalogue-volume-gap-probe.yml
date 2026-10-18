@@ -1,0 +1,30 @@
+name: Persian Catalogue Volume Gap Probe
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/persian-catalogue-volume-gap-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,urllib.parse,urllib.request
+          queries=[
+            'title:("Catalogue of the Persian, Turkish, Hindustani and Pushtu manuscripts")',
+            'title:("Catalogue of Persian manuscripts" AND "India Office")',
+            'title:("Catalogue of the Persian manuscripts" AND "British Museum")'
+          ]
+          out=[]
+          for q in queries:
+            p=urllib.parse.urlencode({'q':q,'fl[]':['identifier','title','date','year','creator','volume'],'rows':100,'output':'json'},doseq=True)
+            req=urllib.request.Request('https://archive.org/advancedsearch.php?'+p,headers={'User-Agent':'OSR-Preservation/1.0'})
+            with urllib.request.urlopen(req,timeout=90) as r:o=json.load(r)
+            out.append({'query':q,'numFound':o.get('response',{}).get('numFound'),'docs':o.get('response',{}).get('docs',[])})
+          print('RESULT_JSON='+json.dumps(out,ensure_ascii=False,sort_keys=True))
+          PY

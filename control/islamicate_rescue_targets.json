@@ -1,0 +1,71 @@
+{
+  "schema_version": "osr-islamicate-rescue-targets-v4",
+  "destination_root": "龍族古籍源庫｜Dragon Source Corpus/ISLAMIC_PERSIAN_RESCUE",
+  "sources": [
+    {
+      "id": "openiti",
+      "label": "OpenITI 2025.1.9",
+      "enabled": false,
+      "managed_by": ".github/workflows/openiti-drive-ingest.yml",
+      "kind": "existing_pipeline",
+      "version": "2025.1.9",
+      "source_url": "https://zenodo.org/records/17767721",
+      "notes": "Immutable raw release + metadata + deterministic Parquet sidecar pipeline. Do not duplicate."
+    },
+    {
+      "id": "ganjoor",
+      "label": "Ganjoor Persian Poetry SQLite",
+      "enabled": true,
+      "kind": "ganjoor_sqlite",
+      "version": "v2.81",
+      "download_url": "https://github.com/ganjoor/desktop/releases/download/v2.81/ganjoor.s3db.zip",
+      "source_page": "https://ganjoor.net/faq?id=11",
+      "expected_bytes": 50486148,
+      "rights_note": "Official Ganjoor FAQ publicly distributes the SQLite database; preserve source/release metadata and verify downstream redistribution terms separately."
+    },
+    {
+      "id": "hmml_reading_room",
+      "label": "HMML Reading Room Full Metadata",
+      "enabled": true,
+      "kind": "hmml_metadata",
+      "download_url": "https://www.vhmml.org/datasets/vhmml_rr_fulldata.zip",
+      "source_page": "https://www.vhmml.org/dataPortal/dataset",
+      "license": "CC-BY-4.0",
+      "update_policy": "weekly snapshot",
+      "rights_note": "Metadata only. Do not bulk-download HMML manuscript images without item-level permission."
+    },
+    {
+      "id": "loc_persian_manuscripts",
+      "label": "Library of Congress Persian Manuscripts",
+      "enabled": false,
+      "kind": "dedicated_pipeline",
+      "managed_by": ".github/workflows/loc-persian-pdf-rescue.yml",
+      "expected_items": 173,
+      "capture": ["item_api_json", "official_pdf", "page_file_inventory"],
+      "image_policy": "PDF-first; original-page backfill later from preserved FILES.json",
+      "access_note": "LOC item JSON API is reachable from GitHub; Presentation Manifest endpoint is Cloudflare-challenged on GitHub-hosted runners, so the rescue pipeline uses the official item JSON resources and PDF directly.",
+      "rights_note": "LOC Persian Language Manuscript Project items are public domain or have no known copyright restrictions and are free to use and reuse."
+    },
+    {
+      "id": "qdl_arabic_scientific_manuscripts",
+      "label": "Qatar Digital Library Arabic Scientific Manuscripts",
+      "enabled": false,
+      "kind": "external_acquisition_required",
+      "registry": "control/qdl_public_domain_rescue_registry.json",
+      "access_state": "GITHUB_HOSTED_RUNNER_BLOCKED_403",
+      "verified_at": "2026-08-27",
+      "blocked_planes": ["www.qdl.qa", "iiif.qdl.qa"],
+      "next_plane": "non-GitHub acquisition with ordinary permitted public access",
+      "image_policy": "public-domain-or-explicit-open-rights-only",
+      "rights_note": "Do not attempt to bypass QDL access controls. Preserve verified public metadata/manifest/image identities and acquire only through a permitted network plane."
+    },
+    {
+      "id": "gallica_persian_manuscripts",
+      "label": "BnF Gallica Persian Manuscripts",
+      "enabled": false,
+      "kind": "iiif_registry_only",
+      "image_policy": "disabled-until-rights-audit",
+      "rights_note": "Register manifests/rights first; no bulk image mirroring until collection-level reuse terms are audited."
+    }
+  ]
+}

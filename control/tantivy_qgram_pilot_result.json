@@ -1,0 +1,121 @@
+{
+  "status": "PASS",
+  "engine": "Tantivy q-gram locator pilot",
+  "tantivy_version": "tantivy v0.26.0, index_format v7",
+  "tokenizer": "NgramTokenizer(3,3,false)",
+  "index_record_option": "basic (DocID only; no freq; no positions)",
+  "text_stored": false,
+  "locator_fields_stored": [
+    "corpus",
+    "shard",
+    "row",
+    "chunk",
+    "row_hash"
+  ],
+  "chunk_chars": 8192,
+  "chunk_overlap": 128,
+  "sources": [
+    {
+      "corpus": "Literature-zh",
+      "repo": "Geralt-Targaryen/Literature-zh",
+      "file": "literature_zh-00233-of-00233.parquet",
+      "download_bytes": 80314697,
+      "download_seconds": 2.939,
+      "download_mib_s": 26.061,
+      "sha256": "d452713dfc7fecf65e713541a5c85c2f772f51e46b5cd3d6bb34b0aff3b6693e",
+      "text_column": "text",
+      "rows_sampled": 3000,
+      "chunks_indexed": 3513,
+      "text_bytes": 42855271,
+      "sample_phrase": "生活层面的祖",
+      "sample_locator": {
+        "row": 0,
+        "row_hash": "f45902801a4bc56e40028ff9470bc831743e73e12ee9dbbae5f24b1f19420a44"
+      },
+      "parquet_rows": 9660,
+      "row_groups": 1
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "repo": "Morton-Li/ChineseWebText2.0-HighQuality",
+      "file": "data/CASIA-LM_ChineseWebText2.0_partial-001554.parquet",
+      "download_bytes": 233887256,
+      "download_seconds": 7.768,
+      "download_mib_s": 28.715,
+      "sha256": "7413ab08278b34d41c2ac12767992d8195ef39aa22be3ef1db8e35a035b12f41",
+      "text_column": "text",
+      "rows_sampled": 3000,
+      "chunks_indexed": 3023,
+      "text_bytes": 10334264,
+      "sample_phrase": "那是一个春天",
+      "sample_locator": {
+        "row": 0,
+        "row_hash": "d8fd7c579d5c840fd27024e4500e8bc29015fcbfe0d55a5ece5b1dfa5f5b5302"
+      },
+      "parquet_rows": 93566,
+      "row_groups": 1
+    }
+  ],
+  "sampled_text_bytes": 53189535,
+  "chunks_indexed": 6536,
+  "index_data_bytes": 96793020,
+  "index_to_sampled_text_ratio": 1.8198,
+  "total_index_seconds": 15.081,
+  "final_commit_seconds": 3.119,
+  "index_mib_s_on_sampled_text": 3.364,
+  "queries": [
+    {
+      "corpus": "Literature-zh",
+      "phrase": "生活层面的祖",
+      "qgrams": [
+        "生活层",
+        "活层面",
+        "层面的",
+        "面的祖"
+      ],
+      "candidate_count": 1,
+      "returned": 1,
+      "expected_locator_found": true,
+      "elapsed_ms": 0.42,
+      "hits": [
+        {
+          "score": 15.794272422790527,
+          "corpus": "Literature-zh",
+          "shard": "literature_zh-00233-of-00233.parquet",
+          "row": 0,
+          "chunk": 0,
+          "row_hash": "f45902801a4bc56e40028ff9470bc831743e73e12ee9dbbae5f24b1f19420a44"
+        }
+      ]
+    },
+    {
+      "corpus": "ChineseWebText2.0-HighQuality",
+      "phrase": "那是一个春天",
+      "qgrams": [
+        "那是一",
+        "是一个",
+        "一个春",
+        "个春天"
+      ],
+      "candidate_count": 1,
+      "returned": 1,
+      "expected_locator_found": true,
+      "elapsed_ms": 0.339,
+      "hits": [
+        {
+          "score": 18.14644432067871,
+          "corpus": "ChineseWebText2.0-HighQuality",
+          "shard": "data/CASIA-LM_ChineseWebText2.0_partial-001554.parquet",
+          "row": 0,
+          "chunk": 0,
+          "row_hash": "d8fd7c579d5c840fd27024e4500e8bc29015fcbfe0d55a5ece5b1dfa5f5b5302"
+        }
+      ]
+    }
+  ],
+  "total_seconds": 15.083,
+  "runner": "GitHub Actions 1000003432",
+  "github_run_id": "32560108338",
+  "github_sha": "ffce383a497610ae364d9a28d0704c9c1c3ee5cb",
+  "production_contract": "q-gram candidates -> locator -> exact substring recheck against source row; no phrase positions stored in index"
+}

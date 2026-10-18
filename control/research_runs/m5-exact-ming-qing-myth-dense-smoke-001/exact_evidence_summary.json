@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "run_id": "m5-exact-ming-qing-myth-dense-smoke-001",
+  "router_run_id": "m5-router-ming-qing-dense-001",
+  "query_term_count": 15,
+  "research_profile_id": "myth-ming-qing-dense-v1",
+  "source_profile_required": true,
+  "required_any_term_count": 0,
+  "top_n_shards": 4,
+  "rows_found": 120,
+  "bytes_downloaded": 7210395643,
+  "rows_with_source_profile_cue": 120,
+  "unique_source_titles": 120,
+  "all_query_term_rows": 0,
+  "four_plus_local_term_rows": 18,
+  "three_plus_local_term_rows": 44,
+  "rows_with_required_local_term": 0,
+  "rows_with_metadata": 120,
+  "min_local_terms": 2,
+  "selection_mode": "source-profile + required-source-term + best-local-window-per-shard"
+}

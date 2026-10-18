@@ -1,0 +1,110 @@
+name: OSR M5 Exact Evidence Research Run
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths:
+      - control/m5_exact_evidence_request.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: osr-m5-exact-evidence
+  cancel-in-progress: false
+
+jobs:
+  research-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage2-direct-miner-v3-1
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: DRY RUN / cost preflight — no corpus network, no writes
+        run: python tools/osr_research_preflight.py --request control/m5_exact_evidence_request.json --workflow .github/workflows/osr-m5-exact-evidence.yml
+
+      - name: Install exact-retrieval dependencies
+        run: python -m pip install --disable-pip-version-check pyarrow==21.0.0 requests==2.32.4 huggingface_hub==0.34.4
+
+      - name: REAL RUN — retrieve exact source rows
+        run: python tools/osr_m5_exact_evidence.py
+
+      - name: Analyze locality / co-occurrence
+        run: python tools/osr_m5_evidence_analyzer.py
+
+      - name: Quality audit
+        run: python tools/osr_m5_evidence_quality_audit.py
+
+      - name: Source identity / chronology audit
+        run: python tools/osr_m5_source_chronology_audit.py
+
+      - name: Graph prep — local textual edges only
+        run: python tools/osr_m6_graph_prep.py
+
+      - name: Verify core component run IDs before writeback
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          files = {
+            'exact': ('control/m5_exact_evidence_summary.json', 'run_id'),
+            'analysis': ('control/m5_evidence_analysis.json', 'run_id'),
+            'quality': ('control/m5_evidence_quality_audit.json', 'run_id'),
+            'source': ('control/m5_source_chronology_audit.json', 'run_id'),
+            'graph': ('control/m6_graph_prep.json', 'source_run_id'),
+          }
+          vals = {}
+          for k,(p,key) in files.items():
+              obj=json.loads(pathlib.Path(p).read_text('utf-8'))
+              vals[k]=obj.get(key)
+          target=vals['exact']
+          bad={k:v for k,v in vals.items() if v != target}
+          print(json.dumps({'target':target,'components':vals,'mismatches':bad},ensure_ascii=False,indent=2))
+          if bad: raise SystemExit(5)
+          PY
+
+      - name: Build and optionally send Notion writeback
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID }}
+        run: python tools/osr_notion_writeback.py
+
+      - name: Archive complete research package + checksums
+        run: python tools/osr_archive_research_package.py
+
+      - name: Verify archive manifest exists and is COMPLETE
+        shell: python
+        run: |
+          import json, pathlib
+          run=json.load(open('control/m5_exact_evidence_summary.json',encoding='utf-8'))['run_id']
+          p=pathlib.Path('control/research_runs')/run/'run_manifest.json'
+          if not p.exists(): raise SystemExit(f'missing run manifest: {p}')
+          m=json.loads(p.read_text('utf-8'))
+          if m.get('status')!='COMPLETE' or m.get('component_count')!=7:
+              raise SystemExit(f'incomplete research package: {m}')
+          print(json.dumps({'status':'PACKAGE_GATE_PASS','run_id':run,'components':m.get('component_count')},ensure_ascii=False))
+
+      - name: Commit complete research package once
+        run: |
+          git config user.name 'osr-actions-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add \
+            control/m5_exact_evidence_result.json \
+            control/m5_exact_evidence_summary.json \
+            control/m5_evidence_analysis.json \
+            control/m5_evidence_quality_audit.json \
+            control/m5_source_chronology_audit.json \
+            control/m6_graph_prep.json \
+            control/notion_writeback_latest.json \
+            control/research_runs/
+          git diff --cached --quiet && exit 0
+          git commit -m 'm5: complete preflighted research run'
+          git pull --rebase origin stage2-direct-miner-v3-1
+          git push origin HEAD:stage2-direct-miner-v3-1

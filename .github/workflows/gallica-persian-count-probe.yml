@@ -1,0 +1,31 @@
+name: Gallica Persian Count Probe
+
+on:
+  push:
+    branches: [stage2-direct-miner-v3-1]
+    paths: ['.github/workflows/gallica-persian-count-probe.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Query Gallica SRU cardinality
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import urllib.parse, urllib.request, xml.etree.ElementTree as ET
+          q='((dc.language all "per") or (dc.language all "fas")) and (dc.type all "manuscrit")'
+          params=urllib.parse.urlencode({'version':'1.2','operation':'searchRetrieve','query':q,'maximumRecords':1,'collapsing':'false'})
+          req=urllib.request.Request('https://gallica.bnf.fr/SRU?'+params,headers={'User-Agent':'OSR-Preservation/1.0','Accept':'application/xml'})
+          with urllib.request.urlopen(req,timeout=90) as r: data=r.read()
+          root=ET.fromstring(data)
+          vals=[x.text.strip() for x in root.iter() if x.tag.rsplit('}',1)[-1]=='numberOfRecords' and x.text]
+          print('QUERY='+q)
+          print('GALLICA_PERSIAN_MANUSCRIPTS='+str(int(vals[0]) if vals else 0))
+          PY

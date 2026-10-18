@@ -1,0 +1,23 @@
+{
+  "id": 2,
+  "run_id": "dryrun-source-ancestor-20260824-001",
+  "router_result": "control/m5_router_result.json",
+  "expected_router_run_id": "m5-router-fusion-chronology-001",
+  "top_n_shards": 12,
+  "terms": [
+    "共工", "女娲", "不周山", "补天",
+    "论衡", "淮南子", "列子", "三皇本纪",
+    "儒书言", "儒书", "王充", "许慎", "高诱",
+    "谈天", "天文训", "览冥训", "共工，官名", "其后子孙"
+  ],
+  "required_any_terms": [
+    "论衡", "淮南子", "列子", "三皇本纪",
+    "儒书言", "儒书", "王充", "许慎", "高诱",
+    "谈天", "天文训", "览冥训", "共工，官名", "其后子孙"
+  ],
+  "max_rows_per_shard": 30,
+  "context_chars": 700,
+  "document_head_chars": 1000,
+  "min_local_terms": 2,
+  "purpose": "Zero-download preflight for source-critical ancestor audit. Require at least one local bibliographic/textual-critical marker so modern myth retellings cannot dominate the evidence sample."
+}
