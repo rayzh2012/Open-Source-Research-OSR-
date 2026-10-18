@@ -1,0 +1,41 @@
+name: Acquire Kharias 1937
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/acquire-kharias-1937.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - source_id: kharias_vol1
+            url: https://archive.org/download/in.ernet.dli.2015.46905/2015.46905.The-Kharias.pdf
+            filename: 1937_Roy_The_Kharias_Vol1.pdf
+          - source_id: kharias_vol2
+            url: https://archive.org/download/in.ernet.dli.2015.21281/2015.21281.The-Khariasvol2.pdf
+            filename: 1937_Roy_The_Kharias_Vol2.pdf
+    steps:
+      - name: Fetch and validate
+        shell: bash
+        env:
+          URL: ${{ matrix.url }}
+          OUT: ${{ matrix.filename }}
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          curl -fL --retry 5 --retry-all-errors --connect-timeout 30 --max-time 1200 "$URL" -o "out/$OUT"
+          test "$(head -c 5 "out/$OUT")" = '%PDF-'
+          stat -c '%s' "out/$OUT" | tee out/size.txt
+          sha256sum "out/$OUT" | tee out/sha256.txt
+          echo "$URL" > out/source.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roy-${{ matrix.source_id }}-1937
+          path: out/
+          compression-level: 0
+          retention-days: 7

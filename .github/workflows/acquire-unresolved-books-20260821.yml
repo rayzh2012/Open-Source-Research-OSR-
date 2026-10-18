@@ -1,0 +1,152 @@
+name: Acquire Unresolved Books 20260821
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/acquire-unresolved-books-20260821.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  archive-books:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - source_id: elwin_middle_india_1949
+            ia: in.ernet.dli.2015.103560
+            filename: 1949_Elwin_Myths_of_Middle_India.pdf
+          - source_id: elwin_orissa_1954
+            ia: in.gov.ignca.2054
+            filename: 1954_Elwin_Tribal_Myths_of_Orissa.pdf
+          - source_id: elwin_indian_tribe_1955
+            ia: in.gov.ignca.3063
+            filename: 1955_Elwin_The_Religion_of_an_Indian_Tribe.pdf
+    steps:
+      - name: Resolve best PDF from Internet Archive metadata
+        shell: bash
+        env:
+          IA: ${{ matrix.ia }}
+          OUT: ${{ matrix.filename }}
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          curl -fL --retry 3 --connect-timeout 20 --max-time 120 "https://archive.org/metadata/$IA" -o out/meta.json
+          python - <<'PY' > out/selected.txt
+          import json, os
+          d=json.load(open('out/meta.json'))
+          files=d.get('files',[])
+          c=[]
+          for f in files:
+              n=f.get('name','')
+              if not n.lower().endswith('.pdf'): continue
+              try:s=int(f.get('size') or 0)
+              except:s=0
+              score=0
+              ln=n.lower()
+              if '_text.pdf' in ln: score+=50
+              if f.get('source')=='original': score+=40
+              if 'text pdf' in (f.get('format') or '').lower(): score+=20
+              if s>1_000_000: score+=10
+              c.append((score,s,n))
+          if not c: raise SystemExit('NO_PDF')
+          c.sort(reverse=True)
+          print(c[0][2])
+          print(c[0][1])
+          print(c[0][0])
+          print('CANDIDATES')
+          for x in c[:20]: print(x)
+          PY
+          PDFNAME="$(head -n1 out/selected.txt)"
+          echo "Selected $PDFNAME"
+          curl -fL --retry 3 --connect-timeout 30 --max-time 1200 "https://archive.org/download/$IA/$PDFNAME" -o "out/$OUT"
+          test "$(head -c 5 "out/$OUT")" = '%PDF-'
+          stat -c '%s' "out/$OUT" | tee out/size.txt
+          sha256sum "out/$OUT" | tee out/sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unresolved-${{ matrix.source_id }}
+          path: out/
+          compression-level: 0
+          retention-days: 7
+
+  riedel-1886:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Discover and fetch Riedel 1886 from open indexes
+        shell: bash
+        run: |
+          set -u
+          mkdir -p out
+          title='De sluik-en kroesharige rassen tusschen Selebes en Papua'
+          curl -A 'Mozilla/5.0' -L --retry 2 --get --data-urlencode "title=$title" --data-urlencode 'author=Riedel' --data-urlencode 'limit=20' 'https://openlibrary.org/search.json' -o out/openlibrary.json || true
+          curl -A 'Mozilla/5.0' -L --retry 2 --get --data-urlencode 'q=title:"De sluik-en kroesharige rassen tusschen Selebes en Papua" AND creator:Riedel' --data-urlencode 'fl[]=identifier,title,creator' --data-urlencode 'rows=50' --data-urlencode 'output=json' 'https://archive.org/advancedsearch.php' -o out/ia_search.json || true
+          curl -A 'Mozilla/5.0' -L --retry 2 --connect-timeout 20 --max-time 90 'https://books.google.com/books?id=jelU0AEACAAJ' -o out/google.html || true
+          python - <<'PY' | tee out/discovery.txt
+          import json,re,pathlib,html
+          ids=[]
+          p=pathlib.Path('out/openlibrary.json')
+          if p.exists() and p.stat().st_size:
+              try:
+                  d=json.load(open(p))
+                  for doc in d.get('docs',[]):
+                      print('OL',doc.get('title'),doc.get('first_publish_year'),'IA',doc.get('ia'))
+                      ids += doc.get('ia') or []
+              except Exception as e: print('OL_ERR',e)
+          p=pathlib.Path('out/ia_search.json')
+          if p.exists() and p.stat().st_size:
+              try:
+                  d=json.load(open(p))
+                  for doc in d.get('response',{}).get('docs',[]):
+                      print('IASEARCH',doc)
+                      x=doc.get('identifier')
+                      if x: ids.append(x)
+              except Exception as e: print('IA_ERR',e)
+          p=pathlib.Path('out/google.html')
+          if p.exists():
+              t=html.unescape(p.read_text(errors='ignore'))
+              gids=[]
+              for m in re.finditer(r'(?:books\?id=|/books/edition/[^"?]+\?id=)([A-Za-z0-9_-]{8,})',t): gids.append(m.group(1))
+              print('GOOGLE_IDS',sorted(set(gids)))
+              for gid in sorted(set(gids)):
+                  if gid!='jelU0AEACAAJ': print('GOOGLE_CANDIDATE',gid)
+          print('IA_IDS',list(dict.fromkeys(ids)))
+          pathlib.Path('out/ia_ids.txt').write_text('\n'.join(dict.fromkeys(ids)))
+          PY
+          found=0
+          if [[ -s out/ia_ids.txt ]]; then
+            while IFS= read -r id; do
+              [[ -z "$id" ]] && continue
+              echo "Trying IA $id"
+              curl -fL --retry 2 --max-time 90 "https://archive.org/metadata/$id" -o "out/meta_$id.json" || continue
+              pdf=$(python - "$id" <<'PY'
+          import json,sys
+          id=sys.argv[1]; d=json.load(open('out/meta_'+id+'.json')); c=[]
+          for f in d.get('files',[]):
+              n=f.get('name','')
+              if not n.lower().endswith('.pdf'): continue
+              try:s=int(f.get('size') or 0)
+              except:s=0
+              sc=(50 if '_text.pdf' in n.lower() else 0)+(40 if f.get('source')=='original' else 0)+(10 if s>1000000 else 0)
+              c.append((sc,s,n))
+          c.sort(reverse=True)
+          print(c[0][2] if c else '')
+          PY
+          )
+              [[ -z "$pdf" ]] && continue
+              curl -fL --retry 2 --connect-timeout 30 --max-time 1200 "https://archive.org/download/$id/$pdf" -o out/1886_Riedel_De_sluik_en_kroesharige_rassen_tusschen_Selebes_en_Papua.pdf || continue
+              if [[ "$(head -c 5 out/1886_Riedel_De_sluik_en_kroesharige_rassen_tusschen_Selebes_en_Papua.pdf)" == '%PDF-' ]]; then found=1; echo "$id/$pdf" > out/source_selected.txt; break; fi
+            done < out/ia_ids.txt
+          fi
+          if [[ $found -eq 1 ]]; then
+            stat -c '%s' out/1886_Riedel_De_sluik_en_kroesharige_rassen_tusschen_Selebes_en_Papua.pdf | tee out/size.txt
+            sha256sum out/1886_Riedel_De_sluik_en_kroesharige_rassen_tusschen_Selebes_en_Papua.pdf | tee out/sha256.txt
+          else
+            echo 'RIEDEL_NOT_FETCHED' > out/status.txt
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unresolved-riedel-1886
+          path: out/
+          compression-level: 0
+          retention-days: 7

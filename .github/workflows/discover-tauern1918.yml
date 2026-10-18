@@ -1,0 +1,45 @@
+name: Discover Tauern 1918
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/discover-tauern1918.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query Google Books and Play for Patasiwa und Patalima
+        shell: bash
+        run: |
+          set -u
+          mkdir -p out
+          q='Patasiwa und Patalima Tauern 1918'
+          curl -A 'Mozilla/5.0' -L --retry 3 --get --data-urlencode "q=$q" --data-urlencode 'maxResults=40' 'https://www.googleapis.com/books/v1/volumes' -o out/gbooks.json || true
+          curl -A 'Mozilla/5.0' -L --retry 3 'https://play.google.com/store/books/author?id=Odo+Deodatus+Tauern&hl=en' -o out/play_author.html || true
+          curl -A 'Mozilla/5.0' -L --retry 3 'https://books.google.com/books?id=MmQwNAAACAAJ' -o out/book.html || true
+          python - <<'PY' | tee out/candidates.txt
+          import json,re,pathlib,html
+          p=pathlib.Path('out/gbooks.json')
+          if p.exists():
+              try:
+                  d=json.loads(p.read_text(errors='ignore'))
+                  for x in d.get('items',[]):
+                      v=x.get('volumeInfo',{}); a=x.get('accessInfo',{})
+                      print('GB',x.get('id'),v.get('title'),v.get('publishedDate'),a.get('viewability'),a.get('publicDomain'),a.get('pdf'))
+              except Exception as e: print('GBERR',e)
+          for fn in ['out/play_author.html','out/book.html']:
+              p=pathlib.Path(fn)
+              if not p.exists(): continue
+              t=html.unescape(p.read_text(errors='ignore'))
+              for m in re.finditer(r'.{0,1000}Patasiwa.{0,2000}',t,re.I|re.S):
+                  s=re.sub(r'\s+',' ',m.group(0))
+                  ids=sorted(set(re.findall(r'(?:[?&]id=|books/edition/[^?]+\?id=)([A-Za-z0-9_-]{8,})',s)))
+                  print('HTML',fn,'IDS',ids,'TEXT',s[:2500])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tauern1918-discovery
+          path: out/
+          retention-days: 3
