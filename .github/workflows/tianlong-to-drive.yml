@@ -1,0 +1,111 @@
+name: '天龙八部：三版本全文 → 私人 Google Drive'
+
+on:
+  workflow_dispatch:
+    inputs:
+      include_analysis:
+        description: '同时生成场景／人物／武功三版比对 CSV（只存短锚）'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tianlong-three-editions-drive
+  cancel-in-progress: false
+
+jobs:
+  download-analyze-upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout automation code only
+        uses: actions/checkout@v4
+
+      - name: Confirm private Drive authorization
+        shell: bash
+        env:
+          DRIVE_RCLONE_B64: ${{ secrets.GDRIVE_RCLONE_CONFIG_B64 }}
+          DRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${DRIVE_RCLONE_B64}" || -z "${DRIVE_FOLDER_ID}" ]]; then
+            echo '::error::请先在 GitHub Actions Secrets 设置 GDRIVE_RCLONE_CONFIG_B64 和 GDRIVE_FOLDER_ID。见 docs/tianlong-drive-setup.md'
+            exit 1
+          fi
+          printf '%s' "$DRIVE_RCLONE_B64" | base64 --decode > "$RUNNER_TEMP/rclone.conf"
+          chmod 600 "$RUNNER_TEMP/rclone.conf"
+          if ! grep -q '^\[gdrive\]' "$RUNNER_TEMP/rclone.conf"; then
+            echo '::error::RCLONE_CONFIG 必须包含一个名为 [gdrive] 的 Google Drive remote。'
+            exit 1
+          fi
+          # Rclone config is secret; never echo its contents.
+          echo "DRIVE_FOLDER_ID=$DRIVE_FOLDER_ID" >> "$GITHUB_ENV"
+
+      - name: Download three complete Markdown editions (sparse checkout)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --filter=blob:none --sparse \
+            https://github.com/OliverCWY/JY.git "$RUNNER_TEMP/JY"
+          git -C "$RUNNER_TEMP/JY" sparse-checkout set --cone \
+            'Markdown/旧版/天龙八部' \
+            'Markdown/三联版/天龙八部' \
+            'Markdown/新修版/天龙八部'
+          for edition in 旧版 三联版 新修版; do
+            test -s "$RUNNER_TEMP/JY/Markdown/$edition/天龙八部/index.md"
+          done
+          echo "SOURCE_SHA=$(git -C "$RUNNER_TEMP/JY" rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Build complete Markdown, ZIP and SHA-256 manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/tianlong_drive_pipeline.py \
+            --source "$RUNNER_TEMP/JY" \
+            --output "$RUNNER_TEMP/tianlong_payload"
+
+      - name: Analyze aligned scenes / characters / martial arts
+        if: ${{ inputs.include_analysis }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/tianlong_scene_diff.py \
+            --corpus "$RUNNER_TEMP/JY" \
+            --output "$RUNNER_TEMP/tianlong_payload/ANALYSIS" \
+            --max-candidates 1000
+
+      - name: Install rclone
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq rclone
+          rclone version | head -1
+
+      - name: Copy to existing private Google Drive folder (never delete)
+        shell: bash
+        run: |
+          set -euo pipefail
+          rclone --config "$RUNNER_TEMP/rclone.conf" \
+            --drive-root-folder-id "$DRIVE_FOLDER_ID" \
+            copy "$RUNNER_TEMP/tianlong_payload" \
+            'gdrive:天龙八部_三版本' \
+            --checksum --transfers 4 --checkers 8 --retries 4 \
+            --stats 15s --stats-one-line
+
+      - name: Verify remote matches staged payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          rclone --config "$RUNNER_TEMP/rclone.conf" \
+            --drive-root-folder-id "$DRIVE_FOLDER_ID" \
+            check "$RUNNER_TEMP/tianlong_payload" \
+            'gdrive:天龙八部_三版本' \
+            --one-way --size-only --checkers 8 --retries 3
+          echo "### 天龙八部三版本 → Google Drive" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 来源 commit: \`$SOURCE_SHA\`" >> "$GITHUB_STEP_SUMMARY"
+          echo '- 已上传并校验：三个版本 Markdown 全章、三个 ZIP、SHA256 索引和可选场景比对。' >> "$GITHUB_STEP_SUMMARY"
+          echo '- 目标：原有「金庸MOD」文件夹下的「天龙八部_三版本」。' >> "$GITHUB_STEP_SUMMARY"
