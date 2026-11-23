@@ -1,0 +1,80 @@
+name: '天龙八部：三版本扫描（无需 Google Drive Secrets）'
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/tianlong-analyze-no-drive.yml'
+      - 'tools/tianlong_scene_diff.py'
+      - 'acquisition/download_tianlong_local.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tianlong-three-edition-quick-analysis
+  cancel-in-progress: false
+
+jobs:
+  scan-three-editions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout analysis scripts
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download only three Tianlong Markdown edition directories
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --filter=blob:none --sparse \
+            'https://github.com/OliverCWY/JY.git' "$RUNNER_TEMP/JY"
+          git -C "$RUNNER_TEMP/JY" sparse-checkout set --cone \
+            'Markdown/旧版/天龙八部' \
+            'Markdown/三联版/天龙八部' \
+            'Markdown/新修版/天龙八部'
+          for ver in '旧版' '三联版' '新修版'; do
+            test -s "$RUNNER_TEMP/JY/Markdown/$ver/天龙八部/index.md"
+            echo "$ver: $(find "$RUNNER_TEMP/JY/Markdown/$ver/天龙八部" -maxdepth 1 -name '*.md' -type f | wc -l) MD files"
+          done
+          echo "SOURCE_COMMIT=$(git -C "$RUNNER_TEMP/JY" rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Analyze scenes, named characters, and martial-art names
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/tianlong_scene_diff.py \
+            --corpus "$RUNNER_TEMP/JY" \
+            --output "$RUNNER_TEMP/analysis" \
+            --max-candidates 1000
+          test -s "$RUNNER_TEMP/analysis/manifest.json"
+          test -s "$RUNNER_TEMP/analysis/chapter_scan.csv"
+          test -s "$RUNNER_TEMP/analysis/person_skill_matrix.csv"
+      - name: Save provenance and processing summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'Source: https://github.com/OliverCWY/JY\nCommit: %s\nAnalysis code: %s\n' \
+            "$SOURCE_COMMIT" "$GITHUB_SHA" > "$RUNNER_TEMP/analysis/SOURCE_COMMIT.txt"
+          {
+            echo '### 天龙八部三版算法分析'
+            echo "- Third-party transcription SHA: \`$SOURCE_COMMIT\`"
+            echo '- Source full texts were fetched into an ephemeral GitHub runner only.'
+            echo '- Artifacts contain aggregate counts and metadata only; no full chapters or quote collections.'
+            echo '- Local download: acquisition/download_tianlong_local.sh'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload metadata-only result artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tianlong-three-edition-safe-analysis
+          path: |
+            ${{ runner.temp }}/analysis/manifest.json
+            ${{ runner.temp }}/analysis/chapter_scan.csv
+            ${{ runner.temp }}/analysis/person_skill_matrix.csv
+            ${{ runner.temp }}/analysis/SOURCE_COMMIT.txt
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error
